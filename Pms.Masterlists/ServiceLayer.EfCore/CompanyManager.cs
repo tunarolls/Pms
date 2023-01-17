@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Pms.Common;
 using Pms.Masterlists.Persistence;
 using Pms.Masterlists.ValueObjects;
 using System;

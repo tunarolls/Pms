@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace Pms.Masterlists.Enums
 {
-    public enum PayrollRegisterTypes
-    {
-        PD = 10,
-        KS = 11
-    }
+    //public enum PayrollRegisterTypes
+    //{
+    //    PD = 10,
+    //    KS = 11
+    //}
 }

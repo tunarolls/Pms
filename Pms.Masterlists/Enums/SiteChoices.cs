@@ -6,10 +6,10 @@ using System.Threading.Tasks;
 
 namespace Pms.Masterlists.Enums
 {
-    public enum SiteChoices
-    {
-        MANILA = 30,
-        LEYTE = 31,
-        UNKNOWN = 0
-    }
+    //public enum SiteChoices
+    //{
+    //    MANILA = 30,
+    //    LEYTE = 31,
+    //    UNKNOWN = 0
+    //}
 }

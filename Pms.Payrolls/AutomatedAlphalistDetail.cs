@@ -12,14 +12,14 @@ namespace Pms.Payrolls
 
         #region EMPLOYEE INFORMATION
         private string EEId;
-        private string Company;
+        private string Company = string.Empty;
         private string FirstName;
         private string LastName;
         private string MiddleName;
         private string TIN;
 
-        private string StartDate;
-        private string ResignationDate;
+        private string StartDate = string.Empty;
+        private string ResignationDate = string.Empty;
         private string Nationality { get; set; }
         private string ReasonForSeparation { get; set; }
         private string EmploymentStatus { get; set; }
@@ -194,7 +194,7 @@ namespace Pms.Payrolls
             EmploymentStatus = "R";
             ReasonForSeparation = "";
 
-            Payroll previousDecemberPayroll = yearlyPayrolls.Where(py => py.Cutoff.CutoffDate.Month == 12 && py.Cutoff.CutoffDate.Year < yearCovered).FirstOrDefault();
+            Payroll? previousDecemberPayroll = yearlyPayrolls.Where(py => py.Cutoff.CutoffDate.Month == 12 && py.Cutoff.CutoffDate.Year < yearCovered).FirstOrDefault();
             List<Payroll> JanToDecPayrolls = yearlyPayrolls.Where(py => py.Cutoff.CutoffDate.Year == yearCovered).ToList();
             List<Payroll> PreviousDecToJanPayrolls = yearlyPayrolls.Where(py => py.YearCovered == yearCovered).ToList();
 

@@ -1,4 +1,5 @@
-﻿using Pms.Masterlists.Enums;
+﻿using Pms.Common.Enums;
+using Pms.Masterlists.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,28 +8,28 @@ using System.Threading.Tasks;
 
 namespace Pms.Masterlists.ValueObjects
 {
-    public class PayrollCode
-    {
-        public PayrollCode() { }
+    //public class PayrollCode
+    //{
+    //    public PayrollCode() { }
 
-        public PayrollCode(string name, string site)
-        {
-            Name = name;
-            Site = site;
-        }
+    //    public PayrollCode(string name, string site)
+    //    {
+    //        Name = name;
+    //        Site = site;
+    //    }
 
-        public string CompanyId { get; set; } = string.Empty;
-        public string Name { get; set; } = string.Empty;
-        public string PayrollCodeId { get; set; } = string.Empty;
-        //public CompanyView Company { get; set; }
-        public PayrollRegisterTypes Process { get; set; }
-        public string Site { get; set; } = string.Empty;
+    //    public string CompanyId { get; set; } = string.Empty;
+    //    public string Name { get; set; } = string.Empty;
+    //    public string PayrollCodeId { get; set; } = string.Empty;
+    //    //public CompanyView Company { get; set; }
+    //    public PayrollRegisterTypes Process { get; set; }
+    //    public string Site { get; set; } = string.Empty;
 
-        public static string GenerateId(PayrollCode payrollCode) => $"{payrollCode.Site[0]}-{payrollCode.Name}";
+    //    public static string GenerateId(PayrollCode payrollCode) => $"{payrollCode.Site[0]}-{payrollCode.Name}";
 
-        public override string ToString()
-        {
-            return PayrollCodeId;
-        }
-    }
+    //    public override string ToString()
+    //    {
+    //        return PayrollCodeId;
+    //    }
+    //}
 }

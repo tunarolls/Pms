@@ -8,6 +8,6 @@ namespace Pms.Timesheets
 {
     public class DownloadContent<T>
     {
-        public T[]? Message;
+        public T[]? Message { get; set; }
     }
 }

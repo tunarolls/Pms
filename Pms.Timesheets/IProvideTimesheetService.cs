@@ -2,12 +2,15 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Pms.Timesheets
 {
     public interface IProvideTimesheetService
     {
+        EmployeeView FindEmployeeView(string eeId);
+
         public int GetLastPage(string cutoffId, string payrollCode);
 
         public List<int> GetMissingPages(string cutoffId, string payrollCode);
@@ -20,7 +23,9 @@ namespace Pms.Timesheets
 
         IEnumerable<Timesheet> GetTimesheets();
 
-        IEnumerable<Timesheet> GetTimesheets(string cutoffId);
+        Task<IEnumerable<Timesheet>> GetTimesheets(string cutoffId, CancellationToken cancellationToken = default);
+
+        IEnumerable<Timesheet> GetTimesheets(string cutoffId, string payrollCodeId);
 
         IEnumerable<Timesheet> GetTimesheetsByMonth(int month);
 

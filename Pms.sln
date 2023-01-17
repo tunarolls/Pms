@@ -3,8 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.2.32526.322
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pms", "Pms\Pms.csproj", "{DA84F344-0F32-48E0-8CFC-1B4F5018FDFA}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pms.Adjustments", "Pms.Adjustments\Pms.Adjustments.csproj", "{BA798B07-4774-4DBA-88C7-5910EC74A9BC}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pms.Timesheets", "Pms.Timesheets\Pms.Timesheets.csproj", "{331FD6DD-5083-42CB-893A-B4D72ABE0197}"
@@ -15,7 +13,19 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pms.PayrollsTests", "Pms.Pa
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pms.Masterlists", "Pms.Masterlists\Pms.Masterlists.csproj", "{D318EB60-87D7-415F-AA76-37493241BDE5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pms.MasterlistsTests", "Pms.MasterlistsTests\Pms.MasterlistsTests.csproj", "{B2ED3D4A-B506-411D-BE59-8ACAEE9753C9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pms.MasterlistsTests", "Pms.MasterlistsTests\Pms.MasterlistsTests.csproj", "{B2ED3D4A-B506-411D-BE59-8ACAEE9753C9}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pms.TimesheetsTests", "Pms.TimesheetsTests\Pms.TimesheetsTests.csproj", "{AE51F673-18FD-4AF6-8E9F-9BD289B1A783}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pms.AdjustmentsTests", "Pms.AdjustmentsTests\Pms.AdjustmentsTests.csproj", "{494E3721-F8A5-4E8C-B7CC-AC824B09DDA1}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pms.Main", "Pms.Main\Pms.Main.csproj", "{32BCD697-3A3A-4124-B9CA-C06957B46C70}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pms.Timesheets.Module", "Pms.Timesheets.UI\Pms.Timesheets.Module.csproj", "{F0B6D285-1519-4A30-B2BD-E1A75EDAEEC1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pms.Payrolls.App", "Pms.Payrolls.App\Pms.Payrolls.App.csproj", "{2597BD7A-3350-4D71-891D-A553CED30D73}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pms.Common", "Pms.Common\Pms.Common.csproj", "{7CFA0B82-B69D-4E60-90AF-05E0765843A3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -23,10 +33,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{DA84F344-0F32-48E0-8CFC-1B4F5018FDFA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{DA84F344-0F32-48E0-8CFC-1B4F5018FDFA}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{DA84F344-0F32-48E0-8CFC-1B4F5018FDFA}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{DA84F344-0F32-48E0-8CFC-1B4F5018FDFA}.Release|Any CPU.Build.0 = Release|Any CPU
 		{BA798B07-4774-4DBA-88C7-5910EC74A9BC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{BA798B07-4774-4DBA-88C7-5910EC74A9BC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BA798B07-4774-4DBA-88C7-5910EC74A9BC}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -51,6 +57,30 @@ Global
 		{B2ED3D4A-B506-411D-BE59-8ACAEE9753C9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B2ED3D4A-B506-411D-BE59-8ACAEE9753C9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B2ED3D4A-B506-411D-BE59-8ACAEE9753C9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AE51F673-18FD-4AF6-8E9F-9BD289B1A783}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AE51F673-18FD-4AF6-8E9F-9BD289B1A783}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AE51F673-18FD-4AF6-8E9F-9BD289B1A783}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AE51F673-18FD-4AF6-8E9F-9BD289B1A783}.Release|Any CPU.Build.0 = Release|Any CPU
+		{494E3721-F8A5-4E8C-B7CC-AC824B09DDA1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{494E3721-F8A5-4E8C-B7CC-AC824B09DDA1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{494E3721-F8A5-4E8C-B7CC-AC824B09DDA1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{494E3721-F8A5-4E8C-B7CC-AC824B09DDA1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{32BCD697-3A3A-4124-B9CA-C06957B46C70}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{32BCD697-3A3A-4124-B9CA-C06957B46C70}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{32BCD697-3A3A-4124-B9CA-C06957B46C70}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{32BCD697-3A3A-4124-B9CA-C06957B46C70}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F0B6D285-1519-4A30-B2BD-E1A75EDAEEC1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F0B6D285-1519-4A30-B2BD-E1A75EDAEEC1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F0B6D285-1519-4A30-B2BD-E1A75EDAEEC1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F0B6D285-1519-4A30-B2BD-E1A75EDAEEC1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2597BD7A-3350-4D71-891D-A553CED30D73}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2597BD7A-3350-4D71-891D-A553CED30D73}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2597BD7A-3350-4D71-891D-A553CED30D73}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2597BD7A-3350-4D71-891D-A553CED30D73}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7CFA0B82-B69D-4E60-90AF-05E0765843A3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7CFA0B82-B69D-4E60-90AF-05E0765843A3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7CFA0B82-B69D-4E60-90AF-05E0765843A3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7CFA0B82-B69D-4E60-90AF-05E0765843A3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

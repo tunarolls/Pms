@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using Pms.Common.Enums;
 using Pms.Masterlists.Enums;
 using Pms.Masterlists.Exceptions;
 using System;

@@ -22,4 +22,8 @@
     <PackageReference Include="System.Text.Encoding.CodePages" Version="7.0.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Pms.Common\Pms.Common.csproj" />
+  </ItemGroup>
+
 </Project>

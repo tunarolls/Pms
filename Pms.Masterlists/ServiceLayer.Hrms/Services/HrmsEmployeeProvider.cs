@@ -30,6 +30,16 @@ namespace Pms.Masterlists.ServiceLayer.Hrms.Services
             throw new Exception("HRMS Service is not set.");
         }
 
+        public async Task<Employee?> GetEmployee(string eeId, string site, CancellationToken cancellationToken = default)
+        {
+            var employee = await _hrmsAdapter.GetEmployeeFromHRMS<Employee>(eeId, site, cancellationToken);
+            if (employee != null)
+            {
+                employee.PayrollCode = ParsePayrollCode(employee.PayrollCode, site);
+            }
+            return employee;
+        }
+
         public async Task<IEnumerable<Employee>?> GetNewlyHiredEmployeesAsync(DateTime fromDate, string site)
         {
             if (_hrmsAdapter is not null)
@@ -46,6 +56,18 @@ namespace Pms.Masterlists.ServiceLayer.Hrms.Services
             throw new Exception("HRMS Service is not set.");
         }
 
+        public async Task<ICollection<Employee>> GetNewlyHiredEmployees(DateTime fromDate, string site, CancellationToken cancellationToken = default)
+        {
+            var employees = await _hrmsAdapter.GetNewlyHiredEmployeesFromHRMS<Employee>(fromDate, site, cancellationToken);
+
+            foreach (var employee in employees)
+            {
+                employee.PayrollCode = ParsePayrollCode(employee.PayrollCode, site);
+            }
+
+            return employees;
+        }
+
         public async Task<IEnumerable<Employee>?> GetResignedEmployeesAsync(DateTime fromDate, string site)
         {
             if (_hrmsAdapter is not null)
@@ -60,6 +82,18 @@ namespace Pms.Masterlists.ServiceLayer.Hrms.Services
                 return null;
             }
             throw new Exception("HRMS Service is not set.");
+        }
+
+        public async Task<ICollection<Employee>> GetResignedEmployees(DateTime fromDate, string site, CancellationToken cancellationToken = default)
+        {
+            var employees = await _hrmsAdapter.GetResignedEmployeesFromHRMS<Employee>(fromDate, site, cancellationToken);
+
+            foreach (var employee in employees)
+            {
+                employee.PayrollCode = ParsePayrollCode(employee.PayrollCode, site);
+            }
+
+            return employees;
         }
 
         private static string ParseBankCategory(string payrollCode, string bankCategory)

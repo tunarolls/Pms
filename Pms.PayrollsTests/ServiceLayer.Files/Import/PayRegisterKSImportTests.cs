@@ -1,4 +1,5 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Pms.Common.Enums;
 using Pms.Payrolls;
 using Pms.Payrolls.ServiceLayer.Files.Import.PayrollRegister;
 using Pms.Payrolls.Services;

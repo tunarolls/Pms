@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using Pms.Common.Enums;
 using Pms.Payrolls.Services;
 
 namespace Pms.Payrolls.ServiceLayer.Files.Import.PayrollRegister

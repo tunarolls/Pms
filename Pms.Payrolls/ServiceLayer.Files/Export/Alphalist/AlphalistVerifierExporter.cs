@@ -12,9 +12,9 @@ namespace Pms.Payrolls.ServiceLayer.Files.Export.Alphalist
         public void StartExport(IEnumerable<IEnumerable<Payroll>> employeePayrolls, int year, string companyId)
         {
             string startupPath = AppDomain.CurrentDomain.BaseDirectory;
-            string filePath = $@"{startupPath}\EXPORT\Alphalist";
+            string filePath = $@"{startupPath}\EXPORT\ALPHALIST";
             Directory.CreateDirectory(filePath);
-            string filename = $"{companyId}_{year}-Alpha Verifier".AppendFile(filePath);
+            string filename = $"{filePath}\\{companyId}_{year}-Alpha Verifier.xls";
 
             IWorkbook workbook = new HSSFWorkbook();
 

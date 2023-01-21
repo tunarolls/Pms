@@ -46,8 +46,8 @@ namespace Pms.Timesheets.Module.ViewModels
 
         public void OnDialogOpened(IDialogParameters parameters)
         {
-            _timesheet = parameters.GetValue<Timesheet?>(Common.Constants.Timesheet);
-            _timesheets = parameters.GetValue<Timesheets?>(Common.Constants.Timesheets);
+            _timesheet = parameters.GetValue<Timesheet?>(Common.PmsConstants.Timesheet);
+            _timesheets = parameters.GetValue<Timesheets?>(Common.PmsConstants.Timesheets);
             RaisePropertyChanged(nameof(Timesheet));
             RaisePropertyChanged(nameof(IsForEditing));
         }

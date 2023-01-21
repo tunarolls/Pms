@@ -1,0 +1,31 @@
+﻿<UserControl x:Class="Pms.Masterlists.Module.Views.SelectDateView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:local="clr-namespace:Pms.Masterlists.Module.Views"
+             xmlns:prism="http://prismlibrary.com/"
+             mc:Ignorable="d"
+             Height="100" Width="275">
+    <prism:Dialog.WindowStyle>
+        <Style TargetType="Window">
+            <Setter Property="prism:Dialog.WindowStartupLocation" Value="CenterOwner" />
+            <Setter Property="Height" Value="128" />
+            <Setter Property="Width" Value="384" />
+            <!--<Setter Property="WindowStyle" Value="ToolWindow" />-->
+            <Setter Property="ResizeMode" Value="NoResize" />
+        </Style>
+    </prism:Dialog.WindowStyle>
+    <Viewbox>
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock VerticalAlignment="Center" Margin="8">Date:</TextBlock>
+            <DatePicker VerticalAlignment="Center" Margin="8" Grid.Column="1" SelectedDate="{Binding SelectedDate}" />
+            <Button VerticalAlignment="Center" Margin="8" Grid.Column="2" IsDefault="True" Content="Select" Command="{Binding SelectCommand}" />
+        </Grid>
+    </Viewbox>
+</UserControl>

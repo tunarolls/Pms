@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Pms.Common.Enums;
 using Pms.Payrolls.Services;
 
 namespace Pms.Payrolls.ServiceLayer.Files.Export.BankReport

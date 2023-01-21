@@ -15,31 +15,31 @@ namespace Pms.Payrolls
     /// </summary>
     /// 
 
-    public enum AlphalistScheduleNumberChoices
-    {
-        D1 = 1232,
-        D2 = 1351,
-    }
+    //public enum AlphalistScheduleNumberChoices
+    //{
+    //    D1 = 1232,
+    //    D2 = 1351,
+    //}
 
-    public enum BankChoices
-    {
-        CHK = 000,
-        LBP = 100,
-        CBC = 101,
-        CBC1 = 111,
-        MTAC = 102,
-        MPALO = 103,
-    }
+    //public enum BankChoices
+    //{
+    //    CHK = 000,
+    //    LBP = 100,
+    //    CBC = 101,
+    //    CBC1 = 111,
+    //    MTAC = 102,
+    //    MPALO = 103,
+    //}
 
-    public enum ImportProcessChoices
-    {
-        PD = 10,
-        KS = 11
-    }
+    //public enum ImportProcessChoices
+    //{
+    //    PD = 10,
+    //    KS = 11
+    //}
 
-    public enum SiteChoices
-    {
-        MANILA = 1415,
-        LEYTE = 1642,
-    }
+    //public enum SiteChoices
+    //{
+    //    MANILA = 1415,
+    //    LEYTE = 1642,
+    //}
 }

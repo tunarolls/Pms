@@ -61,7 +61,7 @@ namespace Pms.Timesheets.Module.ViewModels
 
         private readonly IDialogService _dialog;
         private readonly Timesheets _timesheet;
-        private IMain? _placeholder;
+        private IMain? _main;
         private Cutoff _cutoff = new();
         private SemaphoreSlim _busyLock = new(1);
         private PayrollCode _payrollCode = new PayrollCode();
@@ -158,10 +158,7 @@ namespace Pms.Timesheets.Module.ViewModels
                     timesheet.EE = ee;
                     timesheet.CutoffId = cutoff.CutoffId;
 
-                    Application.Current.Dispatcher.Invoke(() =>
-                    {
-                        Timesheets.Add(timesheet);
-                    });
+                    Timesheets.Add(timesheet);
                 }
             }
             catch
@@ -327,8 +324,8 @@ namespace Pms.Timesheets.Module.ViewModels
                 {
                     var dialogParams = new DialogParameters
                     {
-                        { Constants.Timesheets, _timesheet },
-                        { Constants.Timesheet, timesheet }
+                        { PmsConstants.Timesheets, _timesheet },
+                        { PmsConstants.Timesheet, timesheet }
                     };
                     _dialog.ShowDialog(ViewNames.TimesheetDetailView, dialogParams, (_) => { });
                 }
@@ -400,14 +397,11 @@ namespace Pms.Timesheets.Module.ViewModels
                     if (summary == null) throw new Exception("Summary is null.");
                     var timesheets = _timesheet.MapEmployeeView(summary.UnconfirmedTimesheet);
 
-                    Application.Current.Dispatcher.Invoke(() =>
-                    {
-                        Timesheets.Clear();
-                        Timesheets.AddRange(timesheets);
-                        NotConfirmed = Timesheets.Count;
-                        Confirmed = int.Parse(summary.TotalConfirmed);
-                        TotalTimesheets = int.Parse(summary.TotalCount);
-                    });
+                    Timesheets.Clear();
+                    Timesheets.AddRange(timesheets);
+                    NotConfirmed = Timesheets.Count;
+                    Confirmed = int.Parse(summary.TotalConfirmed);
+                    TotalTimesheets = int.Parse(summary.TotalCount);
                 }
                 catch
                 {
@@ -432,16 +426,13 @@ namespace Pms.Timesheets.Module.ViewModels
                             .FilterPayrollCode(PayrollCode.PayrollCodeId)
                             .FilterSearchInput(SearchInput);
 
-                        Application.Current.Dispatcher.Invoke(() =>
-                        {
-                            Timesheets.Clear();
-                            Timesheets.AddRange(timesheets);
-                            Confirmed = Timesheets.Count(t => t.TotalHours > 0 && t.IsConfirmed);
-                            ConfirmedWithoutAttendance = Timesheets.Count(t => t.TotalHours == 0 && t.IsConfirmed);
-                            NotConfirmed = Timesheets.Count(t => !t.IsConfirmed);
-                            NotConfirmedWithAttendance = Timesheets.Count(t => t.TotalHours > 0 && !t.IsConfirmed);
-                            TotalTimesheets = Timesheets.Count;
-                        });
+                        Timesheets.Clear();
+                        Timesheets.AddRange(timesheets);
+                        Confirmed = Timesheets.Count(t => t.TotalHours > 0 && t.IsConfirmed);
+                        ConfirmedWithoutAttendance = Timesheets.Count(t => t.TotalHours == 0 && t.IsConfirmed);
+                        NotConfirmed = Timesheets.Count(t => !t.IsConfirmed);
+                        NotConfirmedWithAttendance = Timesheets.Count(t => t.TotalHours > 0 && !t.IsConfirmed);
+                        TotalTimesheets = Timesheets.Count;
                     }
                 }
                 catch
@@ -458,10 +449,10 @@ namespace Pms.Timesheets.Module.ViewModels
         #region INavigationAware
         public void OnNavigatedTo(NavigationContext navigationContext)
         {
-            _placeholder = navigationContext.Parameters.GetValue<IMain?>(Constants.Placeholder);
-            if (_placeholder != null)
+            _main = navigationContext.Parameters.GetValue<IMain?>(PmsConstants.Main);
+            if (_main != null)
             {
-                _placeholder.PropertyChanged += Placeholder_PropertyChanged;
+                _main.PropertyChanged += Main_PropertyChanged;
             }
 
             _ = LoadValues();
@@ -474,53 +465,29 @@ namespace Pms.Timesheets.Module.ViewModels
 
         public void OnNavigatedFrom(NavigationContext navigationContext)
         {
-            if (_placeholder != null)
+            if (_main != null)
             {
-                _placeholder.PropertyChanged -= Placeholder_PropertyChanged;
+                _main.PropertyChanged -= Main_PropertyChanged;
             }
         }
         #endregion
 
-        private void Placeholder_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+        private void Main_PropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
             _ = LoadValues();
         }
 
         private async Task LoadValues(CancellationToken cancellationToken = default)
         {
-            if (_placeholder != null)
+            if (_main != null)
             {
-                _cutoff = !string.IsNullOrEmpty(_placeholder.CutoffId) ? new Cutoff(_placeholder.CutoffId) : new Cutoff();
-                _payrollCode = _placeholder.PayrollCode;
-                _site = _placeholder.Site;
+                _cutoff = !string.IsNullOrEmpty(_main.CutoffId) ? new Cutoff(_main.CutoffId) : new Cutoff();
+                _payrollCode = _main.PayrollCode ?? new PayrollCode();
+                _site = _main.Site ?? SiteChoices.UNKNOWN;
 
                 await LoadTimesheets(cancellationToken);
             }
         }
-
-        //public TimesheetListingViewModel(Models.Timesheets timesheets)
-        //{
-        //    LoadTimesheets = new Listing(this, timesheets);
-
-        //    LoadSummary = new LoadSummary(this, timesheets);
-        //    DownloadCommand = new Download(this, timesheets);
-        //    EvaluateCommand = new EvaluateAll(this, timesheets);
-        //    ExportCommand = new Export(this, timesheets);
-        //    DetailTimesheet = new Detail(this, timesheets);
-
-        //    _timesheets = new ObservableCollection<Timesheet>();
-        //    Timesheets = new ObservableCollection<Timesheet>();
-
-        //    _site = WeakReferenceMessenger.Default.Send<CurrentSiteRequestMessage>();
-        //    _payrollCode = WeakReferenceMessenger.Default.Send<CurrentPayrollCodeRequestMessage>();
-
-        //    string cutoffId = WeakReferenceMessenger.Default.Send<CurrentCutoffIdRequestMessage>();
-        //    if (!string.IsNullOrEmpty(cutoffId))
-        //        _cutoff = new Cutoff(cutoffId);
-
-        //    IsActive = true;
-        //    LoadTimesheets.Execute(null);
-        //}
 
         #region commands
         public DelegateCommand<object?> DetailTimesheetCommand { get; }
@@ -529,26 +496,11 @@ namespace Pms.Timesheets.Module.ViewModels
         public DelegateCommand ExportCommand { get; }
         public DelegateCommand LoadSummaryCommand { get; }
         public DelegateCommand LoadTimesheetsCommand { get; }
+        #endregion
 
         #region IRegionMemberLifetime
         public bool KeepAlive => true;
         #endregion
-
-        #endregion
-        //protected override void OnActivated()
-        //{
-        //    Messenger.Register<TimesheetListingViewModel, SelectedSiteChangedMessage>(this, (r, m) => r.Site = m.Value);
-        //    Messenger.Register<TimesheetListingViewModel, SelectedPayrollCodeChangedMessage>(this, (r, m) => r.PayrollCode = m.Value);
-        //    Messenger.Register<TimesheetListingViewModel, SelectedCutoffIdChangedMessage>(this, (r, m) => r.Cutoff = new Cutoff(m.Value));
-        //}
-
-        //protected override void OnPropertyChanged(System.ComponentModel.PropertyChangedEventArgs e)
-        //{
-        //    if ((new string[] { nameof(Site), nameof(PayrollCode), nameof(SearchInput), nameof(Cutoff) }).Any(p => p == e.PropertyName))
-        //        LoadTimesheets.Execute(null);
-
-        //    base.OnPropertyChanged(e);
-        //}
     }
 }
 

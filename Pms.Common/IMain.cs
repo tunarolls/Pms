@@ -10,8 +10,9 @@ namespace Pms.Common
 {
     public interface IMain : INotifyPropertyChanged
     {
+        public Company? Company { get; }
         public string CutoffId { get; }
-        public PayrollCode PayrollCode { get; }
-        public SiteChoices Site { get; }
+        public PayrollCode? PayrollCode { get; }
+        public SiteChoices? Site { get; }
     }
 }

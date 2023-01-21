@@ -9,7 +9,6 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="5.0.13" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="7.0.0" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="5.0.2" />
     <PackageReference Include="Prism.DryIoc" Version="8.1.97" />
     <PackageReference Include="Prism.Wpf" Version="8.1.97" />
   </ItemGroup>
@@ -18,10 +17,6 @@
     <ProjectReference Include="..\Pms.Common\Pms.Common.csproj" />
     <ProjectReference Include="..\Pms.Masterlists\Pms.Masterlists.csproj" />
     <ProjectReference Include="..\Pms.Timesheets\Pms.Timesheets.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Models\" />
   </ItemGroup>
 
 </Project>

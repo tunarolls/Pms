@@ -23,9 +23,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pms.Main", "Pms.Main\Pms.Ma
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pms.Timesheets.Module", "Pms.Timesheets.UI\Pms.Timesheets.Module.csproj", "{F0B6D285-1519-4A30-B2BD-E1A75EDAEEC1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pms.Payrolls.App", "Pms.Payrolls.App\Pms.Payrolls.App.csproj", "{2597BD7A-3350-4D71-891D-A553CED30D73}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pms.Payrolls.App", "Pms.Payrolls.App\Pms.Payrolls.App.csproj", "{2597BD7A-3350-4D71-891D-A553CED30D73}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pms.Common", "Pms.Common\Pms.Common.csproj", "{7CFA0B82-B69D-4E60-90AF-05E0765843A3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pms.Common", "Pms.Common\Pms.Common.csproj", "{7CFA0B82-B69D-4E60-90AF-05E0765843A3}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pms.Payrolls.Module", "Pms.Payrolls.Module\Pms.Payrolls.Module.csproj", "{D55D244C-BC5F-4C59-B636-CA2202803C8D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pms.Masterlists.Module", "Pms.Masterlists.Module\Pms.Masterlists.Module.csproj", "{920FA0D9-1420-4BD5-8A92-757D290C79FB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -81,6 +85,14 @@ Global
 		{7CFA0B82-B69D-4E60-90AF-05E0765843A3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7CFA0B82-B69D-4E60-90AF-05E0765843A3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7CFA0B82-B69D-4E60-90AF-05E0765843A3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D55D244C-BC5F-4C59-B636-CA2202803C8D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D55D244C-BC5F-4C59-B636-CA2202803C8D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D55D244C-BC5F-4C59-B636-CA2202803C8D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D55D244C-BC5F-4C59-B636-CA2202803C8D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{920FA0D9-1420-4BD5-8A92-757D290C79FB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{920FA0D9-1420-4BD5-8A92-757D290C79FB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{920FA0D9-1420-4BD5-8A92-757D290C79FB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{920FA0D9-1420-4BD5-8A92-757D290C79FB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

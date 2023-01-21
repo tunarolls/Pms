@@ -1,5 +1,6 @@
 ﻿using NPOI.HSSF.UserModel;
 using NPOI.SS.UserModel;
+using Pms.Common.Enums;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -12,9 +13,9 @@ namespace Pms.Payrolls.ServiceLayer.Files.Export.Alphalist
         public void StartExport(IEnumerable<AlphalistDetail> alphalists, int year, string companyId, double minimumRate)
         {
             string startupPath = AppDomain.CurrentDomain.BaseDirectory;
-            string filePath = $@"{startupPath}\EXPORT\Alphalist";
+            string filePath = $@"{startupPath}\EXPORT\ALPHALIST";
             Directory.CreateDirectory(filePath);
-            string filename = $"{companyId}_{year}-Alpha".AppendFile(filePath);
+            string filename = $"{filePath}\\{companyId}_{year}-Alpha.xls";
 
             IWorkbook workbook = new HSSFWorkbook();
 

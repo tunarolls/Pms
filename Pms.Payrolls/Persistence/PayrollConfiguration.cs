@@ -29,9 +29,15 @@ namespace Pms.Payrolls.Persistence
             builder.Property(cc => cc.GrossPay).HasColumnType("DOUBLE(9,2)").IsRequired();
             builder.Property(cc => cc.RegularPay).HasColumnType("DOUBLE(9,2)").IsRequired();
             builder.Property(cc => cc.NetPay).HasColumnType("DOUBLE(9,2)").IsRequired();
+
             builder.Property(cc => cc.EmployeeSSS).HasColumnType("DOUBLE(9,2)").IsRequired();
+            builder.Property(cc => cc.EmployerSSS).HasColumnType("DOUBLE(9,2)").IsRequired();
+
             builder.Property(cc => cc.EmployeePhilHealth).HasColumnType("DOUBLE(9,2)").IsRequired();
+            builder.Property(cc => cc.EmployerPhilHealth).HasColumnType("DOUBLE(9,2)").IsRequired();
+
             builder.Property(cc => cc.EmployeePagibig).HasColumnType("DOUBLE(9,2)").IsRequired();
+            builder.Property(cc => cc.EmployerPagibig).HasColumnType("DOUBLE(9,2)").IsRequired();
 
             builder.Property(cc => cc.WithholdingTax).HasColumnType("DOUBLE(9,2)").IsRequired();
 

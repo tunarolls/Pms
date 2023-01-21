@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Pms.Common
 {
-    public class Constants
+    public class PmsConstants
     {
         public const string ConfigFilename = "appsettings.json";
         public const string DevelopmentConnectionName = "Development";
@@ -16,6 +16,7 @@ namespace Pms.Common
         public const string Site = nameof(Site);
         public const string PayrollCode = nameof(PayrollCode);
         public const string Cutoff = nameof(Cutoff);
-        public const string Placeholder = nameof(Placeholder);
+        public const string Main = nameof(Main);
+        public const string SelectedDate = nameof(SelectedDate);
     }
 }

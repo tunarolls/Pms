@@ -1,4 +1,6 @@
-﻿using Pms.Payrolls.App.Views;
+﻿using Pms.Masterlists.Module;
+using Pms.Payrolls.App.Views;
+using Pms.Payrolls.Module;
 using Pms.Timesheets.Module;
 using Prism.Ioc;
 using Prism.Modularity;
@@ -30,6 +32,8 @@ namespace Pms.Payrolls.App
         protected override void ConfigureModuleCatalog(IModuleCatalog moduleCatalog)
         {
             moduleCatalog.AddModule<TimesheetsModule>();
+            moduleCatalog.AddModule<PayrollsModule>();
+            moduleCatalog.AddModule<MasterlistsModule>();
         }
     }
 }

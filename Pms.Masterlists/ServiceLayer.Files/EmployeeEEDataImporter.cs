@@ -9,7 +9,7 @@ namespace Pms.Masterlists.ServiceLayer.Files
 {
     public class EmployeeEEDataImporter
     {
-        public IEnumerable<IEEDataInformation> StartImport(string fileName)
+        public static ICollection<IEEDataInformation> StartImport(string fileName)
         {
             IWorkbook nWorkbook;
             using (var nTemplateFile = new FileStream(fileName, FileMode.Open, FileAccess.ReadWrite))
@@ -73,13 +73,12 @@ namespace Pms.Masterlists.ServiceLayer.Files
             return employees;
         }
 
-        private bool ValidateRow(IRow row, HSSFFormulaEvaluator formulator)
+        private static bool ValidateRow(IRow? row, HSSFFormulaEvaluator formulator)
         {
-            if (row is null) return false;
-
-            ICell cell = row.GetCell(1);
-            if (cell is null) return false;
-            if (cell.GetValue(formulator) == string.Empty) return false;
+            if (row == null) return false;
+            var cell = row.GetCell(1);
+            if (cell == null) return false;
+            if (string.IsNullOrEmpty(cell.GetValue(formulator))) return false;
             if (cell.GetValue(formulator).Trim().Length != 4) return false;
 
             return true;

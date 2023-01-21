@@ -13,10 +13,20 @@ namespace Pms.Masterlists.Entities
     public class Employee : IHRMSInformation, IBankInformation, IGovernmentInformation, IEEDataInformation, IActive, IMasterFileInformation
     {
         #region COMPANY
-        public bool Active { get; set; } = true;
-        public string CompanyId { get; set; } = string.Empty;
-        public DateTime DateResigned { get; set; }
+        [JsonProperty("idno")]
+        public string EEId { get; set; }
+        [JsonProperty("department")]
+        public string Location { get; set; }
+        [JsonProperty("jobcode")]
+        public string JobCode { get; set; }
+        [JsonProperty("job_remarks")]
+        public string JobRemarks { get; set; }
+        public string Site { get; set; }
+        public string CompanyId { get; set; }
 
+        public bool Active { get; set; } = true;
+
+        public DateTime DateResigned { get; set; }
         [JsonProperty("terminated_date")]
         public string DateResignedSetter
         {
@@ -26,7 +36,8 @@ namespace Pms.Masterlists.Entities
                     DateResigned = default;
                 else
                 {
-                    if (DateTime.TryParse(value, out DateTime dateResigned))
+                    DateTime dateResigned;
+                    if (DateTime.TryParse(value, out dateResigned))
                         DateResigned = dateResigned;
                     else if (DateTime.TryParseExact(value, new string[] { "MM/dd/yyyy", "M/dd/yyyy" }, CultureInfo.InvariantCulture, DateTimeStyles.None, out dateResigned))
                         DateResigned = dateResigned;
@@ -35,43 +46,39 @@ namespace Pms.Masterlists.Entities
                 }
             }
         }
-
-        [JsonProperty("idno")]
-        public string EEId { get; set; } = string.Empty;
-
-        [JsonProperty("jobcode")]
-        public string JobCode { get; set; } = string.Empty;
-
-        [JsonProperty("department")]
-        public string Location { get; set; } = string.Empty;
-
-        public string Site { get; set; } = string.Empty;
-        #endregion
-
-        #region PERSONAL
-        public DateTime BirthDate { get; set; }
-
-        [JsonProperty("birthdate")]
-        public string BirthDateSetter
+        public DateTime DateHired { get; set; }
+        [JsonProperty("joined_date")]
+        public string DateHiredSetter
         {
             set
             {
                 if (value == "" || value == "0000-00-00")
-                    BirthDate = default;
+                    DateHired = default;
                 else
                 {
-                    if (DateTime.TryParse(value, out DateTime birthDate))
-                        BirthDate = birthDate;
-                    else if (DateTime.TryParseExact(value, new string[] { "MM/dd/yyyy", "M/dd/yyyy" }, CultureInfo.InvariantCulture, DateTimeStyles.None, out birthDate))
-                        BirthDate = birthDate;
+                    DateTime dateResigned;
+                    if (DateTime.TryParse(value, out dateResigned))
+                        DateHired = dateResigned;
+                    else if (DateTime.TryParseExact(value, new string[] { "MM/dd/yyyy", "M/dd/yyyy" }, CultureInfo.InvariantCulture, DateTimeStyles.None, out dateResigned))
+                        DateHired = dateResigned;
                     else
-                        BirthDate = DateTime.Parse(value);
+                        DateHired = DateTime.Parse(value);
                 }
             }
         }
+        #endregion
 
+        #region PERSONAL
         [JsonProperty("first_name")]
         public string FirstName { get; set; } = string.Empty;
+
+        [JsonProperty("last_name")]
+        public string LastName { get; set; } = string.Empty;
+
+        [JsonProperty("middle_name")]
+        public string MiddleName { get; set; } = string.Empty;
+
+        public string NameExtension { get; set; } = string.Empty;
 
         public string Fullname
         {
@@ -87,43 +94,85 @@ namespace Pms.Masterlists.Entities
             }
         }
 
-        public string Gender { get; set; } = string.Empty;
+        public string Gender { get; set; }
 
-        [JsonProperty("last_name")]
-        public string LastName { get; set; } = string.Empty;
-
-        [JsonProperty("middle_name")]
-        public string MiddleName { get; set; } = string.Empty;
-
-        public string NameExtension { get; set; } = string.Empty;
+        public DateTime BirthDate { get; set; }
+        [JsonProperty("birthdate")]
+        public string BirthDateSetter
+        {
+            set
+            {
+                if (value == "" || value == "0000-00-00")
+                    BirthDate = default;
+                else
+                {
+                    DateTime birthDate;
+                    if (DateTime.TryParse(value, out birthDate))
+                        BirthDate = birthDate;
+                    else if (DateTime.TryParseExact(value, new string[] { "MM/dd/yyyy", "M/dd/yyyy" }, CultureInfo.InvariantCulture, DateTimeStyles.None, out birthDate))
+                        BirthDate = birthDate;
+                    else
+                        BirthDate = DateTime.Parse(value);
+                }
+            }
+        }
         #endregion
 
         #region GOVERNMENT
         [JsonProperty("pagibig")]
-        public string Pagibig { get; set; } = string.Empty;
+        public string Pagibig { get; set; }
 
         [JsonProperty("philhealth")]
-        public string PhilHealth { get; set; } = string.Empty;
+        public string PhilHealth { get; set; }
 
         [JsonProperty("sss")]
-        public string SSS { get; set; } = string.Empty;
+        public string SSS { get; set; }
 
         [JsonProperty("tin")]
-        public string TIN { get; set; } = string.Empty;
+        public string TIN { get; set; }
 
         #endregion
 
         #region BANK
+        public string PayrollCode { get; set; }
+
+        [JsonProperty("payroll_code")]
+        public string PayrollCodeSetter
+        {
+            set
+            {
+                value = value.ToUpper();
+                string[] valueArgs = value.Split("-");
+                PayrollCode = valueArgs[0];
+                if (valueArgs.Length > 1)
+                    BankSetter = valueArgs[1];
+            }
+        }
+
+        [JsonProperty("card_number")]
+        public string CardNumber { get; set; } = string.Empty;
+
         [JsonProperty("account_number")]
         public string AccountNumber { get; set; } = string.Empty;
 
         public BankChoices Bank { get; set; }
 
-        [JsonProperty("bank_name")]
+        [JsonProperty("bank_category")]
+        public string BankCategorySetter
+        {
+            set
+            {
+                value = value.ToUpper();
+                if (value == "CHK" || value == "CHECK" || value == "CHEQUE")
+                    Bank = BankChoices.CHK;
+            }
+        }
+
         public string BankSetter
         {
             set
             {
+                value = value.ToUpper();
                 if (value == "LANDBANK" || value == "LBP")
                     Bank = BankChoices.LBP;
                 else if (value == "CHINABANK" || value == "CBC")
@@ -134,7 +183,7 @@ namespace Pms.Masterlists.Entities
                     Bank = BankChoices.MPALO;
                 else if (value == "MTAC")
                     Bank = BankChoices.MTAC;
-                else if (value == "CHK")
+                else if (value == "CHK" || value == "CHECK" || value == "CHEQUE")
                     Bank = BankChoices.CHK;
                 else if (value == "UCPB")
                     Bank = BankChoices.UCPB;
@@ -142,16 +191,14 @@ namespace Pms.Masterlists.Entities
                     Bank = BankChoices.UNKNOWN;
             }
         }
-
-        [JsonProperty("card_number")]
-        public string CardNumber { get; set; } = string.Empty;
-
-        [JsonProperty("payroll_code")]
-        public string PayrollCode { get; set; } = string.Empty;
         #endregion
 
-        public DateTime DateCreated { get; set; }
         public DateTime DateModified { get; set; }
+        public DateTime DateCreated { get; set; }
+
+
+
+
 
         public void ValidateAll()
         {
@@ -164,12 +211,60 @@ namespace Pms.Masterlists.Entities
                 throw new InvalidFieldValuesException(EEId, exceptions);
         }
 
-        public List<InvalidFieldValueException> ValidateBankInformation(bool throwsException = true)
+
+        public List<InvalidFieldValueException> ValidatePersonalInformation(bool throwsException = true)
         {
             List<InvalidFieldValueException> exceptions = new();
 
+            if (EEId is not null && EEId != string.Empty)
+            {
+                if (EEId.Length < 3) exceptions.Add(new InvalidFieldValueException(nameof(EEId), EEId, EEId));
+                if (EEId.Length > 4) exceptions.Add(new InvalidFieldValueException(nameof(EEId), EEId, EEId));
+                //if (EEId.Any(char.IsLower)) throw new InvalidEmployeeFieldValueException(nameof(EEId), EEId, EEId);
+            }
+            else
+                throw new InvalidFieldValueException(nameof(EEId), EEId, EEId);
+
+            if (FirstName is not null && FirstName != string.Empty)
+            {
+                if (FirstName.Length < 2) exceptions.Add(new InvalidFieldValueException(nameof(FirstName), FirstName, EEId));
+                if (FirstName.Length > 45) exceptions.Add(new InvalidFieldValueException(nameof(FirstName), FirstName, EEId));
+                if (FirstName.Any(char.IsDigit)) exceptions.Add(new InvalidFieldValueException(nameof(FirstName), FirstName, EEId));
+                //if (FirstName.Any(char.IsLower)) throw new InvalidEmployeeFieldValueException(nameof(FirstName), FirstName, EEId);
+            }
+
+            if (LastName is not null && LastName != string.Empty)
+            {
+                if (LastName.Length < 2) exceptions.Add(new InvalidFieldValueException(nameof(LastName), LastName, EEId));
+                if (LastName.Length > 45) exceptions.Add(new InvalidFieldValueException(nameof(LastName), LastName, EEId));
+                if (LastName.Any(char.IsDigit)) exceptions.Add(new InvalidFieldValueException(nameof(LastName), LastName, EEId));
+                //if (LastName.Any(char.IsLower)) throw new InvalidEmployeeFieldValueException(nameof(LastName), LastName, EEId);
+            }
+
+            if (MiddleName is not null && MiddleName != string.Empty)
+            {
+                if (MiddleName.Length > 45) exceptions.Add(new InvalidFieldValueException(nameof(MiddleName), MiddleName, EEId));
+                if (MiddleName.Any(char.IsDigit)) exceptions.Add(new InvalidFieldValueException(nameof(MiddleName), MiddleName, EEId));
+                //if (MiddleName.Any(char.IsLower)) throw new InvalidEmployeeFieldValueException(nameof(MiddleName), MiddleName, EEId);
+            }
+
+            if (exceptions.Any() && throwsException)
+                throw new InvalidFieldValuesException(EEId, exceptions);
+
+            return exceptions;
+        }
+
+        public List<InvalidFieldValueException> ValidateBankInformation(bool throwsException = true)
+        {
+            List<InvalidFieldValueException> exceptions = new();
+            if (!Active)// Ignore bank information if already resigned.
+                return exceptions;
+
             if (Bank != BankChoices.CHK && AccountNumber == string.Empty)
+            {
                 exceptions.Add(new InvalidFieldValueException(nameof(AccountNumber), AccountNumber, EEId, "Should not be blank."));
+                return exceptions;
+            }
             if (AccountNumber.Any(char.IsLetter))
                 exceptions.Add(new InvalidFieldValueException(nameof(AccountNumber), AccountNumber, EEId));
 
@@ -202,19 +297,15 @@ namespace Pms.Masterlists.Entities
                 case BankChoices.MTAC:
                     if (AccountNumber.Length != 13)
                         exceptions.Add(new InvalidFieldValueException(nameof(AccountNumber), AccountNumber, EEId));
-#pragma warning disable IDE0057 // Use range operator
                     if (AccountNumber.Substring(0, 3) != "525")
                         exceptions.Add(new InvalidFieldValueException(nameof(AccountNumber), AccountNumber, EEId, "MTAC Account numbers have leading '525'."));
-#pragma warning restore IDE0057 // Use range operator
                     break;
 
                 case BankChoices.MPALO:
                     if (AccountNumber.Length != 13)
                         exceptions.Add(new InvalidFieldValueException(nameof(AccountNumber), AccountNumber, EEId));
-#pragma warning disable IDE0057 // Use range operator
                     if (AccountNumber.Substring(0, 3) != "756")
                         exceptions.Add(new InvalidFieldValueException(nameof(AccountNumber), AccountNumber, EEId, "MPALO Account numbers have leading '756'."));
-#pragma warning restore IDE0057 // Use range operator
                     break;
                 case BankChoices.UCPB:
                     exceptions.Add(new InvalidFieldValueException(nameof(Bank), Bank.ToString(), EEId));
@@ -273,46 +364,5 @@ namespace Pms.Masterlists.Entities
             return exceptions;
         }
 
-        public List<InvalidFieldValueException> ValidatePersonalInformation(bool throwsException = true)
-        {
-            List<InvalidFieldValueException> exceptions = new();
-
-            if (!string.IsNullOrEmpty(EEId))
-            {
-                if (EEId.Length < 3) exceptions.Add(new InvalidFieldValueException(nameof(EEId), EEId, EEId));
-                if (EEId.Length > 4) exceptions.Add(new InvalidFieldValueException(nameof(EEId), EEId, EEId));
-                //if (EEId.Any(char.IsLower)) throw new InvalidEmployeeFieldValueException(nameof(EEId), EEId, EEId);
-            }
-            else
-                throw new InvalidFieldValueException(nameof(EEId), EEId, EEId);
-
-            if (FirstName is not null && FirstName != string.Empty)
-            {
-                if (FirstName.Length < 2) exceptions.Add(new InvalidFieldValueException(nameof(FirstName), FirstName, EEId));
-                if (FirstName.Length > 45) exceptions.Add(new InvalidFieldValueException(nameof(FirstName), FirstName, EEId));
-                if (FirstName.Any(char.IsDigit)) exceptions.Add(new InvalidFieldValueException(nameof(FirstName), FirstName, EEId));
-                //if (FirstName.Any(char.IsLower)) throw new InvalidEmployeeFieldValueException(nameof(FirstName), FirstName, EEId);
-            }
-
-            if (LastName is not null && LastName != string.Empty)
-            {
-                if (LastName.Length < 2) exceptions.Add(new InvalidFieldValueException(nameof(LastName), LastName, EEId));
-                if (LastName.Length > 45) exceptions.Add(new InvalidFieldValueException(nameof(LastName), LastName, EEId));
-                if (LastName.Any(char.IsDigit)) exceptions.Add(new InvalidFieldValueException(nameof(LastName), LastName, EEId));
-                //if (LastName.Any(char.IsLower)) throw new InvalidEmployeeFieldValueException(nameof(LastName), LastName, EEId);
-            }
-
-            if (MiddleName is not null && MiddleName != string.Empty)
-            {
-                if (MiddleName.Length > 45) exceptions.Add(new InvalidFieldValueException(nameof(MiddleName), MiddleName, EEId));
-                if (MiddleName.Any(char.IsDigit)) exceptions.Add(new InvalidFieldValueException(nameof(MiddleName), MiddleName, EEId));
-                //if (MiddleName.Any(char.IsLower)) throw new InvalidEmployeeFieldValueException(nameof(MiddleName), MiddleName, EEId);
-            }
-
-            if (exceptions.Any() && throwsException)
-                throw new InvalidFieldValuesException(EEId, exceptions);
-
-            return exceptions;
-        }
     }
 }

@@ -8,39 +8,63 @@ namespace Pms.Masterlists.ServiceLayer.Files
 {
     public class MasterFileImporter
     {
-        public IEnumerable<IMasterFileInformation> StartImport(string fileName)
-        {
-            IWorkbook nWorkbook;
-            using (var nTemplateFile = new FileStream(fileName, FileMode.Open, FileAccess.ReadWrite))
-                nWorkbook = new HSSFWorkbook(nTemplateFile);
-            HSSFFormulaEvaluator formulator = new HSSFFormulaEvaluator(nWorkbook);
-            ISheet nSheet = nWorkbook.GetSheetAt(0);
+        //public IEnumerable<IMasterFileInformation> StartImport(string fileName)
+        //{
+        //    IWorkbook nWorkbook;
+        //    using (var nTemplateFile = new FileStream(fileName, FileMode.Open, FileAccess.ReadWrite))
+        //        nWorkbook = new HSSFWorkbook(nTemplateFile);
+        //    HSSFFormulaEvaluator formulator = new HSSFFormulaEvaluator(nWorkbook);
+        //    ISheet nSheet = nWorkbook.GetSheetAt(0);
 
-            List<IMasterFileInformation> employeeBankInformations = new();
+        //    List<IMasterFileInformation> employeeBankInformations = new();
+        //    int i = 1;
+        //    while (i <= nSheet.LastRowNum)
+        //    {
+        //        IRow row = nSheet.GetRow(i);
+        //        if (ValidateRow(row) == false) break;
+
+        //        IMasterFileInformation info = new Employee();
+        //        info.EEId = row.GetCell(0).GetValue(formulator);
+        //        info.JobCode = row.GetCell(3).GetValue(formulator);
+
+        //        employeeBankInformations.Add(info);
+        //        i++;
+        //    }
+
+        //    return employeeBankInformations;
+        //}
+
+        public static IEnumerable<IMasterFileInformation> StartImport(string fileName)
+        {
+            using var nTemplateFile = new FileStream(fileName, FileMode.Open, FileAccess.ReadWrite);
+            var nWorkbook = new HSSFWorkbook(nTemplateFile);
+            var formulator = new HSSFFormulaEvaluator(nWorkbook);
+            var nSheet = nWorkbook.GetSheetAt(0);
             int i = 1;
+
             while (i <= nSheet.LastRowNum)
             {
-                IRow row = nSheet.GetRow(i);
-                if (ValidateRow(row) == false) break;
+                var row = nSheet.GetRow(i);
+                if (!ValidateRow(row)) break;
 
-                IMasterFileInformation info = new Employee();
-                info.EEId = row.GetCell(0).GetValue(formulator);
-                info.JobCode = row.GetCell(3).GetValue(formulator);
+                var info = new Employee
+                {
+                    EEId = row.GetCell(0).GetValue(formulator),
+                    JobCode = row.GetCell(3).GetValue(formulator)
+                };
 
-                employeeBankInformations.Add(info);
                 i++;
-            }
 
-            return employeeBankInformations;
+                yield return info;
+            }
         }
 
-        private bool ValidateRow(IRow row)
+        private static bool ValidateRow(IRow? row)
         {
-            if (row is null) return false;
-
-            ICell cell = row.GetCell(0);
-            if (cell is null) return false;
-            if (cell.GetValue() == string.Empty) return false;
+            if (row == null) return false;
+            var cell = row.GetCell(0);
+            if (cell == null) return false;
+            if (string.IsNullOrEmpty(cell.GetValue())) return false;
             if (cell.GetValue().Trim().Length != 4) return false;
 
             return true;

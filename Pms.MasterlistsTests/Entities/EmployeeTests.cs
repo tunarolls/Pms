@@ -1,6 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Pms.Common.Enums;
 using Pms.Masterlists.Entities;
-using Pms.Masterlists.Enums;
 using Pms.Masterlists.Exceptions;
 
 namespace Pms.MasterlistsTests.Entities

@@ -7,6 +7,7 @@ using Pms.Masterlists.ServiceLayer.Hrms.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -31,8 +32,15 @@ namespace Pms.Masterlists.Module
 
         public void ExportMasterlist(IEnumerable<Employee> employees, PayrollCode payrollCode, string remarks = "")
         {
-            //MasterlistExporter exporter = new();
-            //exporter.StartExport(employees, payrollCode, remarks);
+            MasterlistExporter.StartExport(employees, payrollCode, remarks);
+        }
+
+        public async Task ExportMasterlist(IEnumerable<Employee> employees, PayrollCode payrollCode, string remarks = "", CancellationToken cancellationToken = default)
+        {
+            await Task.Run(() =>
+            {
+                MasterlistExporter.StartExport(employees, payrollCode, remarks);
+            }, cancellationToken);
         }
 
         public Employee FindEmployee(string eeId)

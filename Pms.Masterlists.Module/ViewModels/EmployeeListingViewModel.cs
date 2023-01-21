@@ -23,6 +23,15 @@ using System.Windows.Input;
 
 namespace Pms.Masterlists.Module.ViewModels
 {
+    public class DummyEmployeeListingViewMode : EmployeeListingViewModel
+    {
+        public DummyEmployeeListingViewMode(Employees employees, PayrollCodes payrollCodes, Companies companies, IDialogService dialog, IFileDialogService fileDialog)
+            : base(employees, payrollCodes, companies, dialog, fileDialog)
+        {
+            Employees = new Employee[] { new Employee() };
+        }
+    }
+
     public class EmployeeListingViewModel : BindableBase, INavigationAware
     {
         private readonly Employees m_Employees;
@@ -52,21 +61,21 @@ namespace Pms.Masterlists.Module.ViewModels
             EEDataImportCommand = new DelegateCommand(EEDataImport);
             MasterFileImportCommand = new DelegateCommand(MasterFileImport);
 
-            //AllEEExport = new MasterlistExport(this, employees);
-            //NoTinEEExport = new UnknownTin(this, employees);
+            MasterlistExportCommand = new DelegateCommand(MasterlistExport);
+            UnknownTinExportCommand = new DelegateCommand(UnknownTinExport);
 
-            //CheckDetail = new Detail(this, employees);
+            CheckDetailCommand = new DelegateCommand<object?>(CheckDetail);
 
             //OpenPayrollCodeView = new Commands.Payroll_Codes.OpenView(this, payrollCodes, companies);
         }
 
         #region properties
-        private IEnumerable<Employee> _employees;
+        private IEnumerable<Employee> _employees = Enumerable.Empty<Employee>();
         private int _activeEECount;
         private string _companyId = string.Empty;
         private bool _hideArchived;
         private int _nonActiveEECount;
-        private PayrollCode _payrollCode;
+        private PayrollCode _payrollCode = new();
         private string _payrollCodeId = string.Empty;
         private string _searchInput = string.Empty;
         private SiteChoices _site = SiteChoices.MANILA;
@@ -86,13 +95,12 @@ namespace Pms.Masterlists.Module.ViewModels
         #endregion
 
         #region commands
-        public DelegateCommand AllEEExportCommand { get; }
+        public DelegateCommand MasterlistExportCommand { get; }
         public DelegateCommand BankImportCommand { get; }
-        public DelegateCommand CheckDetailCommand { get; }
+        public DelegateCommand<object?> CheckDetailCommand { get; }
         public DelegateCommand EEDataImportCommand { get; }
-        public DelegateCommand LoadEmployeesCommand { get; }
         public DelegateCommand MasterFileImportCommand { get; }
-        public DelegateCommand NoTinEEExportCommand { get; }
+        public DelegateCommand UnknownTinExportCommand { get; }
         public DelegateCommand OpenPayrollCodeViewCommand { get; }
         public DelegateCommand SyncAllCommand { get; }
         public DelegateCommand SyncNewlyHiredCommand { get; }
@@ -350,14 +358,17 @@ namespace Pms.Masterlists.Module.ViewModels
                         }
                         catch (InvalidFieldValueException)
                         {
+                            throw;
                         }
                         catch (DuplicateBankInformationException)
                         {
+                            throw;
                         }
                     }
                 }
                 catch
                 {
+                    throw;
                 }
             }
         }
@@ -390,11 +401,13 @@ namespace Pms.Masterlists.Module.ViewModels
                         }
                         catch
                         {
+                            throw;
                         }
                     }
                 }
                 catch
                 {
+                    throw;
                 }
             }
         }
@@ -425,13 +438,80 @@ namespace Pms.Masterlists.Module.ViewModels
                     }
                     catch
                     {
+                        throw;
                     }
                 }
             }
             catch
             {
+                throw;
             }
         }
+        #endregion
+
+        #region masterlist export
+        private void MasterlistExport()
+        {
+            _ = MasterlistExport(default);
+        }
+
+        private async Task MasterlistExport(CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                var employees = Employees.ToList();
+                await m_Employees.ExportMasterlist(employees, _payrollCode, cancellationToken: cancellationToken);
+            }
+            catch
+            {
+                throw;
+            }
+        }
+        #endregion
+
+        #region unknown tin export
+        private void UnknownTinExport()
+        {
+            _ = UnknownTinExport(default);
+        }
+
+        private async Task UnknownTinExport(CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                var noTin = Employees.Where(t => string.IsNullOrEmpty(t.TIN)).ToList();
+                await m_Employees.ExportMasterlist(noTin, _payrollCode, cancellationToken: cancellationToken);
+            }
+            catch
+            {
+                throw;
+            }
+        }
+        #endregion
+
+        #region check detail
+        private void CheckDetail(object? parameter)
+        {
+            try
+            {
+                if (parameter is not Employee employee)
+                {
+                    employee = new();
+                }
+
+                var dialogParams = new DialogParameters
+                {
+                    { PmsConstants.Employee, employee }
+                };
+
+                s_Dialog.ShowDialog(ViewNames.EmployeeDetailView, dialogParams, (_) => { });
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
         #endregion
     }
 }

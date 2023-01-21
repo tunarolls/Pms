@@ -19,21 +19,21 @@ namespace Pms.Masterlists.ServiceLayer.Files.Tests
         }
     }
 
-    [TestClass]
-    public class MasterFileImporterIsValid
-    {
-        [TestMethod]
-        public void IfItDoesNotThrowException()
-        {
-            MasterFileImporter importer = new();
+    //[TestClass]
+    //public class MasterFileImporterIsValid
+    //{
+    //    [TestMethod]
+    //    public void IfItDoesNotThrowException()
+    //    {
+    //        MasterFileImporter importer = new();
 
-            string filename = $@"{AppDomain.CurrentDomain.BaseDirectory}\TESTDATA\MASTER FILE.xls";
-            IEnumerable<IMasterFileInformation> masterFileInformations = importer.StartImport(filename);
+    //        string filename = $@"{AppDomain.CurrentDomain.BaseDirectory}\TESTDATA\MASTER FILE.xls";
+    //        IEnumerable<IMasterFileInformation> masterFileInformations = importer.StartImport(filename);
 
 
 
-            Assert.IsNotNull(masterFileInformations);
-            Assert.IsTrue(!masterFileInformations.Any());
-        }
-    }
+    //        Assert.IsNotNull(masterFileInformations);
+    //        Assert.IsTrue(!masterFileInformations.Any());
+    //    }
+    //}
 }

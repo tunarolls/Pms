@@ -11,6 +11,7 @@ namespace Pms.Common
         public const string ConfigFilename = "appsettings.json";
         public const string DevelopmentConnectionName = "Development";
         public const string ProductionConnectionName = "Production";
+
         public const string Timesheets = nameof(Timesheets);
         public const string Timesheet = nameof(Timesheet);
         public const string Site = nameof(Site);
@@ -18,5 +19,6 @@ namespace Pms.Common
         public const string Cutoff = nameof(Cutoff);
         public const string Main = nameof(Main);
         public const string SelectedDate = nameof(SelectedDate);
+        public const string Employee = nameof(Employee);
     }
 }

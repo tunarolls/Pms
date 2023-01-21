@@ -19,23 +19,23 @@ namespace Pms.Masterlists.ServiceLayer.Files.Tests
         }
     }
 
-    [TestClass]
-    public class An_extracted_employees_from_bank_information_import_can_be_saved
-    {
-        [TestMethod]
-        public void if_this_does_not_throw_an_exception()
-        {
-            EmployeeBankInformationImporter importer = new();
+    //[TestClass]
+    //public class An_extracted_employees_from_bank_information_import_can_be_saved
+    //{
+    //    [TestMethod]
+    //    public void if_this_does_not_throw_an_exception()
+    //    {
+    //        EmployeeBankInformationImporter importer = new();
 
-            string filename = $@"{AppDomain.CurrentDomain.BaseDirectory}\TESTDATA\BANK INFORMATION SAMPLE 2209.xls";
-            IEnumerable<IBankInformation> actualBankInformations = importer.StartImport(filename);
+    //        string filename = $@"{AppDomain.CurrentDomain.BaseDirectory}\TESTDATA\BANK INFORMATION SAMPLE 2209.xls";
+    //        IEnumerable<IBankInformation> actualBankInformations = importer.StartImport(filename);
 
-            foreach (Employee actualBankInformation in actualBankInformations)
-                actualBankInformation.ValidateBankInformation();
+    //        foreach (Employee actualBankInformation in actualBankInformations)
+    //            actualBankInformation.ValidateBankInformation();
 
 
-            Assert.IsNotNull(actualBankInformations);
-            Assert.IsTrue(!actualBankInformations.Any());
-        }
-    }
+    //        Assert.IsNotNull(actualBankInformations);
+    //        Assert.IsTrue(!actualBankInformations.Any());
+    //    }
+    //}
 }

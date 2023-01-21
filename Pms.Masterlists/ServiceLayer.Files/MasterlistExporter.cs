@@ -14,31 +14,39 @@ namespace Pms.Masterlists.ServiceLayer.Files
 {
     public class MasterlistExporter
     {
-        public void StartExport(IEnumerable<Employee> employees, PayrollCode payrollCode)
+        public static void StartExport(IEnumerable<Employee> employees, PayrollCode payrollCode, string remarks)
         {
-            IWorkbook nWorkbook = new HSSFWorkbook();
-            ISheet nSheet = nWorkbook.CreateSheet("Sheet1");
-
+            var nWorkbook = new HSSFWorkbook();
+            var nSheet = nWorkbook.CreateSheet("Sheet1");
 
             int rowIndex = -1;
 
             WriteHeader(nSheet.CreateRow(Append(ref rowIndex)));
-            foreach (Employee employee in employees)
+
+            foreach (var employee in employees)
+            {
                 WriteRow(nSheet.CreateRow(Append(ref rowIndex)), employee);
+            }
 
+            string fileDirectory = $@"{AppDomain.CurrentDomain.BaseDirectory}\EXPORT\MASTERLIST";
+            Directory.CreateDirectory(fileDirectory);
 
+            string fileName = "MASTER-ALL";
 
-            string filedirectory = $@"{AppDomain.CurrentDomain.BaseDirectory}\EXPORT\MASTERLIST";
-            Directory.CreateDirectory(filedirectory);
-
-            string filename = "MASTER-ALL";
             if (payrollCode.PayrollCodeId != string.Empty)
-                filename = $"MASTER-{payrollCode.PayrollCodeId}";
+            {
+                fileName = $"MASTER-{payrollCode.PayrollCodeId}";
+            }
 
-            string fullname = $@"{filedirectory}\{filename}-{DateTime.Now:yyyyMMdd}.xls";
+            if (remarks != string.Empty)
+            {
+                fileName = $"{fileName}-{remarks}";
+            }
 
-            using (var nReportFile = new FileStream(fullname, FileMode.OpenOrCreate, FileAccess.Write))
-                nWorkbook.Write(nReportFile, false);
+            string fullname = $@"{fileDirectory}\{fileName}-{DateTime.Now:yyyyMMdd}.xls";
+
+            using var nReportFile = new FileStream(fullname, FileMode.OpenOrCreate, FileAccess.Write);
+            nWorkbook.Write(nReportFile, false);
         }
 
         private static int Append(ref int index)
@@ -47,7 +55,7 @@ namespace Pms.Masterlists.ServiceLayer.Files
             return index;
         }
 
-        private void WriteHeader(IRow row)
+        private static void WriteHeader(IRow row)
         {
             int cellIndex = -1;
             row.CreateCell(Append(ref cellIndex)).SetCellValue("#");
@@ -59,12 +67,13 @@ namespace Pms.Masterlists.ServiceLayer.Files
             row.CreateCell(Append(ref cellIndex)).SetCellValue("BANK");
             row.CreateCell(Append(ref cellIndex)).SetCellValue("ACCOUNT NUMBER");
             row.CreateCell(Append(ref cellIndex)).SetCellValue("CARD NUMBER");
+            row.CreateCell(Append(ref cellIndex)).SetCellValue("TIN");
             row.CreateCell(Append(ref cellIndex)).SetCellValue("SSS");
             row.CreateCell(Append(ref cellIndex)).SetCellValue("PHILHEALTH");
             row.CreateCell(Append(ref cellIndex)).SetCellValue("PAGIBIG");
         }
 
-        private void WriteRow(IRow row, Employee employee)
+        private static void WriteRow(IRow row, Employee employee)
         {
             int cellIndex = -1;
             row.CreateCell(Append(ref cellIndex)).SetCellValue(row.RowNum);
@@ -76,6 +85,7 @@ namespace Pms.Masterlists.ServiceLayer.Files
             row.CreateCell(Append(ref cellIndex)).SetCellValue(employee.Bank.ToString());
             row.CreateCell(Append(ref cellIndex)).SetCellValue(employee.AccountNumber);
             row.CreateCell(Append(ref cellIndex)).SetCellValue(employee.CardNumber);
+            row.CreateCell(Append(ref cellIndex)).SetCellValue(employee.TIN);
             row.CreateCell(Append(ref cellIndex)).SetCellValue(employee.SSS);
             row.CreateCell(Append(ref cellIndex)).SetCellValue(employee.PhilHealth);
             row.CreateCell(Append(ref cellIndex)).SetCellValue(employee.Pagibig);

@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Pms.Common;
+using Pms.Masterlists.Module.ViewModels;
 using Pms.Masterlists.Module.Views;
 using Pms.Masterlists.Persistence;
 using Pms.Masterlists.ServiceLayer.EfCore;
@@ -37,7 +38,12 @@ namespace Pms.Masterlists.Module
             containerRegistry.Register<CompanyManager>();
             containerRegistry.Register<PayrollCodeManager>();
             containerRegistry.RegisterDialog<SelectDateView>(ViewNames.SelectDateView);
+            containerRegistry.RegisterDialog<EmployeeDetailView>(ViewNames.EmployeeDetailView);
             containerRegistry.RegisterForNavigation<EmployeeListingView>(ViewNames.EmployeeListingView);
+
+#if DEBUG
+            containerRegistry.Register<EmployeeListingViewModel, DummyEmployeeListingViewMode>();
+#endif
         }
     }
 }

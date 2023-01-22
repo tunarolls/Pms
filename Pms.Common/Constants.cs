@@ -21,4 +21,16 @@ namespace Pms.Common
         public const string SelectedDate = nameof(SelectedDate);
         public const string Employee = nameof(Employee);
     }
+
+    public class DialogNames
+    {
+        public const string CancelDialog = nameof(CancelDialog);
+    }
+
+    public class DialogParameterNames
+    {
+        public const string Message = nameof(Message);
+        public const string Title = nameof(Title);
+        public const string TaskCompletion = nameof(TaskCompletion);
+    }
 }

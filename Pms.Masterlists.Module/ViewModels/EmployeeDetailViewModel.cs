@@ -2,17 +2,22 @@
 using Prism.Mvvm;
 using Prism.Services.Dialogs;
 using System;
+using System.Collections;
+using System.Collections.Generic;
 
 namespace Pms.Masterlists.Module.ViewModels
 {
     public class EmployeeDetailViewModel : BindableBase, IDialogAware
     {
-        private Employee? l_Employee;
         private readonly Employees m_Employees;
-
-        public EmployeeDetailViewModel(Employees employees)
+        private readonly PayrollCodes m_PayrollCodes;
+        private readonly IDialogService s_Dialog;
+        private Employee? l_Employee;
+        public EmployeeDetailViewModel(IDialogService dialogService, Employees employees, PayrollCodes payrollCodes)
         {
             m_Employees = employees;
+            m_PayrollCodes = payrollCodes;
+            s_Dialog = dialogService;
 
             //Save = new Save(this, employees);
             //Sync = new SyncOne(this, employees);
@@ -50,7 +55,13 @@ namespace Pms.Masterlists.Module.ViewModels
 
         public Employee? Employee { get => l_Employee; set => SetProperty(ref l_Employee, value); }
 
-        //public string[] PayrollCodes { get; }
+        public IEnumerable<string> PayrollCodes { get; }
+
+        #region init
+        private void Init()
+        {
+        }
+        #endregion
 
         //public ICommand Save { get; set; }
 

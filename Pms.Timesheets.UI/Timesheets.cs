@@ -47,8 +47,10 @@ namespace Pms.Timesheets.Module
         public int[] GetPageWithUnconfirmedTS(Cutoff cutoff, string payrollCode) =>
             _timesheetProvider.GetPageWithUnconfirmedTS(cutoff.CutoffId, payrollCode).ToArray();
 
-        public async Task<IEnumerable<Timesheet>> GetTimesheets(string cutoffId, CancellationToken cancellationToken = default) =>
-            await _timesheetProvider.GetTimesheets(cutoffId, cancellationToken);
+        public async Task<ICollection<Timesheet>> GetTimesheets(string cutoffId, CancellationToken cancellationToken = default)
+        {
+            return await _timesheetProvider.GetTimesheets(cutoffId, cancellationToken);
+        }
 
         public IEnumerable<Timesheet> GetTimesheets(string cutoffId, string payrollCodeId) =>
             _timesheetProvider.GetTimesheets(cutoffId, payrollCodeId);

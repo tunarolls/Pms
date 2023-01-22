@@ -86,7 +86,7 @@
         <TextBox Grid.Row="2" Grid.Column="7" Text="{Binding Employee.NameExtension}" />
       
         <TextBlock Grid.Row="5" Grid.Column="0">Payroll Code:</TextBlock>
-        <ComboBox Grid.Row="5" Grid.Column="1" SelectedValue="{Binding Employee.PayrollCode}" ItemsSource="{Binding PayrollCodes}"/>
+        <ComboBox Grid.Row="5" Grid.Column="1" SelectedValue="{Binding Employee.PayrollCode}" ItemsSource="{Binding PayrollCodes}" />
         <TextBlock Grid.Row="5" Grid.Column="2">Account Number:</TextBlock>
         <TextBox Grid.Row="5" Grid.Column="3" Text="{Binding Employee.AccountNumber}" />
         <TextBlock Grid.Row="5" Grid.Column="4">Card Number:</TextBlock>

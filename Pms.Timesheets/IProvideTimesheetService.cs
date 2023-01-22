@@ -23,7 +23,7 @@ namespace Pms.Timesheets
 
         IEnumerable<Timesheet> GetTimesheets();
 
-        Task<IEnumerable<Timesheet>> GetTimesheets(string cutoffId, CancellationToken cancellationToken = default);
+        Task<ICollection<Timesheet>> GetTimesheets(string cutoffId, CancellationToken cancellationToken = default);
 
         IEnumerable<Timesheet> GetTimesheets(string cutoffId, string payrollCodeId);
 

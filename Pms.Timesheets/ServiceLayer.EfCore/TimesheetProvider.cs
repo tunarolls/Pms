@@ -90,9 +90,9 @@ namespace Pms.Timesheets.ServiceLayer.EfCore
             return context.Timesheets.Include(ts => ts.EE).ToList();
         }
 
-        public async Task<IEnumerable<Timesheet>> GetTimesheets(string cutoffId, CancellationToken cancellationToken = default)
+        public async Task<ICollection<Timesheet>> GetTimesheets(string cutoffId, CancellationToken cancellationToken = default)
         {
-            using TimesheetDbContext context = _factory.CreateDbContext();
+            using var context = _factory.CreateDbContext();
             return await context.Timesheets
                 .Include(ts => ts.EE)
                 .FilterByCutoffId(cutoffId)

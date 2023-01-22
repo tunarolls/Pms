@@ -211,7 +211,7 @@ namespace Pms.Timesheets.Module.ViewModels
                     var payrollCode = PayrollCode.PayrollCodeId;
                     cutoff.SetSite(PayrollCode.Site);
                     var timesheets = await _timesheet.GetTimesheets(cutoffId, cancellationToken);
-                    timesheets = timesheets.FilterByPayrollCode(payrollCode);
+                    var filtered = timesheets.FilterByPayrollCode(payrollCode);
 
                     // if (timesheets.Any(t => !t.IsValid)) // IsValid property doesn't exist
                     // {
@@ -219,14 +219,14 @@ namespace Pms.Timesheets.Module.ViewModels
                     // }
 
                     IEnumerable<Timesheet> twoPeriodTimesheets = _timesheet.GetTwoPeriodTimesheets(cutoffId).FilterByPayrollCode(payrollCode);
-                    List<TimesheetBankChoices> bankCategories = timesheets.ExtractBanks();
+                    List<TimesheetBankChoices> bankCategories = filtered.ExtractBanks();
                     var bankTasks = new List<Task>();
 
                     foreach (var bankCategory in bankCategories)
                     {
                         var bankTask = Task.Run(() =>
                         {
-                            var timesheetsByBankCategory = timesheets.FilterByBank(bankCategory);
+                            var timesheetsByBankCategory = filtered.FilterByBank(bankCategory);
                             var twoPeriodTimesheetsByBankCategory = twoPeriodTimesheets.FilterByBank(bankCategory);
 
                             if (timesheetsByBankCategory.Any())

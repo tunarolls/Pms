@@ -32,7 +32,7 @@ namespace Pms.Masterlists.Module.ViewModels
         }
     }
 
-    public class EmployeeListingViewModel : BindableBase, INavigationAware
+    public class EmployeeListingViewModel : CancellableBase, INavigationAware, IRegionMemberLifetime
     {
         private readonly Employees m_Employees;
         private readonly PayrollCodes m_PayrollCodes;
@@ -105,6 +105,8 @@ namespace Pms.Masterlists.Module.ViewModels
         public DelegateCommand SyncAllCommand { get; }
         public DelegateCommand SyncNewlyHiredCommand { get; }
         public DelegateCommand SyncResignedCommand { get; }
+
+        public bool KeepAlive => true;
         #endregion
 
         public void SelectDate(Action<IDialogResult> selectDateCallback)
@@ -267,6 +269,37 @@ namespace Pms.Masterlists.Module.ViewModels
         }
         #endregion
 
+        #region cancel test
+        public void OpenCancelDialog()
+        {
+            var cts = GetCancellationTokenSource();
+            var dialogParameters = CreateDialogParameters("Hi", "Hi", this);
+            var operation = RunOperation(1000, cts.Token);
+            s_Dialog.ShowDialog(DialogNames.CancelDialog, dialogParameters, (_) => { });
+        }
+
+        private async Task RunOperation(int lengthMilliseconds = 1000, CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                OnMessageSent(new("Hello"));
+                await Task.Delay(lengthMilliseconds, cancellationToken);
+                await Task.Delay(lengthMilliseconds, cancellationToken);
+                await Task.Delay(lengthMilliseconds, cancellationToken);
+                await Task.Delay(lengthMilliseconds, cancellationToken);
+                await Task.Delay(lengthMilliseconds, cancellationToken);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+            finally
+            {
+                OnTaskCompleted();
+            }
+        }
+        #endregion
+
 
         #region INavigationAware
         public void OnNavigatedTo(NavigationContext navigationContext)
@@ -277,7 +310,10 @@ namespace Pms.Masterlists.Module.ViewModels
                 _main.PropertyChanged += Main_PropertyChanged;
             }
 
-            _ = LoadValues();
+            var cts = GetCancellationTokenSource();
+            var dialogParameters = CreateDialogParameters("Initialization", "Loading...", this);
+            _ = LoadValues(cts.Token);
+            s_Dialog.ShowDialog(DialogNames.CancelDialog, dialogParameters, (_) => { });
         }
 
         public bool IsNavigationTarget(NavigationContext navigationContext)
@@ -301,14 +337,25 @@ namespace Pms.Masterlists.Module.ViewModels
 
         private async Task LoadValues(CancellationToken cancellationToken = default)
         {
-            if (_main != null)
+            try
             {
-                _payrollCode = _main.PayrollCode ?? new PayrollCode();
-                _payrollCodeId = _payrollCode.PayrollCodeId;
-                _site = _main.Site ?? SiteChoices.UNKNOWN;
-                _companyId = _main.Company?.CompanyId ?? new Company().CompanyId;
+                if (_main != null)
+                {
+                    _payrollCode = _main.PayrollCode ?? new PayrollCode();
+                    _payrollCodeId = _payrollCode.PayrollCodeId;
+                    _site = _main.Site ?? SiteChoices.UNKNOWN;
+                    _companyId = _main.Company?.CompanyId ?? new Company().CompanyId;
 
-                await LoadEmployees(cancellationToken);
+                    await LoadEmployees(cancellationToken);
+                }
+            }
+            catch
+            {
+                throw;
+            }
+            finally
+            {
+                OnTaskCompleted();
             }
         }
 
@@ -511,7 +558,6 @@ namespace Pms.Masterlists.Module.ViewModels
                 throw;
             }
         }
-
         #endregion
     }
 }

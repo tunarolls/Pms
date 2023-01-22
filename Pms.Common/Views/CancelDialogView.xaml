@@ -1,0 +1,33 @@
+﻿<UserControl x:Class="Pms.Common.Views.CancelDialogView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Pms.Common.Views"
+             xmlns:prism="http://prismlibrary.com/"
+             prism:ViewModelLocator.AutoWireViewModel="True"
+             mc:Ignorable="d" 
+             d:DesignHeight="100" d:DesignWidth="300">
+    <prism:Dialog.WindowStyle>
+        <Style TargetType="Window">
+            <Setter Property="prism:Dialog.WindowStartupLocation" Value="CenterOwner" />
+            <Setter Property="Height" Value="{Binding ElementName=Grid, Path=ActualHeight}" />
+            <Setter Property="Width" Value="{Binding ElementName=Grid, Path=ActualWidth}" />
+            <Setter Property="ResizeMode" Value="NoResize" />
+            <Setter Property="Title" Value="{Binding Title}" />
+            <Setter Property="SizeToContent" Value="WidthAndHeight" />
+            <Setter Property="MinWidth" Value="300" />
+            <Setter Property="MinHeight" Value="100" />
+        </Style>
+    </prism:Dialog.WindowStyle>
+    <Grid x:Name="Grid">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <TextBlock Text="{Binding Message}" VerticalAlignment="Center" Margin="16,24" TextWrapping="Wrap" MaxWidth="500" MinHeight="48" />
+        <Separator Grid.Row="1" />
+        <Button Content="Cancel" Command="{Binding CancelCommand}" Grid.Row="2" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="12" Padding="16,4" />
+    </Grid>
+</UserControl>

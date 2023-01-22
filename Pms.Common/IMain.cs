@@ -14,5 +14,6 @@ namespace Pms.Common
         public string CutoffId { get; }
         public PayrollCode? PayrollCode { get; }
         public SiteChoices? Site { get; }
+        public IEnumerable<PayrollCode> PayrollCodes { get; }
     }
 }

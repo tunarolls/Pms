@@ -1,4 +1,5 @@
-﻿using Pms.Masterlists.Module;
+﻿using Pms.Common;
+using Pms.Masterlists.Module;
 using Pms.Payrolls.App.Views;
 using Pms.Payrolls.Module;
 using Pms.Timesheets.Module;
@@ -31,6 +32,7 @@ namespace Pms.Payrolls.App
 
         protected override void ConfigureModuleCatalog(IModuleCatalog moduleCatalog)
         {
+            moduleCatalog.AddModule<CommonModule>();
             moduleCatalog.AddModule<TimesheetsModule>();
             moduleCatalog.AddModule<PayrollsModule>();
             moduleCatalog.AddModule<MasterlistsModule>();

@@ -31,4 +31,12 @@ namespace Pms.Common
             return PayrollCodeId;
         }
     }
+
+    public static class PayrollCodeExtensions
+    {
+        public static string GenerateId(this PayrollCode payrollCode)
+        {
+            return $"{payrollCode.Site[0]}-{payrollCode.Name}";
+        }
+    }
 }

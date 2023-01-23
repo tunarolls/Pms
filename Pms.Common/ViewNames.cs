@@ -15,5 +15,6 @@ namespace Pms.Common
         public const string SelectDateView = nameof(SelectDateView);
         public const string EmployeeListingView = nameof(EmployeeListingView);
         public const string EmployeeDetailView = nameof(EmployeeDetailView);
+        public const string PayrollCodeDetailView = nameof(PayrollCodeDetailView);
     }
 }

@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Pms.Common.ViewModels
@@ -15,6 +16,8 @@ namespace Pms.Common.ViewModels
         private string _message = string.Empty;
         private string _title = string.Empty;
         private bool _canClose = false;
+        private CancellationTokenSource? c_Cts;
+
         public CancelDialogViewModel()
         {
             CancelCommand = new DelegateCommand(Cancel);
@@ -30,6 +33,13 @@ namespace Pms.Common.ViewModels
             RequestClose?.Invoke(result);
         }
 
+        private void Caller_TaskException(object? sender, EventArgs e)
+        {
+            var result = new DialogResult(ButtonResult.None);
+            _canClose = true;
+            RequestClose?.Invoke(result);
+        }
+
         private void Caller_MessageSent(object? sender, MessageSentEventArgs e)
         {
             Message = e.Message;
@@ -37,7 +47,8 @@ namespace Pms.Common.ViewModels
 
         private void Cancel()
         {
-            _caller?.RaiseTaskCancelled();
+            c_Cts?.Cancel();
+            //_caller?.RaiseTaskCancelled();
         }
         
         #region IDialogAware
@@ -52,6 +63,13 @@ namespace Pms.Common.ViewModels
 
         public void OnDialogClosed()
         {
+            if (_caller != null)
+            {
+                _caller.Enable();
+                _caller.TaskCompleted -= Caller_TaskCompleted;
+                _caller.TaskException -= Caller_TaskException;
+                _caller.MessageSent -= Caller_MessageSent;
+            }
         }
 
         public void OnDialogOpened(IDialogParameters parameters)
@@ -59,10 +77,13 @@ namespace Pms.Common.ViewModels
             Message = parameters.GetValue<string?>(DialogParameterNames.Message) ?? string.Empty;
             Title = parameters.GetValue<string?>(DialogParameterNames.Title) ?? string.Empty;
             _caller = parameters.GetValue<INotifyTaskCompletion?>(DialogParameterNames.TaskCompletion);
+            c_Cts = parameters.GetValue<CancellationTokenSource?>(DialogParameterNames.CancellationTokenSource);
 
             if (_caller != null)
             {
+                _caller.Disable();
                 _caller.TaskCompleted += Caller_TaskCompleted;
+                _caller.TaskException += Caller_TaskException;
                 _caller.MessageSent += Caller_MessageSent;
             }
         }

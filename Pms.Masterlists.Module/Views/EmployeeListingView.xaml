@@ -7,7 +7,8 @@
              xmlns:prism="http://prismlibrary.com/"
              prism:ViewModelLocator.AutoWireViewModel="True"
              mc:Ignorable="d"
-             d:DesignHeight="550" d:DesignWidth="800">
+             d:DesignHeight="550" d:DesignWidth="800"
+             IsEnabled="{Binding IsEnabled}">
     <UserControl.Resources>
         <Style TargetType="MenuItem">
             <Setter Property="Margin" Value="0" />

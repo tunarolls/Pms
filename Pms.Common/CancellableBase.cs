@@ -9,6 +9,28 @@ using System.Threading.Tasks;
 
 namespace Pms.Common
 {
+    public enum TaskResult
+    {
+        CancelledByUser,
+        CancelledByException,
+        Completed
+    }
+
+    public interface ITaskCompletionResult
+    {
+        public TaskResult TaskResult { get; }
+    }
+
+    public class TaskCompletionResult : ITaskCompletionResult
+    {
+        public TaskCompletionResult(TaskResult taskResult)
+        {
+            TaskResult = taskResult;
+        }
+
+        public TaskResult TaskResult { get; }
+    }
+
     public class MessageSentEventArgs : EventArgs
     {
         public MessageSentEventArgs(string message)
@@ -23,19 +45,16 @@ namespace Pms.Common
     {
         event EventHandler<EventArgs> TaskCompleted;
         event EventHandler<EventArgs> TaskCancelled;
+        event EventHandler<EventArgs> TaskException;
         event EventHandler<MessageSentEventArgs> MessageSent;
 
-        void RaiseTaskCancelled();
+        void Enable();
+        void Disable();
     }
 
     public abstract class CancellableBase : BindableBase, INotifyTaskCompletion
     {
-        private CancellationTokenSource? l_Cts;
-
-        protected CancellableBase()
-        {
-            TaskCancelled += CancellableBase_TaskCancelled;
-        }
+        private bool l_IsEnabled = true;
 
         public event EventHandler<MessageSentEventArgs>? MessageSent;
 
@@ -43,25 +62,35 @@ namespace Pms.Common
 
         public event EventHandler<EventArgs>? TaskCompleted;
 
-        public void RaiseTaskCancelled()
+        public event EventHandler<EventArgs>? TaskException;
+
+        public bool IsEnabled { get => l_IsEnabled; set => SetProperty(ref l_IsEnabled, value); }
+
+        public void Enable()
         {
-            TaskCancelled?.Invoke(this, EventArgs.Empty);
+            IsEnabled = true;
         }
 
-        protected IDialogParameters CreateDialogParameters(string title, string message, INotifyTaskCompletion taskCompletion)
+        public void Disable()
+        {
+            IsEnabled = false;
+        }
+
+        protected IDialogParameters CreateDialogParameters(string title, string message,
+            INotifyTaskCompletion taskCompletion, CancellationTokenSource cts)
         {
             return new DialogParameters()
             {
                 { DialogParameterNames.Message, message },
                 { DialogParameterNames.Title, title },
-                { DialogParameterNames.TaskCompletion, taskCompletion }
+                { DialogParameterNames.TaskCompletion, taskCompletion },
+                { DialogParameterNames.CancellationTokenSource, cts }
             };
         }
 
         protected CancellationTokenSource GetCancellationTokenSource()
         {
-            l_Cts = new CancellationTokenSource();
-            return l_Cts;
+            return new CancellationTokenSource();
         }
 
         protected void OnMessageSent(MessageSentEventArgs e)
@@ -69,9 +98,9 @@ namespace Pms.Common
             MessageSent?.Invoke(this, e);
         }
 
-        protected void OnTaskCancelled(object? sender, EventArgs e)
+        protected void OnTaskCancelled()
         {
-            l_Cts?.Cancel();
+            TaskCancelled?.Invoke(this, EventArgs.Empty);
         }
 
         protected void OnTaskCompleted()
@@ -79,9 +108,9 @@ namespace Pms.Common
             TaskCompleted?.Invoke(this, EventArgs.Empty);
         }
 
-        private void CancellableBase_TaskCancelled(object? sender, EventArgs e)
+        protected void OnTaskException()
         {
-            l_Cts?.Cancel();
+            TaskException?.Invoke(this, EventArgs.Empty);
         }
     }
 }

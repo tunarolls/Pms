@@ -9,6 +9,11 @@
         mc:Ignorable="d"
         WindowStartupLocation="CenterScreen"
         Title="MainWindow" MinWidth="800" MinHeight="600" Width="800" Height="600">
+    <Window.Style>
+        <Style TargetType="Window">
+            <Setter Property="FontFamily" Value="Tahoma" />
+        </Style>
+    </Window.Style>
     <Border>
         <Grid>
             <Grid.ColumnDefinitions>

@@ -1,14 +1,8 @@
-﻿using DryIoc;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using Microsoft.Extensions.FileProviders;
-using NPOI.OpenXmlFormats.Wordprocessing;
-using NPOI.SS.Formula.PTG;
-using Pms.Common;
+﻿using Pms.Common;
 using Pms.Common.Enums;
 using Pms.Masterlists.Entities;
 using Pms.Masterlists.Exceptions;
 using Prism.Commands;
-using Prism.Mvvm;
 using Prism.Regions;
 using Prism.Services.Dialogs;
 using System;
@@ -18,15 +12,13 @@ using System.Linq;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Input;
 
 namespace Pms.Masterlists.Module.ViewModels
 {
     public class DummyEmployeeListingViewMode : EmployeeListingViewModel
     {
-        public DummyEmployeeListingViewMode(Employees employees, PayrollCodes payrollCodes, Companies companies, IDialogService dialog, IFileDialogService fileDialog)
-            : base(employees, payrollCodes, companies, dialog, fileDialog)
+        public DummyEmployeeListingViewMode(Employees employees, IDialogService dialog, IFileDialogService fileDialog)
+            : base(employees, dialog, fileDialog)
         {
             Employees = new Employee[] { new Employee() };
         }
@@ -35,21 +27,15 @@ namespace Pms.Masterlists.Module.ViewModels
     public class EmployeeListingViewModel : CancellableBase, INavigationAware, IRegionMemberLifetime
     {
         private readonly Employees m_Employees;
-        private readonly PayrollCodes m_PayrollCodes;
-        private readonly Companies m_Companies;
         private readonly IDialogService s_Dialog;
         private readonly IFileDialogService s_FileDialog;
         private IMain? _main;
 
         public EmployeeListingViewModel(Employees employees,
-            PayrollCodes payrollCodes,
-            Companies companies,
             IDialogService dialog,
             IFileDialogService fileDialog)
         {
             m_Employees = employees;
-            m_PayrollCodes = payrollCodes;
-            m_Companies = companies;
             s_Dialog = dialog;
             s_FileDialog = fileDialog;
 
@@ -65,8 +51,7 @@ namespace Pms.Masterlists.Module.ViewModels
             UnknownTinExportCommand = new DelegateCommand(UnknownTinExport);
 
             CheckDetailCommand = new DelegateCommand<object?>(CheckDetail);
-
-            //OpenPayrollCodeView = new Commands.Payroll_Codes.OpenView(this, payrollCodes, companies);
+            OpenPayrollCodeViewCommand = new DelegateCommand(OpenPayrollCodeView);
         }
 
         #region properties
@@ -111,7 +96,7 @@ namespace Pms.Masterlists.Module.ViewModels
 
         public void SelectDate(Action<IDialogResult> selectDateCallback)
         {
-            s_Dialog.ShowDialog(ViewNames.SelectDateView, selectDateCallback);
+            s_Dialog.Show(ViewNames.SelectDateView, selectDateCallback);
         }
 
         #region sync newly hired
@@ -273,9 +258,9 @@ namespace Pms.Masterlists.Module.ViewModels
         public void OpenCancelDialog()
         {
             var cts = GetCancellationTokenSource();
-            var dialogParameters = CreateDialogParameters("Hi", "Hi", this);
+            var dialogParameters = CreateDialogParameters("Hi", "Hi", this, cts);
+            s_Dialog.Show(DialogNames.CancelDialog, dialogParameters, (_) => { });
             var operation = RunOperation(1000, cts.Token);
-            s_Dialog.ShowDialog(DialogNames.CancelDialog, dialogParameters, (_) => { });
         }
 
         private async Task RunOperation(int lengthMilliseconds = 1000, CancellationToken cancellationToken = default)
@@ -310,10 +295,7 @@ namespace Pms.Masterlists.Module.ViewModels
                 _main.PropertyChanged += Main_PropertyChanged;
             }
 
-            var cts = GetCancellationTokenSource();
-            var dialogParameters = CreateDialogParameters("Initialization", "Loading...", this);
-            _ = LoadValues(cts.Token);
-            s_Dialog.ShowDialog(DialogNames.CancelDialog, dialogParameters, (_) => { });
+            LoadValues();
         }
 
         public bool IsNavigationTarget(NavigationContext navigationContext)
@@ -332,7 +314,15 @@ namespace Pms.Masterlists.Module.ViewModels
 
         private void Main_PropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
-            _ = LoadValues();
+            LoadValues();
+        }
+
+        private void LoadValues()
+        {
+            var cts = GetCancellationTokenSource();
+            var dialogParameters = CreateDialogParameters("Loading", "Retrieving employee data...", this, cts);
+            s_Dialog.Show(DialogNames.CancelDialog, dialogParameters, (_) => { });
+            _ = LoadValues(cts.Token);
         }
 
         private async Task LoadValues(CancellationToken cancellationToken = default)
@@ -539,24 +529,28 @@ namespace Pms.Masterlists.Module.ViewModels
         #region check detail
         private void CheckDetail(object? parameter)
         {
-            try
+            if (parameter is not Employee employee)
             {
-                if (parameter is not Employee employee)
-                {
-                    employee = new();
-                }
-
-                var dialogParams = new DialogParameters
-                {
-                    { PmsConstants.Employee, employee }
-                };
-
-                s_Dialog.ShowDialog(ViewNames.EmployeeDetailView, dialogParams, (_) => { });
+                employee = new();
             }
-            catch
+
+            var dialogParams = new DialogParameters
             {
-                throw;
-            }
+                { PmsConstants.Employee, employee }
+            };
+
+            s_Dialog.Show(ViewNames.EmployeeDetailView, dialogParams, (_) => { });
+        }
+        #endregion
+
+        #region open payroll code view
+        private void OpenPayrollCodeView()
+        {
+            var dialogParams = new DialogParameters
+            {
+            };
+
+            s_Dialog.Show(ViewNames.PayrollCodeDetailView, dialogParams, (_) => { });
         }
         #endregion
     }

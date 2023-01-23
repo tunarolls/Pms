@@ -21,7 +21,7 @@ namespace Pms.Masterlists.Module
             return _payrollCodeManager.GetPayrollCodes().ToList();
         }
 
-        public async Task<ICollection<PayrollCode>> ListPayrollCode(CancellationToken cancellationToken = default)
+        public async Task<ICollection<PayrollCode>> ListPayrollCodes(CancellationToken cancellationToken = default)
         {
             return await _payrollCodeManager.GetPayrollCodes(cancellationToken);
         }

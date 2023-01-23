@@ -32,5 +32,6 @@ namespace Pms.Common
         public const string Message = nameof(Message);
         public const string Title = nameof(Title);
         public const string TaskCompletion = nameof(TaskCompletion);
+        public const string CancellationTokenSource = nameof(CancellationTokenSource);
     }
 }

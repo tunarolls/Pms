@@ -7,27 +7,29 @@
              xmlns:prism="http://prismlibrary.com/"
              prism:ViewModelLocator.AutoWireViewModel="True"
              mc:Ignorable="d" 
-             d:DesignHeight="100" d:DesignWidth="300">
+             d:DesignHeight="200" d:DesignWidth="500">
     <prism:Dialog.WindowStyle>
         <Style TargetType="Window">
             <Setter Property="prism:Dialog.WindowStartupLocation" Value="CenterOwner" />
-            <Setter Property="Height" Value="{Binding ElementName=Grid, Path=ActualHeight}" />
-            <Setter Property="Width" Value="{Binding ElementName=Grid, Path=ActualWidth}" />
             <Setter Property="ResizeMode" Value="NoResize" />
             <Setter Property="Title" Value="{Binding Title}" />
             <Setter Property="SizeToContent" Value="WidthAndHeight" />
             <Setter Property="MinWidth" Value="300" />
             <Setter Property="MinHeight" Value="100" />
+            <Setter Property="Topmost" Value="True" />
+            <Setter Property="FontFamily" Value="Tahoma" />
         </Style>
     </prism:Dialog.WindowStyle>
-    <Grid x:Name="Grid">
+    <Grid>
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
         <TextBlock Text="{Binding Message}" VerticalAlignment="Center" Margin="16,24" TextWrapping="Wrap" MaxWidth="500" MinHeight="48" />
-        <Separator Grid.Row="1" />
-        <Button Content="Cancel" Command="{Binding CancelCommand}" Grid.Row="2" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="12" Padding="16,4" />
+        <ProgressBar IsIndeterminate="True" Grid.Row="1" />
+        <!--<Separator Grid.Row="2" />-->
+        <Button Content="Cancel" Command="{Binding CancelCommand}" Grid.Row="3" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="12" Padding="16,4" />
     </Grid>
 </UserControl>

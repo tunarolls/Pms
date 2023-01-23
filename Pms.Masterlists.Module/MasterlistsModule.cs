@@ -39,10 +39,15 @@ namespace Pms.Masterlists.Module
             containerRegistry.Register<PayrollCodeManager>();
             containerRegistry.RegisterDialog<SelectDateView>(ViewNames.SelectDateView);
             containerRegistry.RegisterDialog<EmployeeDetailView>(ViewNames.EmployeeDetailView);
+            containerRegistry.RegisterDialog<PayrollCodeDetailView>(ViewNames.PayrollCodeDetailView);
             containerRegistry.RegisterForNavigation<EmployeeListingView>(ViewNames.EmployeeListingView);
 
+
 #if DEBUG
+            containerRegistry.Register<IMessageBoxService, DummyMessageBoxService>();
             containerRegistry.Register<EmployeeListingViewModel, DummyEmployeeListingViewMode>();
+#else
+            containerRegistry.Register<IMessageBoxService, MessageBoxService>();
 #endif
         }
     }

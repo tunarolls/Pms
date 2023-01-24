@@ -84,7 +84,6 @@ namespace Pms.Common
         {
             var dialog = new FolderBrowserDialog()
             {
-
             };
 
             if (dialog.ShowDialog() == DialogResult.OK)

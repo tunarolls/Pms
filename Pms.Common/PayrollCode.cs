@@ -15,6 +15,8 @@ namespace Pms.Common
         {
             Name = name;
             Site = site;
+
+            PayrollCodeId = this.GenerateId();
         }
 
         public string CompanyId { get; set; } = string.Empty;

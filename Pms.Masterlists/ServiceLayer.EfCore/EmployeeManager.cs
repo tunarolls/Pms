@@ -268,8 +268,8 @@ namespace Pms.Masterlists.ServiceLayer.EfCore
         private async Task ValidateDuplicate(Employee employee, CancellationToken cancellationToken = default)
         {
             using var context = _factory.CreateDbContext();
-            var duplicateAccountNumber = await context.Employees.Where(t => t.EEId != employee.EEId && t.AccountNumber == employee.AccountNumber).ToListAsync(cancellationToken);
-            var duplicateCardNumber = await context.Employees.Where(t => t.EEId != employee.EEId && t.CardNumber == employee.CardNumber).ToListAsync(cancellationToken);
+            var duplicateAccountNumber = await context.Employees.Where(t => !string.IsNullOrEmpty(t.AccountNumber) && t.EEId != employee.EEId && t.AccountNumber == employee.AccountNumber).ToListAsync(cancellationToken);
+            var duplicateCardNumber = await context.Employees.Where(t => !string.IsNullOrEmpty(t.CardNumber) && t.EEId != employee.EEId && t.CardNumber == employee.CardNumber).ToListAsync(cancellationToken);
             var hasDuplicateAccountNumber = employee.Bank == BankChoices.LBP || employee.Bank != BankChoices.CHK && duplicateAccountNumber.Any();
             var hasDuplicateCardNumber = employee.Bank == BankChoices.LBP && duplicateCardNumber.Any();
 
@@ -298,17 +298,20 @@ namespace Pms.Masterlists.ServiceLayer.EfCore
 
         private async Task ValidatePayrollCode(Employee employee, CancellationToken cancellationToken = default)
         {
-            using var context = _factory.CreateDbContext();
-            var payrollCode = await context.PayrollCodes.Where(t => t.PayrollCodeId == employee.PayrollCode).FirstOrDefaultAsync(cancellationToken);
+            if (employee.JobRemarks != "BACKOUT")
+            {
+                using var context = _factory.CreateDbContext();
+                var payrollCode = await context.PayrollCodes.Where(t => t.PayrollCodeId == employee.PayrollCode).FirstOrDefaultAsync(cancellationToken);
 
-            if (payrollCode != null)
-            {
-                employee.CompanyId = payrollCode.CompanyId;
-                employee.Site = payrollCode.Site;
-            }
-            else
-            {
-                throw new InvalidFieldValueException("Payroll Code", employee.PayrollCode, employee.EEId, "Unknown payroll code.");
+                if (payrollCode != null)
+                {
+                    employee.CompanyId = payrollCode.CompanyId;
+                    employee.Site = payrollCode.Site;
+                }
+                else
+                {
+                    throw new InvalidFieldValueException("Payroll Code", employee.PayrollCode, employee.EEId, "Unknown payroll code.");
+                }
             }
         }
 

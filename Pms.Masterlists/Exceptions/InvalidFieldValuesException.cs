@@ -14,7 +14,7 @@ namespace Pms.Masterlists.Exceptions
             EEId = eeId;
             Detail = $"{eeId} encountered the following validation errors:\n";
             foreach (var exception in exceptions)
-                Detail += $"• {exception.Message}\n";
+                Detail += $"\n• {exception.Message}";
         }
 
         public string Detail { get; set; }

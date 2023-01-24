@@ -10,6 +10,7 @@ namespace Pms.Adjustments.Models
     {
         public string CutoffId { get; private set; } = string.Empty;
         public DateTime CutoffDate { get; private set; }
+        public DeductionOptions DeductionOption => CutoffDate.Day == 15 ? DeductionOptions.ONLY15TH : DeductionOptions.ONLY30TH;
 
         public Cutoff()
         {

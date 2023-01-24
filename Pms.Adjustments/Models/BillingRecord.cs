@@ -8,25 +8,34 @@ namespace Pms.Adjustments.Models
 {
     public class BillingRecord : IBillingRecord
     {
-
-        public string RecordId { get; set; } = string.Empty;
-
-        public string EEId { get; set; } = string.Empty;
-        public EmployeeView? EE { get; set; }
-
+        public AdjustmentOptions AdjustmentOption { get; set; }
         public AdjustmentTypes AdjustmentType { get; set; }
-
-        public double Balance { get; set; }
         public double Advances { get; set; }
         public double Amortization { get; set; }
-
-        public DateTime EffectivityDate { get; set; }
-
+        public double Balance { get; set; }
+        public DateTime DateCreated { get; set; } = DateTime.Now;
         public DeductionOptions DeductionOption { get; set; }
-
+        public EmployeeView? EE { get; set; }
+        public string EEId { get; set; } = string.Empty;
+        public DateTime EffectivityDate { get; set; }
+        public string RecordId { get; set; } = string.Empty;
+        public string Remarks { get; set; } = string.Empty; 
         public BillingRecordStatus Status { get; set; }
+        public static string GenerateId(BillingRecord rec) => $"{rec.EEId}_{rec.AdjustmentType}_{rec.EffectivityDate:MMyy}";
 
+        public void Validate()
+        {
+            if (EEId is null)
+                throw new Exception("EE Id should not be blank.");
 
-        public DateTime DateCreated { get; set; }
+            if (RecordId is null)
+                throw new Exception("Record Id should not be blank.");
+
+            //if (Balance > Advances)
+            //    throw new Exception("Remaining Balance should not be greater than Advances.");
+
+            if (Amortization > Advances)
+                throw new Exception("Monthly Amortization should not be greater than Advances.");
+        }
     }
 }

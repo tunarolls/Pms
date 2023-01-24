@@ -26,7 +26,7 @@ namespace Pms.Adjustments.ServiceLayer.EfCore
             return context.Billings
                 .Where(b => b.EEId == eeId)
                 .Where(b => b.CutoffId == cutoffId)
-                .Where(b => b.Deducted)
+                .Where(b => b.Applied)
                 .Sum(b => b.Amount);
         }
 

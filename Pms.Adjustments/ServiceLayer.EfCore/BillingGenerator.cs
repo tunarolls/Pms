@@ -5,37 +5,81 @@ using Pms.Adjustments.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Pms.Adjustments.ServiceLayer.EfCore
 {
     public class BillingGenerator : IGenerateBillingService
     {
         protected IDbContextFactory<AdjustmentDbContext> _factory;
-        //private IManageBillingService _manageBillingService;
 
         public BillingGenerator(IDbContextFactory<AdjustmentDbContext> factory)
         {
             _factory = factory;
-            //_manageBillingService = manageBillingService;
         }
 
-        public IEnumerable<string> CollectEEIdWithPcv(string cutoffId)
+        public IEnumerable<string> CollectEEIdWithBillingRecord(string payrollCodeId, string cutoffId)
         {
             using AdjustmentDbContext context = _factory.CreateDbContext();
-            IEnumerable<string> eeIds = context.Timesheets
-                .Where(ts => !string.IsNullOrEmpty(ts.RawPCV) || ts.Allowance > 0)
-                .Where(ts => ts.CutoffId == cutoffId)
-                .Select(ts => ts.EEId)
+            IEnumerable<string> eeIds = context.BillingRecords
+                .Include(b => b.EE)
+                .Where(b => b.EE != null && b.EE.PayrollCode == payrollCodeId)
+                .Select(b => b.EEId)
+                .Distinct()
                 .ToList();
 
             return eeIds;
         }
 
+        public IEnumerable<string> CollectEEIdWithPcv(string payrollCodeId, string cutoffId)
+        {
+            using AdjustmentDbContext context = _factory.CreateDbContext();
+            IEnumerable<string> eeIds = context.Timesheets
+                .Include(ts => ts.EE)
+                .Where(ts => ts.EE != null && ts.EE.PayrollCode == payrollCodeId)
+                .Where(ts => ts.CutoffId == cutoffId)
+                .Where(ts => ts.RawPCV != "" || ts.Allowance > 0)
+                .Select(ts => ts.EEId)
+                .Distinct()
+                .ToList();
+
+            return eeIds;
+        }
         public IEnumerable<Billing> GenerateBillingFromRecords(string eeId, string cutoffId)
         {
-            throw new NotImplementedException();
+            Cutoff cutoff = new(cutoffId);
+            using AdjustmentDbContext context = _factory.CreateDbContext();
+            IEnumerable<BillingRecord> records = context.BillingRecords
+                .Where(r => r.EEId == eeId)
+                .Where(r => r.Balance > 0)
+                .Where(r => r.DeductionOption == cutoff.DeductionOption || r.DeductionOption == DeductionOptions.EVERYPAYROLL)
+                .Where(r => r.Status == BillingRecordStatus.ON_GOING)
+                .ToList();
+
+            List<Billing> billings = new();
+            foreach (BillingRecord record in records)
+            {
+                if (!context.Billings.Any(b => b.RecordId == record.RecordId && b.CutoffId == cutoffId))
+                {
+                    double amount = record.Amortization;
+                    if (record.Amortization > record.Balance)
+                        amount = record.Balance;
+
+                    Billing billing = new()
+                    {
+                        EEId = eeId,
+                        CutoffId = cutoffId,
+                        AdjustmentType = record.AdjustmentType,
+                        Amount = amount,
+                        AdjustmentOption = AdjustmentOptions.ADJUST2,
+                        Applied = false,
+                        DateCreated = DateTime.Now
+                    };
+                    billing.BillingId = Billing.GenerateId(billing);
+                    billings.Add(billing);
+                }
+            }
+
+            return billings;
         }
 
 
@@ -49,7 +93,7 @@ namespace Pms.Adjustments.ServiceLayer.EfCore
 
             List<Billing> billings = new();
 
-            var timesheetsWithAllowance = eeTimesheets.Where(ts => ts.Allowance > 0).ToList();
+            IEnumerable<TimesheetView> timesheetsWithAllowance = eeTimesheets.Where(ts => ts.Allowance > 0);
             foreach (TimesheetView timesheet in timesheetsWithAllowance)
             {
                 var billing = new Billing()
@@ -59,14 +103,14 @@ namespace Pms.Adjustments.ServiceLayer.EfCore
                     AdjustmentType = AdjustmentTypes.ALLOWANCE,
                     Amount = timesheet.Allowance,
                     AdjustmentOption = AdjustmentOptions.ADJUST1,
-                    Deducted = true,
+                    Applied = false,
                     DateCreated = DateTime.Now
                 };
                 billing.BillingId = Billing.GenerateId(billing);
                 billings.Add(billing);
             }
 
-            var timesheetsWithPCV = eeTimesheets.Where(ts => !string.IsNullOrEmpty(ts.RawPCV)).ToList();
+            IEnumerable<TimesheetView> timesheetsWithPCV = eeTimesheets.Where(ts => ts.RawPCV != "");
             foreach (TimesheetView timesheet in timesheetsWithPCV)
             {
                 string[] rawPCVs = timesheet.RawPCV.Split("|");
@@ -84,7 +128,7 @@ namespace Pms.Adjustments.ServiceLayer.EfCore
                         AdjustmentType = AdjustmentTypes.PCV,
                         Amount = amount,
                         AdjustmentOption = AdjustmentOptions.ADJUST1,
-                        Deducted = true,
+                        Applied = false,
                         Remarks = remarks,
                         DateCreated = DateTime.Now
                     };

@@ -1,4 +1,6 @@
-﻿using Pms.Common;
+﻿using FastExpressionCompiler.LightExpression;
+using NPOI.HPSF;
+using Pms.Common;
 using Pms.Common.Enums;
 using Pms.Masterlists.Entities;
 using Pms.Masterlists.Exceptions;
@@ -8,6 +10,7 @@ using Prism.Services.Dialogs;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Threading;
@@ -17,8 +20,8 @@ namespace Pms.Masterlists.Module.ViewModels
 {
     public class DummyEmployeeListingViewMode : EmployeeListingViewModel
     {
-        public DummyEmployeeListingViewMode(Employees employees, IDialogService dialog, IFileDialogService fileDialog)
-            : base(employees, dialog, fileDialog)
+        public DummyEmployeeListingViewMode(Employees employees, IMessageBoxService message, IDialogService dialog, IFileDialogService fileDialog)
+            : base(employees, message, dialog, fileDialog)
         {
             Employees = new Employee[] { new Employee() };
         }
@@ -29,12 +32,15 @@ namespace Pms.Masterlists.Module.ViewModels
         private readonly Employees m_Employees;
         private readonly IDialogService s_Dialog;
         private readonly IFileDialogService s_FileDialog;
+        private readonly IMessageBoxService s_Message;
         private IMain? _main;
 
         public EmployeeListingViewModel(Employees employees,
+            IMessageBoxService message,
             IDialogService dialog,
             IFileDialogService fileDialog)
         {
+            s_Message = message;
             m_Employees = employees;
             s_Dialog = dialog;
             s_FileDialog = fileDialog;
@@ -110,7 +116,10 @@ namespace Pms.Masterlists.Module.ViewModels
             if (result.Result == ButtonResult.OK)
             {
                 var selectedDate = result.Parameters.GetValue<DateTime>(PmsConstants.SelectedDate);
-                _ = SyncNewlyHired(selectedDate);
+                var cts = GetCancellationTokenSource();
+                var dialogParameters = CreateDialogParameters("Loading", "Syncing data...", this, cts);
+                s_Dialog.Show(DialogNames.CancelDialog, dialogParameters, (_) => { });
+                _ = SyncNewlyHired(selectedDate, cts.Token);
             }
         }
 
@@ -121,6 +130,7 @@ namespace Pms.Masterlists.Module.ViewModels
                 var exceptions = new List<Exception>();
                 var employees = await m_Employees.SyncNewlyHired(selectedDate, _site.ToString(), cancellationToken);
                 if (!employees.Any()) return;
+                OnProgressStart(employees.Count);
 
                 foreach (var employee in employees)
                 {
@@ -133,18 +143,31 @@ namespace Pms.Masterlists.Module.ViewModels
                             await m_Employees.Save(employee, cancellationToken);
                         }
                     }
-                    catch (InvalidFieldValuesException ex) { exceptions.Add(ex); }
-                    catch (InvalidFieldValueException ex) { exceptions.Add(ex); }
-                    catch (DuplicateBankInformationException ex) { exceptions.Add(ex); }
-                    catch (Exception ex) { exceptions.Add(ex); }
+                    catch (TaskCanceledException) { throw; }
+                    catch (InvalidFieldValuesException ex) { exceptions.Add(ex); OnErrorFound(); }
+                    catch (InvalidFieldValueException ex) { exceptions.Add(ex); OnErrorFound(); }
+                    catch (DuplicateBankInformationException ex) { exceptions.Add(ex); OnErrorFound(); }
+                    catch (Exception ex) { exceptions.Add(ex); OnErrorFound(); }
+                    finally { OnProgressIncrement(); }
                 }
 
                 m_Employees.ReportExceptions(exceptions, new PayrollCode(), $"{_site}-NEWLYHIRED");
+                OnTaskCompleted();
             }
-            catch (HttpRequestException) { }
-            catch (Exception) { }
-
-            // Load employees
+            catch (TaskCanceledException)
+            {
+                OnTaskException();
+            }
+            catch (HttpRequestException)
+            {
+                OnTaskException();
+                s_Message.ShowError(ErrorMessages.HrmsHttpRequestError);
+            }
+            catch (Exception ex)
+            {
+                OnTaskException();
+                s_Message.ShowError(ex.Message);
+            }
         }
         #endregion
 
@@ -159,7 +182,10 @@ namespace Pms.Masterlists.Module.ViewModels
             if (result.Result == ButtonResult.OK)
             {
                 var selectedDate = result.Parameters.GetValue<DateTime>(PmsConstants.SelectedDate);
-                _ = SyncResigned(selectedDate);
+                var cts = GetCancellationTokenSource();
+                var dialogParameters = CreateDialogParameters("Loading", "Syncing data...", this, cts);
+                s_Dialog.Show(DialogNames.CancelDialog, dialogParameters, (_) => { });
+                _ = SyncResigned(selectedDate, cts.Token);
             }
         }
 
@@ -170,6 +196,7 @@ namespace Pms.Masterlists.Module.ViewModels
                 var exceptions = new List<Exception>();
                 var employees = await m_Employees.SyncResigned(selectedDate, _site.ToString(), cancellationToken);
                 if (!employees.Any()) return;
+                OnProgressStart(employees.Count);
 
                 foreach (var employee in employees)
                 {
@@ -181,29 +208,40 @@ namespace Pms.Masterlists.Module.ViewModels
                             await m_Employees.Save(employee, cancellationToken);
                         }
                     }
-                    catch (InvalidFieldValuesException ex) { exceptions.Add(ex); }
-                    catch (InvalidFieldValueException ex) { exceptions.Add(ex); }
-                    catch (DuplicateBankInformationException ex) { exceptions.Add(ex); }
-                    catch (Exception ex) { exceptions.Add(ex); }
+                    catch (InvalidFieldValuesException ex) { exceptions.Add(ex); OnErrorFound(); }
+                    catch (InvalidFieldValueException ex) { exceptions.Add(ex); OnErrorFound(); }
+                    catch (DuplicateBankInformationException ex) { exceptions.Add(ex); OnErrorFound(); }
+                    catch (Exception ex) { exceptions.Add(ex); OnErrorFound(); }
+                    finally { OnProgressIncrement(); }
                 }
 
                 m_Employees.ReportExceptions(exceptions, new PayrollCode(), $"{_site}-RESIGNED");
+                OnTaskCompleted();
+            }
+            catch (TaskCanceledException)
+            {
+                OnTaskException();
             }
             catch (HttpRequestException)
             {
+                OnTaskException();
+                s_Message.ShowError(ErrorMessages.HrmsHttpRequestError);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                OnTaskException();
+                s_Message.ShowError(ex.Message);
             }
-
-            // Load employees
         }
         #endregion
 
         #region sync all
         private void SyncAll()
         {
-            _ = SyncAll(Employees.Select(t => t.EEId).ToArray());
+            var cts = GetCancellationTokenSource();
+            var dialogParameters = CreateDialogParameters("Loading", "Syncing data...", this, cts);
+            s_Dialog.Show(DialogNames.CancelDialog, dialogParameters, (_) => { });
+            _ = SyncAll(Employees.Select(t => t.EEId).ToArray(), cts.Token);
         }
 
         private async Task SyncAll(string[] eeIds, CancellationToken cancellationToken = default)
@@ -211,6 +249,7 @@ namespace Pms.Masterlists.Module.ViewModels
             try
             {
                 var exceptions = new List<Exception>();
+                OnProgressStart(eeIds.Length);
 
                 foreach (var eeId in eeIds)
                 {
@@ -239,18 +278,30 @@ namespace Pms.Masterlists.Module.ViewModels
                             await m_Employees.Save(foundEmployee, cancellationToken);
                         }
                     }
-                    catch (InvalidFieldValuesException ex) { exceptions.Add(ex); }
-                    catch (InvalidFieldValueException ex) { exceptions.Add(ex); }
-                    catch (DuplicateBankInformationException ex) { exceptions.Add(ex); }
-                    catch (Exception ex) { exceptions.Add(ex); }
+                    catch (InvalidFieldValuesException ex) { exceptions.Add(ex); OnErrorFound(); }
+                    catch (InvalidFieldValueException ex) { exceptions.Add(ex); OnErrorFound(); }
+                    catch (DuplicateBankInformationException ex) { exceptions.Add(ex); OnErrorFound(); }
+                    catch (Exception ex) { exceptions.Add(ex); OnErrorFound(); }
+                    finally { OnProgressIncrement(); }
                 }
 
                 m_Employees.ReportExceptions(exceptions, _payrollCode, $"{_site}-REGULAR");
+                OnTaskCompleted();
             }
-            catch (HttpRequestException) { }
-            catch (Exception) { }
-
-            // Sync newly hired
+            catch (TaskCanceledException)
+            {
+                OnTaskException();
+            }
+            catch (HttpRequestException)
+            {
+                OnTaskException();
+                s_Message.ShowError(ErrorMessages.HrmsHttpRequestError);
+            }
+            catch (Exception ex)
+            {
+                OnTaskException();
+                s_Message.ShowError(ex.Message);
+            }
         }
         #endregion
 
@@ -258,7 +309,7 @@ namespace Pms.Masterlists.Module.ViewModels
         public void OpenCancelDialog()
         {
             var cts = GetCancellationTokenSource();
-            var dialogParameters = CreateDialogParameters("Hi", "Hi", this, cts);
+            var dialogParameters = CreateDialogParameters("Running", "Testing CancelDialog...", this, cts);
             s_Dialog.Show(DialogNames.CancelDialog, dialogParameters, (_) => { });
             var operation = RunOperation(1000, cts.Token);
         }
@@ -267,20 +318,38 @@ namespace Pms.Masterlists.Module.ViewModels
         {
             try
             {
-                OnMessageSent(new("Hello"));
+                OnMessageSent("Testing CancelDialog...");
                 await Task.Delay(lengthMilliseconds, cancellationToken);
-                await Task.Delay(lengthMilliseconds, cancellationToken);
-                await Task.Delay(lengthMilliseconds, cancellationToken);
-                await Task.Delay(lengthMilliseconds, cancellationToken);
-                await Task.Delay(lengthMilliseconds, cancellationToken);
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-            finally
-            {
+
+                OnMessageSent("Indeterminate operation");
+                OnProgressStart();
+                await Task.Delay(5000, cancellationToken);
+
+                OnMessageSent("Determinate operation");
+                int count = 10;
+                OnProgressStart(count);
+                for (int i = 0; i < count; i++)
+                {
+                    await Task.Delay(lengthMilliseconds, cancellationToken);
+                    OnProgressIncrement();
+                }
+
+                OnErrorFound();
+
+                OnMessageSent("New operation");
+                count = 20;
+                OnProgressStart(count);
+                for (int i = 0; i < count; i++)
+                {
+                    await Task.Delay(lengthMilliseconds, cancellationToken);
+                    OnProgressIncrement();
+                }
+
                 OnTaskCompleted();
+            }
+            catch
+            {
+                OnTaskException();
             }
         }
         #endregion
@@ -320,7 +389,7 @@ namespace Pms.Masterlists.Module.ViewModels
         private void LoadValues()
         {
             var cts = GetCancellationTokenSource();
-            var dialogParameters = CreateDialogParameters("Loading", "Retrieving employee data...", this, cts);
+            var dialogParameters = CreateDialogParameters("Loading", "Retrieving data...", this, cts);
             s_Dialog.Show(DialogNames.CancelDialog, dialogParameters, (_) => { });
             _ = LoadValues(cts.Token);
         }
@@ -338,14 +407,17 @@ namespace Pms.Masterlists.Module.ViewModels
 
                     await LoadEmployees(cancellationToken);
                 }
-            }
-            catch
-            {
-                throw;
-            }
-            finally
-            {
+
                 OnTaskCompleted();
+            }
+            catch (TaskCanceledException)
+            {
+                OnTaskException();
+            }
+            catch (Exception ex)
+            {
+                OnTaskException();
+                s_Message.ShowError(ex.Message);
             }
         }
 
@@ -376,37 +448,51 @@ namespace Pms.Masterlists.Module.ViewModels
 
         private void BankImportCallback(IFileDialogResult result)
         {
-            _ = BankImport(result.FileNames);
+            var cts = GetCancellationTokenSource();
+            var dialogParameters = CreateDialogParameters("Loading", "Importing files...", this, cts);
+            s_Dialog.Show(DialogNames.CancelDialog, dialogParameters, (_) => { });
+            _ = BankImport(result.FileNames, cts.Token);
         }
 
         private async Task BankImport(string[] fileNames, CancellationToken cancellationToken = default)
         {
-            foreach (var fileName in fileNames)
-            {
-                try
-                {
-                    var extractedEmployee = await m_Employees.ImportBankInformation(fileName, cancellationToken);
+            var errors = new Dictionary<string, List<Exception>>();
 
-                    foreach (var employee in extractedEmployee)
+            try
+            {
+                foreach (var fileName in fileNames)
+                {
+                    errors.TryAdd(fileName, new List<Exception>());
+
+                    try
                     {
-                        try
+                        OnMessageSent($"Saving extracted employee bank information from {Path.GetFileName(fileName)}...");
+                        var extractedEmployee = await m_Employees.ImportBankInformation(fileName, cancellationToken);
+                        OnProgressStart(extractedEmployee.Count);
+
+                        foreach (var employee in extractedEmployee)
                         {
-                            await m_Employees.Save(employee, cancellationToken);
-                        }
-                        catch (InvalidFieldValueException)
-                        {
-                            throw;
-                        }
-                        catch (DuplicateBankInformationException)
-                        {
-                            throw;
+                            try
+                            {
+                                await m_Employees.Save(employee, cancellationToken);
+                            }
+                            catch (TaskCanceledException) { throw; }
+                            catch (InvalidFieldValueException ex) { errors[fileName].Add(ex); OnErrorFound(); }
+                            catch (DuplicateBankInformationException ex) { errors[fileName].Add(ex); OnErrorFound(); }
+                            finally { OnProgressIncrement(); }
                         }
                     }
+                    catch (TaskCanceledException) { throw; }
+                    catch (Exception ex) { errors[fileName].Add(ex); OnErrorFound(); }
                 }
-                catch
-                {
-                    throw;
-                }
+
+                OnTaskCompleted();
+            }
+            catch (TaskCanceledException) { OnTaskException(); }
+            catch (Exception ex)
+            {
+                OnTaskException();
+                s_Message.ShowError(ex.Message, "Unexpected error");
             }
         }
         #endregion
@@ -419,33 +505,51 @@ namespace Pms.Masterlists.Module.ViewModels
 
         private void EEDataImportCallback(IFileDialogResult result)
         {
-            _ = EEDataImport(result.FileNames);
+            var cts = GetCancellationTokenSource();
+            var dialogParameters = CreateDialogParameters("Loading", "Importing files...", this, cts);
+            s_Dialog.Show(DialogNames.CancelDialog, dialogParameters, (_) => { });
+            _ = EEDataImport(result.FileNames, cts.Token);
         }
 
         private async Task EEDataImport(string[] fileNames, CancellationToken cancellationToken = default)
         {
-            foreach (var fileName in fileNames)
-            {
-                try
-                {
-                    var extractedEmployee = await m_Employees.ImportEEData(fileName, cancellationToken);
+            var errors = new Dictionary<string, List<Exception>>();
 
-                    foreach (var employee in extractedEmployee)
+            try
+            {
+                foreach (var fileName in fileNames)
+                {
+                    errors.TryAdd(fileName, new List<Exception>());
+
+                    try
                     {
-                        try
+                        OnMessageSent($"Saving employee EE data information from {Path.GetFileName(fileName)}...");
+                        var extractedEmployee = await m_Employees.ImportEEData(fileName, cancellationToken);
+
+                        foreach (var employee in extractedEmployee)
                         {
-                            await m_Employees.Save(employee, cancellationToken);
-                        }
-                        catch
-                        {
-                            throw;
+                            try
+                            {
+                                await m_Employees.Save(employee, cancellationToken);
+                            }
+                            catch (TaskCanceledException) { throw; }
+                            catch (Exception ex) { errors[fileName].Add(ex); }
                         }
                     }
+                    catch (TaskCanceledException) { throw; }
+                    catch (Exception ex)
+                    {
+                        errors[fileName].Add(ex);
+                    }
                 }
-                catch
-                {
-                    throw;
-                }
+
+                OnTaskCompleted();
+            }
+            catch (TaskCanceledException) { OnTaskException(); }
+            catch (Exception ex)
+            {
+                OnTaskException();
+                s_Message.ShowError(ex.Message, "Unexpected error");
             }
         }
         #endregion
@@ -458,13 +562,21 @@ namespace Pms.Masterlists.Module.ViewModels
 
         private void MasterFileImportCallback(IFileDialogResult result)
         {
-            _ = MasterFileImport(result.FileName);
+            var cts = GetCancellationTokenSource();
+            var dialogParameters = CreateDialogParameters("Loading", "Importing files...", this, cts);
+            s_Dialog.Show(DialogNames.CancelDialog, dialogParameters, (_) => { });
+            _ = MasterFileImport(result.FileName, cts.Token);
         }
 
         private async Task MasterFileImport(string fileName, CancellationToken cancellationToken = default)
         {
+            var errors = new Dictionary<string, List<Exception>>();
+
             try
             {
+                errors.TryAdd(fileName, new List<Exception>());
+
+                OnMessageSent($"Saving extracted employee job codes from {Path.GetFileName(fileName)}...");
                 var extractedEmployee = await m_Employees.ImportMasterFile(fileName, cancellationToken);
 
                 foreach (var employee in extractedEmployee)
@@ -473,15 +585,17 @@ namespace Pms.Masterlists.Module.ViewModels
                     {
                         await m_Employees.Save(employee, cancellationToken);
                     }
-                    catch
-                    {
-                        throw;
-                    }
+                    catch (TaskCanceledException) { throw; }
+                    catch (Exception ex) { errors[fileName].Add(ex); }
                 }
+
+                OnTaskCompleted();
             }
-            catch
+            catch (TaskCanceledException) { OnTaskException(); }
+            catch (Exception ex)
             {
-                throw;
+                OnTaskException();
+                s_Message.ShowError(ex.Message, "Unexpected error");
             }
         }
         #endregion
@@ -489,7 +603,10 @@ namespace Pms.Masterlists.Module.ViewModels
         #region masterlist export
         private void MasterlistExport()
         {
-            _ = MasterlistExport(default);
+            var cts = GetCancellationTokenSource();
+            var dialogParameters = CreateDialogParameters("Loading", "Exporting masterlist...", this, cts);
+            s_Dialog.Show(DialogNames.CancelDialog, dialogParameters, (_) => { });
+            _ = MasterlistExport(cts.Token);
         }
 
         private async Task MasterlistExport(CancellationToken cancellationToken = default)
@@ -498,18 +615,25 @@ namespace Pms.Masterlists.Module.ViewModels
             {
                 var employees = Employees.ToList();
                 await m_Employees.ExportMasterlist(employees, _payrollCode, cancellationToken: cancellationToken);
+                OnTaskCompleted();
             }
-            catch
+            catch (TaskCanceledException) { OnTaskException(); }
+            catch (Exception ex)
             {
-                throw;
+                OnTaskException();
+                s_Message.ShowError(ex.Message, "Unexpected error");
             }
+            
         }
         #endregion
 
         #region unknown tin export
         private void UnknownTinExport()
         {
-            _ = UnknownTinExport(default);
+            var cts = GetCancellationTokenSource();
+            var dialogParameters = CreateDialogParameters("Loading", "Exporting unknown TIN...", this, cts);
+            s_Dialog.Show(DialogNames.CancelDialog, dialogParameters, (_) => { });
+            _ = UnknownTinExport(cts.Token);
         }
 
         private async Task UnknownTinExport(CancellationToken cancellationToken = default)
@@ -518,10 +642,13 @@ namespace Pms.Masterlists.Module.ViewModels
             {
                 var noTin = Employees.Where(t => string.IsNullOrEmpty(t.TIN)).ToList();
                 await m_Employees.ExportMasterlist(noTin, _payrollCode, cancellationToken: cancellationToken);
+                OnTaskCompleted();
             }
-            catch
+            catch (TaskCanceledException) { OnTaskException(); }
+            catch (Exception ex)
             {
-                throw;
+                OnTaskException();
+                s_Message.ShowError(ex.Message, "Unexpected error");
             }
         }
         #endregion

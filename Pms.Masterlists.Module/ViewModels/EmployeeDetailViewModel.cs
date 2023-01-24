@@ -83,6 +83,11 @@ namespace Pms.Masterlists.Module.ViewModels
                 PayrollCodes = (await m_PayrollCodes.ListPayrollCodes(cancellationToken)).Select(t => t.PayrollCodeId);
                 OnTaskCompleted();
             }
+            catch (TaskCanceledException)
+            {
+                OnTaskException();
+                RequestClose?.Invoke(new DialogResult());
+            }
             catch (Exception ex)
             {
                 OnTaskException();
@@ -115,6 +120,10 @@ namespace Pms.Masterlists.Module.ViewModels
                 {
                     throw new NullReferenceException("Employee not found.");
                 }
+            }
+            catch (TaskCanceledException)
+            {
+                OnTaskException();
             }
             catch (NullReferenceException nrex)
             {
@@ -167,6 +176,10 @@ namespace Pms.Masterlists.Module.ViewModels
                 }
 
                 OnTaskCompleted();
+            }
+            catch (TaskCanceledException)
+            {
+                OnTaskException();
             }
             catch (NullReferenceException nrex)
             {

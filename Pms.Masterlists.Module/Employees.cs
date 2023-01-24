@@ -104,11 +104,9 @@ namespace Pms.Masterlists.Module
 
         public void ReportExceptions(IEnumerable<Exception> exceptions, PayrollCode payrollCode, string suffix)
         {
-            if (exceptions.Count() > 0)
+            if (exceptions.Any())
             {
-                //InvalidValueReporter exporter = new();
-                //exporter.StartReport(exceptions, payrollCode, suffix);
-
+                InvalidValueReporter.StartReport(exceptions, payrollCode, suffix);
             }
         }
 

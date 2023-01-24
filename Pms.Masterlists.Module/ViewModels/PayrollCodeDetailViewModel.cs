@@ -57,6 +57,12 @@ namespace Pms.Masterlists.Module.ViewModels
                 var companies = await m_Companies.ListCompanies(cancellationToken);
                 PayrollCodes = payrollCodes;
                 CompanyIds = companies.Select(t => t.CompanyId);
+                OnTaskCompleted();
+            }
+            catch (TaskCanceledException)
+            {
+                OnTaskException();
+                RequestClose?.Invoke(new DialogResult());
             }
             catch (Exception ex)
             {
@@ -89,6 +95,10 @@ namespace Pms.Masterlists.Module.ViewModels
                 {
                     OnTaskCompleted();
                 }
+            }
+            catch (TaskCanceledException)
+            {
+                OnTaskException();
             }
             catch (Exception ex)
             {

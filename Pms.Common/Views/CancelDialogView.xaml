@@ -27,8 +27,46 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
-        <TextBlock Text="{Binding Message}" VerticalAlignment="Center" Margin="16,24" TextWrapping="Wrap" MaxWidth="500" MinHeight="48" />
-        <ProgressBar IsIndeterminate="True" Grid.Row="1" />
+        <Grid Margin="16,24,16,8">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition />
+            </Grid.RowDefinitions>
+            <TextBlock Text="{Binding Message}" VerticalAlignment="Center" Margin="0,4" TextWrapping="Wrap" MaxWidth="500" MinHeight="48" />
+            <TextBlock Text="{Binding ErrorCount, StringFormat={}{0} error(s) encountered}" Foreground="Gray" Margin="0,4" Grid.Row="1" HorizontalAlignment="Left">
+                <TextBlock.Style>
+                    <Style TargetType="TextBlock">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding HasErrors}" Value="False">
+                                <Setter Property="Visibility" Value="Collapsed" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBlock.Style>
+            </TextBlock>
+            <TextBlock Text="{Binding ProgressStatus}" Margin="0,4" Grid.Row="1" HorizontalAlignment="Right">
+                <TextBlock.Style>
+                    <Style TargetType="TextBlock">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsIndeterminate}" Value="True">
+                                <Setter Property="Visibility" Value="Collapsed" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBlock.Style>
+            </TextBlock>
+        </Grid>
+        <ProgressBar IsIndeterminate="{Binding IsIndeterminate}" Maximum="{Binding ProgressMax}" Value="{Binding ProgressValue}" Grid.Row="1" Height="2">
+            <ProgressBar.Style>
+                <Style TargetType="ProgressBar">
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding HasErrors}" Value="True">
+                            <Setter Property="Foreground" Value="Red" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </ProgressBar.Style>
+        </ProgressBar>
         <!--<Separator Grid.Row="2" />-->
         <Button Content="Cancel" Command="{Binding CancelCommand}" Grid.Row="3" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="12" Padding="16,4" />
     </Grid>

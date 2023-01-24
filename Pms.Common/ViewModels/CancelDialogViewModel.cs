@@ -17,6 +17,11 @@ namespace Pms.Common.ViewModels
         private string _title = string.Empty;
         private bool _canClose = false;
         private CancellationTokenSource? c_Cts;
+        private bool _hasErrors = false;
+        private int _errorCount = 0;
+        private bool _isIndeterminate = true;
+        private int _progressMax;
+        private int _progressValue;
 
         public CancelDialogViewModel()
         {
@@ -25,6 +30,12 @@ namespace Pms.Common.ViewModels
 
         public DelegateCommand CancelCommand { get; }
         public string Message { get => _message; set => SetProperty(ref _message, value); }
+        public bool HasErrors { get => _hasErrors; set => SetProperty(ref _hasErrors, value); }
+        public int ErrorCount { get => _errorCount; set => SetProperty(ref _errorCount, value); }
+        public bool IsIndeterminate { get => _isIndeterminate; set => SetProperty(ref _isIndeterminate, value); }
+        public int ProgressMax { get => _progressMax; set => SetProperty(ref _progressMax, value); }
+        public int ProgressValue { get => _progressValue; set => SetProperty(ref _progressValue, value); }
+        public string ProgressStatus => $"{ProgressValue} of {ProgressMax}";
 
         private void Caller_TaskCompleted(object? sender, EventArgs e)
         {
@@ -50,9 +61,9 @@ namespace Pms.Common.ViewModels
             c_Cts?.Cancel();
             //_caller?.RaiseTaskCancelled();
         }
-        
+
         #region IDialogAware
-        
+
         public event Action<IDialogResult>? RequestClose;
 
         public string Title { get => _title; set => SetProperty(ref _title, value); }
@@ -69,6 +80,9 @@ namespace Pms.Common.ViewModels
                 _caller.TaskCompleted -= Caller_TaskCompleted;
                 _caller.TaskException -= Caller_TaskException;
                 _caller.MessageSent -= Caller_MessageSent;
+                _caller.ErrorFound -= Caller_ErrorFound;
+                _caller.ProgressStart -= Caller_ProgressStart;
+                _caller.ProgressIncrement -= Caller_ProgressIncrement;
             }
         }
 
@@ -85,8 +99,31 @@ namespace Pms.Common.ViewModels
                 _caller.TaskCompleted += Caller_TaskCompleted;
                 _caller.TaskException += Caller_TaskException;
                 _caller.MessageSent += Caller_MessageSent;
+                _caller.ErrorFound += Caller_ErrorFound;
+                _caller.ProgressStart += Caller_ProgressStart;
+                _caller.ProgressIncrement += Caller_ProgressIncrement;
             }
         }
         #endregion
+
+        private void Caller_ErrorFound(object? sender, EventArgs e)
+        {
+            ErrorCount += 1;
+            HasErrors = ErrorCount > 0;
+        }
+
+        private void Caller_ProgressIncrement(object? sender, ProgressIncrementEventArgs e)
+        {
+            ProgressValue += e.Increment < 1 ? 1 : e.Increment;
+            RaisePropertyChanged(nameof(ProgressStatus));
+        }
+
+        private void Caller_ProgressStart(object? sender, ProgressStartEventArgs e)
+        {
+            ProgressMax = e.ProgressMax;
+            ProgressValue = 0;
+            IsIndeterminate = e.ProgressMax == 0;
+            RaisePropertyChanged(nameof(ProgressStatus));
+        }
     }
 }

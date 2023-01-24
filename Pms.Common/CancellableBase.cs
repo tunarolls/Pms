@@ -41,12 +41,35 @@ namespace Pms.Common
         public string Message { get; }
     }
 
+    public class ProgressStartEventArgs : EventArgs
+    {
+        public ProgressStartEventArgs(int progressMax)
+        {
+            ProgressMax = progressMax;
+        }
+
+        public int ProgressMax { get; }
+    }
+
+    public class ProgressIncrementEventArgs : EventArgs
+    {
+        public ProgressIncrementEventArgs(int increment)
+        {
+            Increment = increment;
+        }
+
+        public int Increment { get; }
+    }
+
     public interface INotifyTaskCompletion
     {
         event EventHandler<EventArgs> TaskCompleted;
         event EventHandler<EventArgs> TaskCancelled;
         event EventHandler<EventArgs> TaskException;
         event EventHandler<MessageSentEventArgs> MessageSent;
+        event EventHandler<EventArgs> ErrorFound;
+        event EventHandler<ProgressStartEventArgs> ProgressStart;
+        event EventHandler<ProgressIncrementEventArgs> ProgressIncrement;
 
         void Enable();
         void Disable();
@@ -63,6 +86,10 @@ namespace Pms.Common
         public event EventHandler<EventArgs>? TaskCompleted;
 
         public event EventHandler<EventArgs>? TaskException;
+
+        public event EventHandler<EventArgs>? ErrorFound;
+        public event EventHandler<ProgressStartEventArgs>? ProgressStart;
+        public event EventHandler<ProgressIncrementEventArgs>? ProgressIncrement;
 
         public bool IsEnabled { get => l_IsEnabled; set => SetProperty(ref l_IsEnabled, value); }
 
@@ -93,9 +120,9 @@ namespace Pms.Common
             return new CancellationTokenSource();
         }
 
-        protected void OnMessageSent(MessageSentEventArgs e)
+        protected void OnMessageSent(string message)
         {
-            MessageSent?.Invoke(this, e);
+            MessageSent?.Invoke(this, new MessageSentEventArgs(message));
         }
 
         protected void OnTaskCancelled()
@@ -111,6 +138,21 @@ namespace Pms.Common
         protected void OnTaskException()
         {
             TaskException?.Invoke(this, EventArgs.Empty);
+        }
+
+        protected void OnErrorFound()
+        {
+            ErrorFound?.Invoke(this, EventArgs.Empty);
+        }
+
+        protected void OnProgressIncrement(int increment = 1)
+        {
+            ProgressIncrement?.Invoke(this, new ProgressIncrementEventArgs(increment));
+        }
+
+        protected void OnProgressStart(int progressMax = 0)
+        {
+            ProgressStart?.Invoke(this, new ProgressStartEventArgs(progressMax));
         }
     }
 }

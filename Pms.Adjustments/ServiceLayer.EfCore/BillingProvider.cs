@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Pms.Adjustments.ServiceLayer.EfCore
@@ -46,6 +47,12 @@ namespace Pms.Adjustments.ServiceLayer.EfCore
                 .Include(b => b.EE)
                 .Where(b => b.CutoffId.Contains(cutoffId))
                 .ToList();
+        }
+
+        public async Task<ICollection<Billing>> GetBillings(string cutoffId, CancellationToken cancellationToken = default)
+        {
+            using var context = _factory.CreateDbContext();
+            return await context.Billings.Include(t => t.EE).Where(t => t.CutoffId == cutoffId).ToListAsync(cancellationToken);
         }
 
         //public IEnumerable<Billing> GetBillings(string cutoffId, string adjustmentName)

@@ -10,11 +10,17 @@ namespace Pms.Common
     {
         public const string Timesheets = nameof(Timesheets);
         public const string TimesheetDetailView = nameof(TimesheetDetailView);
+
         public const string PayrollsView = nameof(PayrollsView);
         public const string ImportAlphalistView = nameof(ImportAlphalistView);
-        public const string SelectDateView = nameof(SelectDateView);
+
+        // adjustments navigation
+        public const string BillingListingView = nameof(BillingListingView);
+
+        // masterlists navigation
         public const string EmployeeListingView = nameof(EmployeeListingView);
         public const string EmployeeDetailView = nameof(EmployeeDetailView);
         public const string PayrollCodeDetailView = nameof(PayrollCodeDetailView);
+        public const string SelectDateView = nameof(SelectDateView);
     }
 }

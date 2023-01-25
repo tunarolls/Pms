@@ -7,19 +7,15 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="7.0.0" />
-    <PackageReference Include="Prism.Core" Version="8.1.97" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="5.0.13" />
     <PackageReference Include="Prism.DryIoc" Version="8.1.97" />
     <PackageReference Include="Prism.Wpf" Version="8.1.97" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Pms.Adjustments\Pms.Adjustments.csproj" />
     <ProjectReference Include="..\Pms.Common\Pms.Common.csproj" />
-    <ProjectReference Include="..\Pms.Masterlists\Pms.Masterlists.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Models\" />
+    <ProjectReference Include="..\Pms.Timesheets\Pms.Timesheets.csproj" />
   </ItemGroup>
 
 </Project>

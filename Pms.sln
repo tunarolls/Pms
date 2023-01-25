@@ -29,7 +29,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pms.Common", "Pms.Common\Pm
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pms.Payrolls.Module", "Pms.Payrolls.Module\Pms.Payrolls.Module.csproj", "{D55D244C-BC5F-4C59-B636-CA2202803C8D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pms.Masterlists.Module", "Pms.Masterlists.Module\Pms.Masterlists.Module.csproj", "{920FA0D9-1420-4BD5-8A92-757D290C79FB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pms.Masterlists.Module", "Pms.Masterlists.Module\Pms.Masterlists.Module.csproj", "{920FA0D9-1420-4BD5-8A92-757D290C79FB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pms.Adjustments.Module", "Pms.Adjustments.Module\Pms.Adjustments.Module.csproj", "{2C585CE4-5A2D-4FD0-BA3D-191C8D111413}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -93,6 +95,10 @@ Global
 		{920FA0D9-1420-4BD5-8A92-757D290C79FB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{920FA0D9-1420-4BD5-8A92-757D290C79FB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{920FA0D9-1420-4BD5-8A92-757D290C79FB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2C585CE4-5A2D-4FD0-BA3D-191C8D111413}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2C585CE4-5A2D-4FD0-BA3D-191C8D111413}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2C585CE4-5A2D-4FD0-BA3D-191C8D111413}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2C585CE4-5A2D-4FD0-BA3D-191C8D111413}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -5,6 +5,8 @@ using Pms.Adjustments.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Pms.Adjustments.ServiceLayer.EfCore
 {
@@ -30,6 +32,16 @@ namespace Pms.Adjustments.ServiceLayer.EfCore
             return eeIds;
         }
 
+        public async Task<ICollection<string>> CollectEEIdWithBillingRecord(string payrollCodeId, string cutoffId, CancellationToken cancellationToken = default)
+        {
+            using var context = _factory.CreateDbContext();
+            return await context.BillingRecords
+                .Where(t => t.EE.PayrollCode == payrollCodeId)
+                .Select(t => t.EEId)
+                .Distinct()
+                .ToListAsync(cancellationToken);
+        }
+
         public IEnumerable<string> CollectEEIdWithPcv(string payrollCodeId, string cutoffId)
         {
             using AdjustmentDbContext context = _factory.CreateDbContext();
@@ -44,6 +56,18 @@ namespace Pms.Adjustments.ServiceLayer.EfCore
 
             return eeIds;
         }
+
+        public async Task<ICollection<string>> CollectEEIdWithPcv(string payrollCodeId, string cutoffId, CancellationToken cancellationToken = default)
+        {
+            using var context = _factory.CreateDbContext();
+            return await context.Timesheets
+                .Where(t => t.EE.PayrollCode == payrollCodeId && t.CutoffId == cutoffId)
+                .Where(t => !string.IsNullOrEmpty(t.RawPCV) || t.Allowance > 0)
+                .Select(t => t.EEId)
+                .Distinct()
+                .ToListAsync(cancellationToken);
+        }
+
         public IEnumerable<Billing> GenerateBillingFromRecords(string eeId, string cutoffId)
         {
             Cutoff cutoff = new(cutoffId);
@@ -74,6 +98,50 @@ namespace Pms.Adjustments.ServiceLayer.EfCore
                         Applied = false,
                         DateCreated = DateTime.Now
                     };
+                    billing.BillingId = Billing.GenerateId(billing);
+                    billings.Add(billing);
+                }
+            }
+
+            return billings;
+        }
+
+        public async Task<ICollection<Billing>> GenerateBillingFromRecords(string eeId, string cutoffId, CancellationToken cancellationToken = default)
+        {
+            var cutoff = new Cutoff(cutoffId);
+            using var context = _factory.CreateDbContext();
+
+            var records = await context.BillingRecords
+                .Where(t => t.EEId == eeId)
+                .Where(t => t.Balance > 0)
+                .Where(t => t.DeductionOption == cutoff.DeductionOption || t.DeductionOption == DeductionOptions.EVERYPAYROLL)
+                .Where(t => t.Status == BillingRecordStatus.ON_GOING)
+                .ToListAsync(cancellationToken);
+
+            var billings = new List<Billing>();
+
+            foreach (var record in records)
+            {
+                if (!await context.Billings.AnyAsync(b => b.RecordId == record.RecordId && b.CutoffId == cutoffId, cancellationToken))
+                {
+                    double amount = record.Amortization;
+
+                    if (record.Amortization > record.Balance)
+                    {
+                        amount = record.Balance;
+                    }
+
+                    var billing = new Billing()
+                    {
+                        EEId = eeId,
+                        CutoffId = cutoffId,
+                        AdjustmentType = record.AdjustmentType,
+                        Amount = amount,
+                        AdjustmentOption = AdjustmentOptions.ADJUST2,
+                        Applied = false,
+                        DateCreated = DateTime.Now
+                    };
+
                     billing.BillingId = Billing.GenerateId(billing);
                     billings.Add(billing);
                 }
@@ -132,6 +200,67 @@ namespace Pms.Adjustments.ServiceLayer.EfCore
                         Remarks = remarks,
                         DateCreated = DateTime.Now
                     };
+                    billing.BillingId = Billing.GenerateId(billing, i);
+                    billings.Add(billing);
+                }
+            }
+
+            return billings;
+        }
+
+        public async Task<ICollection<Billing>> GenerateBillingFromTimesheetView(string eeId, string cutoffId, CancellationToken cancellationToken = default)
+        {
+            using var context = _factory.CreateDbContext();
+            var eeTimesheets = await context.Timesheets
+                .Where(t => t.EEId == eeId)
+                .Where(t => t.CutoffId == cutoffId)
+                .ToListAsync(cancellationToken);
+
+            var billings = new List<Billing>();
+            var timesheetsWithAllowance = eeTimesheets.Where(t => t.Allowance > 0);
+
+            foreach (var timesheet in timesheetsWithAllowance)
+            {
+                var billing = new Billing()
+                {
+                    EEId = eeId,
+                    CutoffId = cutoffId,
+                    AdjustmentType = AdjustmentTypes.ALLOWANCE,
+                    Amount = timesheet.Allowance,
+                    AdjustmentOption = AdjustmentOptions.ADJUST1,
+                    Applied = false,
+                    DateCreated = DateTime.Now
+                };
+
+                billing.BillingId = Billing.GenerateId(billing);
+                billings.Add(billing);
+            }
+
+            var timesheetsWithPCV = eeTimesheets.Where(ts => !string.IsNullOrEmpty(ts.RawPCV));
+
+            foreach (var timesheet in timesheetsWithPCV)
+            {
+                var rawPCVs = timesheet.RawPCV.Split("|");
+
+                for (int i = 0; i < rawPCVs.Length; i++)
+                {
+                    var rawPCV = rawPCVs[i];
+                    var rawPcvArgs = rawPCV.Split("~");
+                    var remarks = rawPcvArgs[0];
+                    var amount = double.Parse(rawPcvArgs[1]);
+
+                    var billing = new Billing()
+                    {
+                        EEId = eeId,
+                        CutoffId = cutoffId,
+                        AdjustmentType = AdjustmentTypes.PCV,
+                        Amount = amount,
+                        AdjustmentOption = AdjustmentOptions.ADJUST1,
+                        Applied = false,
+                        Remarks = remarks,
+                        DateCreated = DateTime.Now
+                    };
+
                     billing.BillingId = Billing.GenerateId(billing, i);
                     billings.Add(billing);
                 }

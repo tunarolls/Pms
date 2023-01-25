@@ -12,9 +12,7 @@ namespace Pms.Adjustments.Persistence
         {
             builder.ToTable("adjustment_billing").HasKey(pcv => pcv.BillingId);
 
-            builder
-               .HasOne(rec => rec.EE)
-               .WithMany();
+            builder.HasOne(rec => rec.EE).WithMany();
 
             //builder
             //    .HasOne(pcv => pcv.Record)

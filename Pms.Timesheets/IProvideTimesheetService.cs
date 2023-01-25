@@ -11,24 +11,24 @@ namespace Pms.Timesheets
     {
         EmployeeView FindEmployeeView(string eeId);
 
-        public int GetLastPage(string cutoffId, string payrollCode);
-
-        public List<int> GetMissingPages(string cutoffId, string payrollCode);
-
-        public List<int> GetPages(string cutoffId, string payrollCode);
-
-        public List<int> GetPageWithUnconfirmedTS(string cutoffId, string payrollCode);
-
-        IEnumerable<Timesheet> GetTimesheetNoEETimesheet(string cutoffId);
-
         IEnumerable<Timesheet> GetTimesheets();
+
+        IEnumerable<Timesheet> GetTimesheets(string cutoffId);
 
         Task<ICollection<Timesheet>> GetTimesheets(string cutoffId, CancellationToken cancellationToken = default);
 
-        IEnumerable<Timesheet> GetTimesheets(string cutoffId, string payrollCodeId);
+        IEnumerable<Timesheet> GetTwoPeriodTimesheets(string cutoffId);
 
         IEnumerable<Timesheet> GetTimesheetsByMonth(int month);
 
-        IEnumerable<Timesheet> GetTwoPeriodTimesheets(string cutoffId);
+        IEnumerable<Timesheet> GetTimesheetNoEETimesheet(string cutoffId);
+
+        public int GetLastPage(string cutoffId, string payrollCode);
+
+        public List<int> GetPageWithUnconfirmedTS(string cutoffId, string payrollCode);
+
+        public List<int> GetPages(string cutoffId, string payrollCode);
+
+        public List<int> GetMissingPages(string cutoffId, string payrollCode);
     }
 }

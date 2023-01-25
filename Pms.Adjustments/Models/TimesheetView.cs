@@ -11,7 +11,7 @@ namespace Pms.Adjustments.Models
     {
         public double Allowance { get; set; }
         public string CutoffId { get; set; } = string.Empty;
-        public EmployeeView? EE { get; set; }
+        public EmployeeView EE { get; set; }
         public string EEId { get; set; } = string.Empty;
         public string RawPCV { get; set; } = string.Empty;
         public string TimesheetId { get; set; } = string.Empty;

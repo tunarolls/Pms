@@ -11,72 +11,78 @@ namespace Pms.Timesheets.ServiceLayer.EfCore
 {
     public class TimesheetProvider : IProvideTimesheetService
     {
-        private IDbContextFactory<TimesheetDbContext> _factory;
+        private readonly IDbContextFactory<TimesheetDbContext> _factory;
         public TimesheetProvider(IDbContextFactory<TimesheetDbContext> factory)
         {
             _factory = factory;
         }
 
-        public EmployeeView FindEmployeeView(string eeId)
+        public IEnumerable<Timesheet> GetTimesheets()
         {
-            throw new NotImplementedException();
+            using TimesheetDbContext Context = _factory.CreateDbContext();
+            return Context.Timesheets.Include(ts => ts.EE).ToList();
+        }
+        public IEnumerable<Timesheet> GetTimesheets(string cutoffId)
+        {
+            using TimesheetDbContext Context = _factory.CreateDbContext();
+            IEnumerable<Timesheet> timesheetsWithEE = Context.Timesheets
+                .Include(ts => ts.EE).ToList()
+                .FilterByCutoffId(cutoffId);
+
+            IEnumerable<Timesheet> allTimesheets = Context.Timesheets.ToList()
+                .FilterByCutoffId(cutoffId);
+
+            return timesheetsWithEE.Union(allTimesheets);
         }
 
-        public int GetLastPage(string cutoffId, string payrollCode)
+        public async Task<ICollection<Timesheet>> GetTimesheets(string cutoffId, CancellationToken cancellationToken = default)
         {
-            using TimesheetDbContext context = _factory.CreateDbContext();
-            IEnumerable<Timesheet> timesheets = context.Timesheets
-                .OrderByDescending(ts => ts.TotalHours)
+            using var context = _factory.CreateDbContext();
+            return await context.Timesheets
+                .Include(t => t.EE)
                 .FilterByCutoffId(cutoffId)
-                .FilterByPayrollCode(payrollCode);
-            return timesheets.Any() ? timesheets.Max(ts => ts.Page) : 0;
+                .ToListAsync(cancellationToken);
         }
 
-        public List<int> GetMissingPages(string cutoffId, string payrollCode)
+        public IEnumerable<Timesheet> GetTimesheets(string cutoffId, string payrollCodeId)
         {
-            using TimesheetDbContext context = _factory.CreateDbContext();
-            List<int> pages = context.Timesheets
+            using TimesheetDbContext Context = _factory.CreateDbContext();
+            IEnumerable<Timesheet> timesheetsWithEE = Context.Timesheets
+                .Include(ts => ts.EE).ToList()
                 .FilterByCutoffId(cutoffId)
-                .FilterByPayrollCode(payrollCode)
-                .ToList()
-                .GroupByPage();
-            if (pages.Any())
-            {
-                List<int> assumedPages = Enumerable.Range(0, pages.Max()).ToList();
-                if (pages.Count > assumedPages.Count) return assumedPages.Except(pages).ToList();
-            }
+                .FilterByPayrollCode(payrollCodeId);
 
-            return new List<int>();
+            IEnumerable<Timesheet> allTimesheets = Context.Timesheets.ToList()
+                .FilterByCutoffId(cutoffId);
+
+            return timesheetsWithEE.Union(allTimesheets);
         }
-
-        public List<int> GetPages(string cutoffId, string payrollCode)
+        public IEnumerable<Timesheet> GetTwoPeriodTimesheets(string cutoffId)
         {
-            using TimesheetDbContext context = _factory.CreateDbContext();
-            return context.Timesheets
-                .FilterByCutoffId(cutoffId)
-                .FilterByPayrollCode(payrollCode)
-                .GroupByPage();
-
+            Cutoff currentCutoff = new Cutoff(cutoffId);
+            using TimesheetDbContext Context = _factory.CreateDbContext();
+            return Context.Timesheets
+                .Include(ts => ts.EE).ToList()
+                .Where(ts => ts.CutoffId == cutoffId || ts.CutoffId == currentCutoff.GetPreviousCutoff())
+                .OrderBy(ts => ts.CutoffId);
         }
-
-        public List<int> GetPageWithUnconfirmedTS(string cutoffId, string payrollCode)
+        public IEnumerable<Timesheet> GetTimesheetsByMonth(int month)
         {
-            using TimesheetDbContext context = _factory.CreateDbContext();
-            IEnumerable<Timesheet> timesheets = context.Timesheets
-                .FilterByCutoffId(cutoffId)
-                .FilterByPayrollCode(payrollCode);
-            timesheets = timesheets.Where(ts => !ts.IsConfirmed && ts.TotalHours > 0);
-            return timesheets.GroupByPage();
+            using TimesheetDbContext Context = _factory.CreateDbContext();
+            return Context.Timesheets
+                .Include(ts => ts.EE).ToList()
+                .Where(ts => ts.Cutoff.CutoffDate.Month == month)
+                .OrderBy(ts => ts.CutoffId);
         }
 
         public IEnumerable<Timesheet> GetTimesheetNoEETimesheet(string cutoffId)
         {
-            TimesheetDbContext context = _factory.CreateDbContext();
-            IEnumerable<Timesheet> validTimesheets = context.Timesheets
+            TimesheetDbContext Context = _factory.CreateDbContext();
+            IEnumerable<Timesheet> validTimesheets = Context.Timesheets
                 .Include(ts => ts.EE)
-                .Where(ts => ts.EE != null && !string.IsNullOrEmpty(ts.EE.PayrollCode))
+                .Where(ts => ts.EE.PayrollCode != "")
                 .FilterByCutoffId(cutoffId);
-            IEnumerable<Timesheet> timesheets = context.Timesheets
+            IEnumerable<Timesheet> timesheets = Context.Timesheets
                 .FilterByCutoffId(cutoffId);
             timesheets = timesheets.Except(validTimesheets);
             Console.WriteLine(timesheets.Count());
@@ -84,43 +90,69 @@ namespace Pms.Timesheets.ServiceLayer.EfCore
             return timesheets;
         }
 
-        public IEnumerable<Timesheet> GetTimesheets()
-        {
-            using TimesheetDbContext context = _factory.CreateDbContext();
-            return context.Timesheets.Include(ts => ts.EE).ToList();
-        }
 
-        public async Task<ICollection<Timesheet>> GetTimesheets(string cutoffId, CancellationToken cancellationToken = default)
+        public int GetLastPage(string cutoffId, string payrollCode)
         {
-            using var context = _factory.CreateDbContext();
-            return await context.Timesheets
-                .Include(ts => ts.EE)
+            using TimesheetDbContext Context = _factory.CreateDbContext();
+            IEnumerable<Timesheet> timesheets = Context.Timesheets
+                .OrderByDescending(ts => ts.TotalHours)
                 .FilterByCutoffId(cutoffId)
-                .ToListAsync(cancellationToken);
+                .FilterByPayrollCode(payrollCode);
+
+            if (timesheets.Count() > 0)
+                return timesheets.Max(ts => ts.Page);
+
+            return 0;
         }
 
-        public IEnumerable<Timesheet> GetTimesheets(string cutoffId, string payrollCodeId)
+        public List<int> GetPageWithUnconfirmedTS(string cutoffId, string payrollCode)
         {
-            throw new NotImplementedException();
+            using TimesheetDbContext Context = _factory.CreateDbContext();
+            IEnumerable<Timesheet> timesheets = Context.Timesheets
+                .FilterByCutoffId(cutoffId)
+                .FilterByPayrollCode(payrollCode);
+
+            timesheets = timesheets.Where(ts =>
+                !ts.IsConfirmed &&
+                ts.TotalHours > 0
+            );
+
+            return timesheets.GroupByPage();
         }
 
-        public IEnumerable<Timesheet> GetTimesheetsByMonth(int month)
+        public List<int> GetPages(string cutoffId, string payrollCode)
         {
-            using TimesheetDbContext context = _factory.CreateDbContext();
-            return context.Timesheets
-                .Include(ts => ts.EE).ToList()
-                .Where(ts => ts.Cutoff.CutoffDate.Month == month)
-                .OrderBy(ts => ts.CutoffId);
+            using TimesheetDbContext Context = _factory.CreateDbContext();
+            return Context.Timesheets
+                .FilterByCutoffId(cutoffId)
+                .FilterByPayrollCode(payrollCode)
+                .GroupByPage();
+
         }
 
-        public IEnumerable<Timesheet> GetTwoPeriodTimesheets(string cutoffId)
+        public List<int> GetMissingPages(string cutoffId, string payrollCode)
         {
-            Cutoff currentCutoff = new Cutoff(cutoffId);
-            using TimesheetDbContext context = _factory.CreateDbContext();
-            return context.Timesheets
-                .Include(ts => ts.EE).ToList()
-                .Where(ts => ts.CutoffId == cutoffId || ts.CutoffId == currentCutoff.GetPreviousCutoff())
-                .OrderBy(ts => ts.CutoffId);
+            using TimesheetDbContext Context = _factory.CreateDbContext();
+            List<int> pages = Context.Timesheets
+                .FilterByCutoffId(cutoffId)
+                .FilterByPayrollCode(payrollCode)
+                .ToList()
+                .GroupByPage();
+
+            if (pages.Count > 0)
+            {
+                List<int> assumedPages = Enumerable.Range(0, pages.Max()).ToList();
+                if (pages.Count > assumedPages.Count)
+                    return assumedPages.Except(pages).ToList();
+            }
+
+            return new List<int>();
+        }
+
+        public EmployeeView FindEmployeeView(string eeId)
+        {
+            using TimesheetDbContext Context = _factory.CreateDbContext();
+            return Context.Employees.Find(eeId);
         }
     }
 }

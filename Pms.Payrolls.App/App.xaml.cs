@@ -1,4 +1,5 @@
-﻿using Pms.Common;
+﻿using Pms.Adjustments.Module;
+using Pms.Common;
 using Pms.Masterlists.Module;
 using Pms.Payrolls.App.Views;
 using Pms.Payrolls.Module;
@@ -36,6 +37,7 @@ namespace Pms.Payrolls.App
             moduleCatalog.AddModule<TimesheetsModule>();
             moduleCatalog.AddModule<PayrollsModule>();
             moduleCatalog.AddModule<MasterlistsModule>();
+            moduleCatalog.AddModule<AdjustmentsModule>();
         }
     }
 }

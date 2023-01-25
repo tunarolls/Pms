@@ -52,8 +52,8 @@ namespace Pms.Timesheets.Module
             return await _timesheetProvider.GetTimesheets(cutoffId, cancellationToken);
         }
 
-        public IEnumerable<Timesheet> GetTimesheets(string cutoffId, string payrollCodeId) =>
-            _timesheetProvider.GetTimesheets(cutoffId, payrollCodeId);
+        //public IEnumerable<Timesheet> GetTimesheets(string cutoffId, string payrollCodeId) =>
+        //    _timesheetProvider.GetTimesheets(cutoffId, payrollCodeId);
 
         public IEnumerable<Timesheet> GetTwoPeriodTimesheets(string cutoffId) =>
             _timesheetProvider.GetTwoPeriodTimesheets(cutoffId);

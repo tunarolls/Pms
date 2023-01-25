@@ -19,99 +19,76 @@ namespace Pms.Timesheets.ServiceLayer.EfCore
 
         public void CreateOrUpdate(Timesheet timesheet, bool save = true)
         {
-            if (timesheet == null) throw new ArgumentNullException(nameof(timesheet));
-            using TimesheetDbContext context = _factory.CreateDbContext();
-            Timesheet? timesheetFound = context.Timesheets.Where(ts => ts.TimesheetId == timesheet.TimesheetId).FirstOrDefault();
-            if (timesheetFound == null) context.Add(timesheet);
-            else context.Entry(timesheetFound).CurrentValues.SetValues(timesheet);
+            using (TimesheetDbContext Context = _factory.CreateDbContext())
+            {
+                var timesheetFound = Context.Timesheets.Where(ts => ts.TimesheetId == timesheet.TimesheetId).FirstOrDefault();
+                if (timesheetFound is null)
+                    Context.Add(timesheet);
+                else
+                    Context.Entry(timesheetFound).CurrentValues.SetValues(timesheet);
 
-            if (save) context.SaveChanges();
+                if (save) Context.SaveChanges();
+            }
         }
 
         public async Task CreateOrUpdate(Timesheet timesheet, bool save = true, CancellationToken cancellationToken = default)
         {
-            if (timesheet == null) throw new ArgumentNullException(nameof(timesheet));
-            using TimesheetDbContext context = _factory.CreateDbContext();
-            var transaction = await context.Database.BeginTransactionAsync(cancellationToken);
-
-            try
+            using var context = _factory.CreateDbContext();
+            var timesheetFound = await context.Timesheets.SingleOrDefaultAsync(t => t.TimesheetId == timesheet.TimesheetId, cancellationToken);
+            if (timesheetFound != null)
             {
-                Timesheet? timesheetFound = await context.Timesheets.Where(ts => ts.TimesheetId == timesheet.TimesheetId).FirstOrDefaultAsync(cancellationToken);
-                if (timesheetFound == null) await context.AddAsync(timesheet);
-                else context.Entry(timesheetFound).CurrentValues.SetValues(timesheet);
-
-                if (save)
-                {
-                    await context.SaveChangesAsync(cancellationToken);
-                    await transaction.CommitAsync(cancellationToken);
-                }
+                context.Entry(timesheetFound).CurrentValues.SetValues(timesheet);
             }
-            catch
+            else
             {
-                await transaction.RollbackAsync(cancellationToken);
-                throw;
+                await context.AddAsync(timesheet, cancellationToken);
             }
+
+            if (save) await context.SaveChangesAsync(cancellationToken);
         }
 
         public EmployeeView? FindEmployee(string eeId)
         {
-            using TimesheetDbContext context = _factory.CreateDbContext();
+            using var context = _factory.CreateDbContext();
             return context.Employees.Find(eeId);
         }
 
         public async Task<EmployeeView?> FindEmployee(string eeId, CancellationToken cancellationToken = default)
         {
-            using TimesheetDbContext context = _factory.CreateDbContext();
-            return await context.Employees.FindAsync(eeId, cancellationToken);
+            using var context = _factory.CreateDbContext();
+            return await context.Employees.FindAsync(new object[] { eeId }, cancellationToken);
         }
 
         public void SaveTimesheet(Timesheet timesheet, string cutoffId, int page)
         {
-            if (timesheet == null) throw new ArgumentNullException(nameof(timesheet));
             timesheet.CutoffId = cutoffId;
             timesheet.Page = page;
             timesheet.TimesheetId = $"{timesheet.EEId}_{timesheet.CutoffId}";
 
             timesheet.RawPCV = ToRawPCV(timesheet.PCV);
-
-            timesheet.SetEmployeeDetail(FindEmployee(timesheet.EEId));
 
             CreateOrUpdate(timesheet, true);
         }
 
         public async Task SaveTimesheet(Timesheet timesheet, string cutoffId, int page, CancellationToken cancellationToken = default)
         {
-            if (timesheet == null) throw new ArgumentNullException(nameof(timesheet));
             timesheet.CutoffId = cutoffId;
             timesheet.Page = page;
             timesheet.TimesheetId = $"{timesheet.EEId}_{timesheet.CutoffId}";
             timesheet.RawPCV = ToRawPCV(timesheet.PCV);
-            timesheet.SetEmployeeDetail(await FindEmployee(timesheet.EEId, cancellationToken));
-
             await CreateOrUpdate(timesheet, true, cancellationToken);
         }
 
-        public void SaveTimesheetEmployeeData(Timesheet timesheet)
+        private static string ToRawPCV(string[,] pcv)
         {
-            if (timesheet.EE is not null)
-            {
-                timesheet.SetEmployeeDetail(timesheet.EE);
-                CreateOrUpdate(timesheet, true);
-            }
-        }
+            string[] to1D = new string[pcv.Length / 2];
 
-        private static string ToRawPCV(string[,]? pcv)
-        {
-            if (pcv != null)
+            for (int i = 0; i < to1D.Length; i++)
             {
-                string[] to1D = new string[pcv.Length / 2];
-
-                for (int i = 0; i < to1D.Length; i++)
-                    to1D[i] = $"{pcv[i, 0]}~{pcv[i, 1]}";
-                return string.Join('|', to1D);
+                to1D[i] = $"{pcv[i, 0]}~{pcv[i, 1]}";
             }
 
-            return string.Empty;
+            return string.Join('|', to1D);
         }
     }
 }

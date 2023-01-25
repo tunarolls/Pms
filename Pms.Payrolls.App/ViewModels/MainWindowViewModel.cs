@@ -15,7 +15,7 @@ using System.Windows.Input;
 
 namespace Pms.Payrolls.App.ViewModels
 {
-    public class MainWindowViewModel : BindableBase, IMain
+    public class MainWindowViewModel : CancellableBase, IMain
     {
         #region properties
         public string[] _cutoffIds = Array.Empty<string>();
@@ -101,7 +101,12 @@ namespace Pms.Payrolls.App.ViewModels
 
         private void Billing()
         {
-            throw new NotImplementedException();
+            var navParams = new NavigationParameters()
+            {
+                { PmsConstants.Main, this }
+            };
+
+            _regionManager.RequestNavigate(RegionNames.PayrollsContentRegion, ViewNames.BillingListingView, navParams);
         }
 
         private void BillingRecord()

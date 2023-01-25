@@ -15,9 +15,9 @@ namespace Pms.Adjustments.Models
         public string BillingId { get; set; } = string.Empty;
         public string CutoffId { get; set; } = string.Empty;
         public DateTime DateCreated { get; set; }
-        public EmployeeView? EE { get; set; }
+        public EmployeeView EE { get; set; }
         public string EEId { get; set; } = string.Empty;
-        public BillingRecord? Record { get; set; }
+        public BillingRecord Record { get; set; }
         public string RecordId { get; set; } = string.Empty;
         public string Remarks { get; set; } = string.Empty;
         public static string GenerateId(Billing bil, int iterator = 0) =>

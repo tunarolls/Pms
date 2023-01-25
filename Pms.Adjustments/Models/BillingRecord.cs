@@ -15,7 +15,7 @@ namespace Pms.Adjustments.Models
         public double Balance { get; set; }
         public DateTime DateCreated { get; set; } = DateTime.Now;
         public DeductionOptions DeductionOption { get; set; }
-        public EmployeeView? EE { get; set; }
+        public EmployeeView EE { get; set; }
         public string EEId { get; set; } = string.Empty;
         public DateTime EffectivityDate { get; set; }
         public string RecordId { get; set; } = string.Empty;
@@ -25,11 +25,11 @@ namespace Pms.Adjustments.Models
 
         public void Validate()
         {
-            if (EEId is null)
-                throw new Exception("EE Id should not be blank.");
+            if (string.IsNullOrEmpty(EEId))
+                throw new Exception("EEId should not be blank.");
 
-            if (RecordId is null)
-                throw new Exception("Record Id should not be blank.");
+            if (string.IsNullOrEmpty(RecordId))
+                throw new Exception("RecordId should not be blank.");
 
             //if (Balance > Advances)
             //    throw new Exception("Remaining Balance should not be greater than Advances.");

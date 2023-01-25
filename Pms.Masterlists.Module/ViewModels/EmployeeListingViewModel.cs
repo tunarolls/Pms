@@ -63,17 +63,19 @@ namespace Pms.Masterlists.Module.ViewModels
         #region properties
         private IEnumerable<Employee> _employees = Enumerable.Empty<Employee>();
         private int _activeEECount;
-        private string _companyId = string.Empty;
+        //private string _companyId = string.Empty;
         private bool _hideArchived;
         private int _nonActiveEECount;
-        private PayrollCode _payrollCode = new();
-        private string _payrollCodeId = string.Empty;
+        //private PayrollCode _payrollCode = new();
+        //private string _payrollCodeId = string.Empty;
         private string _searchInput = string.Empty;
-        private SiteChoices _site = SiteChoices.MANILA;
+        //private SiteChoices _site = SiteChoices.MANILA;
 
+
+        public IMain? Main { get; set; }
         public int ActiveEECount { get => _activeEECount; set => SetProperty(ref _activeEECount, value); }
 
-        public string CompanyId { get => _companyId; set => SetProperty(ref _companyId, value); }
+        //public string CompanyId { get => _companyId; set => SetProperty(ref _companyId, value); }
 
         public IEnumerable<Employee> Employees { get => _employees; set => SetProperty(ref _employees, value); }
 
@@ -82,7 +84,7 @@ namespace Pms.Masterlists.Module.ViewModels
         public int NonActiveEECount { get => _nonActiveEECount; set => SetProperty(ref _nonActiveEECount, value); }
 
         public string SearchInput { get => _searchInput; set => SetProperty(ref _searchInput, value); }
-        public SiteChoices Site { get => _site; set => SetProperty(ref _site, value); }
+        //public SiteChoices Site { get => _site; set => SetProperty(ref _site, value); }
         #endregion
 
         #region commands
@@ -127,8 +129,12 @@ namespace Pms.Masterlists.Module.ViewModels
         {
             try
             {
+                if (Main == null) throw new Exception(ErrorMessages.MainIsNull);
+                if (Main.Site == null) throw new Exception(ErrorMessages.SiteIsNull);
+
                 var exceptions = new List<Exception>();
-                var employees = await m_Employees.SyncNewlyHired(selectedDate, _site.ToString(), cancellationToken);
+                var site = Main.Site.Value;
+                var employees = await m_Employees.SyncNewlyHired(selectedDate, site.ToString(), cancellationToken);
                 if (!employees.Any()) return;
                 OnProgressStart(employees.Count);
 
@@ -151,7 +157,7 @@ namespace Pms.Masterlists.Module.ViewModels
                     finally { OnProgressIncrement(); }
                 }
 
-                m_Employees.ReportExceptions(exceptions, new PayrollCode(), $"{_site}-NEWLYHIRED");
+                m_Employees.ReportExceptions(exceptions, new PayrollCode(), $"{site}-NEWLYHIRED");
                 OnTaskCompleted();
             }
             catch (TaskCanceledException)
@@ -193,8 +199,12 @@ namespace Pms.Masterlists.Module.ViewModels
         {
             try
             {
+                if (Main == null) throw new Exception(ErrorMessages.MainIsNull);
+                if (Main.Site == null) throw new Exception(ErrorMessages.SiteIsNull);
+
+                var site = Main.Site.Value;
                 var exceptions = new List<Exception>();
-                var employees = await m_Employees.SyncResigned(selectedDate, _site.ToString(), cancellationToken);
+                var employees = await m_Employees.SyncResigned(selectedDate, site.ToString(), cancellationToken);
                 if (!employees.Any()) return;
                 OnProgressStart(employees.Count);
 
@@ -215,7 +225,7 @@ namespace Pms.Masterlists.Module.ViewModels
                     finally { OnProgressIncrement(); }
                 }
 
-                m_Employees.ReportExceptions(exceptions, new PayrollCode(), $"{_site}-RESIGNED");
+                m_Employees.ReportExceptions(exceptions, new PayrollCode(), $"{site}-RESIGNED");
                 OnTaskCompleted();
             }
             catch (TaskCanceledException)
@@ -248,6 +258,11 @@ namespace Pms.Masterlists.Module.ViewModels
         {
             try
             {
+                if (Main == null) throw new Exception(ErrorMessages.MainIsNull);
+                if (Main.Site == null) throw new Exception(ErrorMessages.SiteIsNull);
+                if (Main.PayrollCode == null) throw new Exception(ErrorMessages.PayrollCodeIsNull);
+
+                var site = Main.Site.Value;
                 var exceptions = new List<Exception>();
                 OnProgressStart(eeIds.Length);
 
@@ -255,7 +270,7 @@ namespace Pms.Masterlists.Module.ViewModels
                 {
                     try
                     {
-                        var foundEmployee = await m_Employees.SyncOne(eeId, _site.ToString(), cancellationToken);
+                        var foundEmployee = await m_Employees.SyncOne(eeId, site.ToString(), cancellationToken);
                         var foundEmployeeLocal = await m_Employees.FindEmployee(eeId, cancellationToken);
 
                         if (foundEmployee == null && foundEmployeeLocal == null)
@@ -285,7 +300,7 @@ namespace Pms.Masterlists.Module.ViewModels
                     finally { OnProgressIncrement(); }
                 }
 
-                m_Employees.ReportExceptions(exceptions, _payrollCode, $"{_site}-REGULAR");
+                m_Employees.ReportExceptions(exceptions, Main.PayrollCode, $"{site}-REGULAR");
                 OnTaskCompleted();
             }
             catch (TaskCanceledException)
@@ -358,10 +373,10 @@ namespace Pms.Masterlists.Module.ViewModels
         #region INavigationAware
         public void OnNavigatedTo(NavigationContext navigationContext)
         {
-            _main = navigationContext.Parameters.GetValue<IMain?>(PmsConstants.Main);
-            if (_main != null)
+            Main = navigationContext.Parameters.GetValue<IMain?>(PmsConstants.Main);
+            if (Main != null)
             {
-                _main.PropertyChanged += Main_PropertyChanged;
+                Main.PropertyChanged += Main_PropertyChanged;
             }
 
             LoadValues();
@@ -374,9 +389,9 @@ namespace Pms.Masterlists.Module.ViewModels
 
         public void OnNavigatedFrom(NavigationContext navigationContext)
         {
-            if (_main != null)
+            if (Main != null)
             {
-                _main.PropertyChanged -= Main_PropertyChanged;
+                Main.PropertyChanged -= Main_PropertyChanged;
             }
         }
         #endregion
@@ -398,12 +413,12 @@ namespace Pms.Masterlists.Module.ViewModels
         {
             try
             {
-                if (_main != null)
+                if (Main != null)
                 {
-                    _payrollCode = _main.PayrollCode ?? new PayrollCode();
-                    _payrollCodeId = _payrollCode.PayrollCodeId;
-                    _site = _main.Site ?? SiteChoices.UNKNOWN;
-                    _companyId = _main.Company?.CompanyId ?? new Company().CompanyId;
+                    //_payrollCode = _main.PayrollCode ?? new PayrollCode();
+                    //_payrollCodeId = _payrollCode.PayrollCodeId;
+                    //_site = _main.Site ?? SiteChoices.UNKNOWN;
+                    //_companyId = _main.Company?.CompanyId ?? new Company().CompanyId;
 
                     await LoadEmployees(cancellationToken);
                 }
@@ -425,10 +440,13 @@ namespace Pms.Masterlists.Module.ViewModels
         {
             try
             {
+                if (Main == null) throw new Exception(ErrorMessages.MainIsNull);
+                if (Main.PayrollCode == null) throw new Exception(ErrorMessages.PayrollCodeIsNull);
+
                 var employees = (await m_Employees.GetEmployees(cancellationToken))
                     .HideArchived(HideArchived)
                     .FilterSearchInput(SearchInput)
-                    .FilterPayrollCode(_payrollCodeId);
+                    .FilterPayrollCode(Main.PayrollCode.PayrollCodeId);
 
                 Employees = employees;
                 ActiveEECount = employees.Count(t => t.Active);
@@ -613,8 +631,11 @@ namespace Pms.Masterlists.Module.ViewModels
         {
             try
             {
+                if (Main == null) throw new Exception(ErrorMessages.MainIsNull);
+                if (Main.PayrollCode == null) throw new Exception(ErrorMessages.PayrollCodeIsNull);
+
                 var employees = Employees.ToList();
-                await m_Employees.ExportMasterlist(employees, _payrollCode, cancellationToken: cancellationToken);
+                await m_Employees.ExportMasterlist(employees, Main.PayrollCode, cancellationToken: cancellationToken);
                 OnTaskCompleted();
             }
             catch (TaskCanceledException) { OnTaskException(); }
@@ -640,8 +661,11 @@ namespace Pms.Masterlists.Module.ViewModels
         {
             try
             {
+                if (Main == null) throw new Exception(ErrorMessages.MainIsNull);
+                if (Main.PayrollCode == null) throw new Exception(ErrorMessages.PayrollCodeIsNull);
+
                 var noTin = Employees.Where(t => string.IsNullOrEmpty(t.TIN)).ToList();
-                await m_Employees.ExportMasterlist(noTin, _payrollCode, cancellationToken: cancellationToken);
+                await m_Employees.ExportMasterlist(noTin, Main.PayrollCode, cancellationToken: cancellationToken);
                 OnTaskCompleted();
             }
             catch (TaskCanceledException) { OnTaskException(); }

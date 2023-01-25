@@ -12,7 +12,7 @@ namespace Pms.Adjustments.ServiceLayer.Files
 {
     public class BillingExporter
     {
-        public int ExportBillings(IEnumerable<Billing> billings, string cutoffId, string payrollCodeId, AdjustmentTypes adjustmentName)
+        public static int ExportBillings(IEnumerable<Billing> billings, string cutoffId, string payrollCodeId, AdjustmentTypes adjustmentName)
         {
             if (billings?.Any() ?? false)
             {

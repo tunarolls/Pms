@@ -115,6 +115,17 @@ namespace Pms.Common
             };
         }
 
+        protected IDialogParameters CreateDialogParameters(INotifyTaskCompletion taskCompletion, CancellationTokenSource cts)
+        {
+            return new DialogParameters()
+            {
+                { DialogParameterNames.Message, "Starting..." },
+                { DialogParameterNames.Title, "Loading" },
+                { DialogParameterNames.TaskCompletion, taskCompletion },
+                { DialogParameterNames.CancellationTokenSource, cts }
+            };
+        }
+
         protected CancellationTokenSource GetCancellationTokenSource()
         {
             return new CancellationTokenSource();

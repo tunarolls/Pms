@@ -44,8 +44,6 @@ namespace Pms.Adjustments.Module.ViewModels
 
         private AdjustmentTypes _adjustmentName;
         private IEnumerable<Billing> _billings = Enumerable.Empty<Billing>();
-        private string _cutoffId = string.Empty;
-        private string _payrollCodeId = string.Empty;
 
         private readonly Models.Timesheets m_Timesheets;
         private readonly Billings m_Billings;
@@ -60,7 +58,7 @@ namespace Pms.Adjustments.Module.ViewModels
             m_Timesheets = timesheets;
 
             AddToAdjustmentCommand = new DelegateCommand<object?>(AddToAdjustment);
-            ExportBillingsCommand = new DelegateCommand(() => { });
+            ExportBillingsCommand = new DelegateCommand(ExportBillings);
             GenerateBillingsCommand = new DelegateCommand(GenerateBillings);
             AdjustmentNames = Enum.GetValues<AdjustmentTypes>();
         }
@@ -68,14 +66,42 @@ namespace Pms.Adjustments.Module.ViewModels
         public AdjustmentTypes AdjustmentName { get => _adjustmentName; set => SetProperty(ref _adjustmentName, value); }
         public IEnumerable<AdjustmentTypes> AdjustmentNames { get; }
         public IEnumerable<Billing> Billings { get => _billings; set => SetProperty(ref _billings, value); }
-        //public string CutoffId { get => _cutoffId; set => SetProperty(ref _cutoffId, value); }
-        //public string PayrollCodeId { get => _payrollCodeId; set => SetProperty(ref _payrollCodeId, value); }
         public IMain? Main { get; set; }
 
         #region commands
         public DelegateCommand<object?> AddToAdjustmentCommand { get; }
         public DelegateCommand ExportBillingsCommand { get; }
         public DelegateCommand GenerateBillingsCommand { get; }
+        #endregion
+
+        #region Export
+        private void ExportBillings()
+        {
+            var cts = GetCancellationTokenSource();
+            var dialogParameters = CreateDialogParameters(this, cts);
+            s_Dialog.Show(DialogNames.CancelDialog, dialogParameters, (_) => { });
+            _ = ExportBillings(cts.Token);
+        }
+
+        private async Task ExportBillings(CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                if (Main == null) throw new Exception(ErrorMessages.MainIsNull);
+                if (Main.PayrollCode == null) throw new Exception(ErrorMessages.PayrollCodeIsNull);
+
+                OnMessageSent("Exporting adjustments...");
+                OnProgressStart();
+                await m_Billings.Export(Billings, Main.CutoffId, Main.PayrollCode.PayrollCodeId, AdjustmentName, cancellationToken);
+                OnTaskCompleted();
+            }
+            catch (TaskCanceledException) { OnTaskException(); }
+            catch (Exception ex)
+            {
+                OnTaskException();
+                s_Message.ShowError(ex.Message);
+            }
+        }
         #endregion
 
         #region GenerateBillings

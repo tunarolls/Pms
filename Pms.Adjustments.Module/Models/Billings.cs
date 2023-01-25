@@ -110,5 +110,13 @@ namespace Pms.Adjustments.Module.Models
         {
             BillingExporter.ExportBillings(billings, cutoffId, payrollCodeId, adjustmentName);
         }
+
+        public async Task Export(IEnumerable<Billing> billings, string cutoffId, string payrollCodeId, AdjustmentTypes adjustmentName, CancellationToken cancellationToken = default)
+        {
+            await Task.Run(() =>
+            {
+                BillingExporter.ExportBillings(billings, cutoffId, payrollCodeId, adjustmentName);
+            }, cancellationToken);
+        }
     }
 }

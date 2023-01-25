@@ -28,10 +28,6 @@ namespace Pms.Adjustments.Module
 
         public void RegisterTypes(IContainerRegistry containerRegistry)
         {
-            var config = new ConfigurationBuilder().AddJsonFile(PmsConstants.ConfigFilename, optional: false, reloadOnChange: true).Build();
-            var connectionString = config.GetConnectionString(PmsConstants.DevelopmentConnectionName) ?? string.Empty;
-            containerRegistry.RegisterInstance<IDbContextFactory<AdjustmentDbContext>>(new AdjustmentDbContextFactory(connectionString));
-            containerRegistry.RegisterInstance<IDbContextFactory<TimesheetDbContext>>(new TimesheetDbContextFactory(connectionString));
             containerRegistry.Register<IMessageBoxService, DummyMessageBoxService>();
             containerRegistry.Register<Models.Timesheets>();
             containerRegistry.Register<Billings>();

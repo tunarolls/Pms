@@ -16,6 +16,15 @@ namespace Pms.Payrolls.ServiceLayer.EfCore
                 .Select(ts => ts.CutoffId)
                 .ToList();
 
+        public static IEnumerable<string> CutoffIds(this IEnumerable<Payroll> payrolls)
+        {
+            return payrolls
+                .GroupBy(t => t.CutoffId)
+                .Select(t => t.First())
+                .OrderByDescending(t => t.CutoffId)
+                .Select(t => t.CutoffId);
+        }
+
         public static List<string> ExtractEEIds(this IEnumerable<Payroll> payrolls) =>
             payrolls
                 .GroupBy(ts => ts.EEId)

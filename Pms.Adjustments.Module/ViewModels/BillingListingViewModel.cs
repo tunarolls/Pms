@@ -8,7 +8,6 @@ using Pms.Adjustments.Module.Models;
 using Pms.Common;
 using Pms.Adjustments.Models;
 using Prism.Commands;
-using Pms.AdjustmentModule.FrontEnd.Models;
 using System.Threading.Tasks;
 using System.Threading;
 using Prism.Services.Dialogs;

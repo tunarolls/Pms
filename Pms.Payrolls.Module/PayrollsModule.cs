@@ -19,13 +19,10 @@ namespace Pms.Payrolls.Module
 
         public void RegisterTypes(IContainerRegistry containerRegistry)
         {
-            var config = new ConfigurationBuilder().AddJsonFile(PmsConstants.ConfigFilename, optional: false, reloadOnChange: true).Build();
-            var connectionString = config.GetConnectionString(PmsConstants.DevelopmentConnectionName) ?? string.Empty;
             containerRegistry.Register<IManagePayrollService, PayrollManager>();
             containerRegistry.Register<IProvidePayrollService, PayrollProvider>();
             containerRegistry.Register<Payrolls>();
             containerRegistry.Register<IFileDialogService, FileDialogService>();
-            containerRegistry.RegisterInstance<IDbContextFactory<PayrollDbContext>>(new PayrollDbContextFactory(connectionString));
             containerRegistry.RegisterForNavigation<PayrollView>(ViewNames.PayrollsView);
             containerRegistry.RegisterForNavigation<AlphalistView>(ViewNames.ImportAlphalistView);
         }

@@ -15,7 +15,7 @@ namespace Pms.Adjustments.Models
         public double Balance { get; set; }
         public DateTime DateCreated { get; set; } = DateTime.Now;
         public DeductionOptions DeductionOption { get; set; }
-        public EmployeeView EE { get; set; }
+        public EmployeeView? EE { get; set; }
         public string EEId { get; set; } = string.Empty;
         public DateTime EffectivityDate { get; set; }
         public string RecordId { get; set; } = string.Empty;

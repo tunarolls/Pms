@@ -40,7 +40,7 @@ namespace Pms.Timesheets
 
         public DateTime CutoffDate { get; private set; }
         public string CutoffId { get; private set; } = string.Empty;
-        public DateTime[] CutoffRange { get; private set; } = Array.Empty<DateTime>();
+        public DateTime[] CutoffRange { get; private set; } = new DateTime[] { };
         public string Site { get; private set; } = string.Empty;
         public string GetPreviousCutoff() => new Cutoff(CutoffDate.AddDays(-15)).CutoffId;
 

@@ -2,20 +2,22 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Pms.Timesheets.Persistence;
 
 namespace Pms.Timesheets.Migrations
 {
     [DbContext(typeof(TimesheetDbContext))]
-    partial class TimesheetDbContextModelSnapshot : ModelSnapshot
+    [Migration("20221024111044_removedFields")]
+    partial class removedFields
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("Relational:MaxIdentifierLength", 64)
-                .HasAnnotation("ProductVersion", "5.0.13");
+                .HasAnnotation("ProductVersion", "5.0.17");
 
             modelBuilder.Entity("Pms.Timesheets.EmployeeView", b =>
                 {
@@ -26,27 +28,21 @@ namespace Pms.Timesheets.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("FirstName")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("LastName")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("Location")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("MiddleName")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("NameExtension")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("PayrollCode")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.HasKey("EEId");
@@ -60,12 +56,6 @@ namespace Pms.Timesheets.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("VARCHAR(35)")
                         .HasColumnName("id");
-
-                    b.Property<double>("Adjust1")
-                        .HasColumnType("DOUBLE(8,2)");
-
-                    b.Property<double>("Adjust2")
-                        .HasColumnType("DOUBLE(8,2)");
 
                     b.Property<double>("Allowance")
                         .HasColumnType("DOUBLE(8,2)");
@@ -85,12 +75,11 @@ namespace Pms.Timesheets.Migrations
                     b.Property<byte>("IsConfirmed")
                         .HasColumnType("TINYINT");
 
-                    b.Property<short>("Page")
-                        .HasColumnType("SMALLINT")
+                    b.Property<byte>("Page")
+                        .HasColumnType("TINYINT")
                         .HasComment("Time System API Page");
 
                     b.Property<string>("RawPCV")
-                        .IsRequired()
                         .HasColumnType("VARCHAR(255)");
 
                     b.Property<double>("TotalHOT")

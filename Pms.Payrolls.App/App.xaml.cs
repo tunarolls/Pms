@@ -1,9 +1,22 @@
-﻿using Pms.Adjustments.Module;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Pms.Adjustments.Module;
+using Pms.Adjustments.Persistence;
 using Pms.Common;
+using Pms.Common.Views;
 using Pms.Masterlists.Module;
+using Pms.Masterlists.Persistence;
+using Pms.Masterlists.ServiceLayer.Hrms.Adapter;
 using Pms.Payrolls.App.Views;
 using Pms.Payrolls.Module;
+using Pms.Payrolls.Persistence;
+using Pms.Timesheets;
 using Pms.Timesheets.Module;
+using Pms.Timesheets.Persistence;
+using Pms.Timesheets.ServiceLayer.EfCore;
+using Pms.Timesheets.ServiceLayer.TimeSystem;
+using Pms.Timesheets.ServiceLayer.TimeSystem.Adapter;
+using Pms.Timesheets.ServiceLayer.TimeSystem.Services;
 using Prism.Ioc;
 using Prism.Modularity;
 using System;
@@ -29,6 +42,25 @@ namespace Pms.Payrolls.App
 
         protected override void RegisterTypes(IContainerRegistry containerRegistry)
         {
+            var config = new ConfigurationBuilder().AddJsonFile(PmsConstants.ConfigFilename, optional: false, reloadOnChange: true).Build();
+            var connectionString = config.GetConnectionString(PmsConstants.DevelopmentConnectionName) ?? string.Empty;
+            containerRegistry.RegisterInstance(HRMSAdapterFactory.CreateAdapter(config));
+            containerRegistry.RegisterInstance(TimeDownloaderFactory.CreateAdapter(config));
+            containerRegistry.RegisterInstance<IDbContextFactory<TimesheetDbContext>>(new TimesheetDbContextFactory(connectionString));
+            containerRegistry.RegisterInstance<IDbContextFactory<AdjustmentDbContext>>(new AdjustmentDbContextFactory(connectionString));
+            containerRegistry.RegisterInstance<IDbContextFactory<PayrollDbContext>>(new PayrollDbContextFactory(connectionString));
+            containerRegistry.RegisterInstance<IDbContextFactory<EmployeeDbContext>>(new EmployeeDbContextFactory(connectionString));
+
+            containerRegistry.Register<Timesheets.Module.Timesheets>();
+            containerRegistry.Register<IDownloadContentProvider, DownloadContentProvider>();
+            containerRegistry.Register<IProvideTimesheetService, TimesheetProvider>();
+            containerRegistry.Register<TimesheetManager>();
+
+            containerRegistry.Register<Module.Payrolls>();
+            containerRegistry.Register<PayrollCodes>();
+            containerRegistry.Register<Companies>();
+            containerRegistry.Register<IMessageBoxService, MessageBoxService>();
+            containerRegistry.RegisterDialog<CancelDialogView>(DialogNames.CancelDialog);
         }
 
         protected override void ConfigureModuleCatalog(IModuleCatalog moduleCatalog)

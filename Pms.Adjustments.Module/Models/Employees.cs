@@ -1,7 +1,9 @@
 ﻿using Pms.Adjustments.Models;
 using Pms.Adjustments.ServiceLayer.EfCore;
+using System.Threading;
+using System.Threading.Tasks;
 
-namespace Pms.AdjustmentModule.FrontEnd.Models
+namespace Pms.Adjustments.Module.Models
 {
     public class Employees
     {
@@ -15,6 +17,11 @@ namespace Pms.AdjustmentModule.FrontEnd.Models
         public EmployeeView Find(string eeId)
         {
             return _provider.FindEmployee(eeId);
+        }
+
+        public async Task<EmployeeView?> Find(string eeId, CancellationToken cancellationToken = default)
+        {
+            return await _provider.FindEmployee(eeId, cancellationToken);
         }
     }
 }

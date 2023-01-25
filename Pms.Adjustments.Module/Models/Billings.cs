@@ -97,7 +97,7 @@ namespace Pms.Adjustments.Module.Models
 
         public void AddBilling(Billing billing)
         {
-            billing.EE = null;
+            //billing.EE = null;
             _billingManager.AddBilling(billing);
         }
 

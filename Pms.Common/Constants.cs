@@ -20,6 +20,7 @@ namespace Pms.Common
         public const string Main = nameof(Main);
         public const string SelectedDate = nameof(SelectedDate);
         public const string Employee = nameof(Employee);
+        public const string BillingRecord = nameof(BillingRecord);
     }
 
     public class DialogNames
@@ -33,5 +34,10 @@ namespace Pms.Common
         public const string Title = nameof(Title);
         public const string TaskCompletion = nameof(TaskCompletion);
         public const string CancellationTokenSource = nameof(CancellationTokenSource);
+    }
+
+    public class FileFilters
+    {
+        public const string BillingRecordImport = "Billing Record Import Files(*.xls)|*.xls";
     }
 }

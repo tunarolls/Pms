@@ -12,6 +12,7 @@ namespace Pms.Timesheets
         EmployeeView FindEmployeeView(string eeId);
 
         IEnumerable<Timesheet> GetTimesheets();
+        Task<ICollection<Timesheet>> GetTimesheets(CancellationToken cancellationToken = default);
 
         IEnumerable<Timesheet> GetTimesheets(string cutoffId);
 

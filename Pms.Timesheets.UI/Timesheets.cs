@@ -61,6 +61,12 @@ namespace Pms.Timesheets.Module
         public string[] ListCutoffIds() =>
             _timesheetProvider.GetTimesheets().ExtractCutoffIds().ToArray();
 
+        public async Task<string[]> ListCutoffIds(CancellationToken cancellationToken = default)
+        {
+            var timesheets = await _timesheetProvider.GetTimesheets(cancellationToken);
+            return timesheets.CutoffIds().ToArray();
+        }
+
         public string[] ListPayrollCodes() =>
             _timesheetProvider.GetTimesheets().ExtractPayrollCodes().ToArray();
 

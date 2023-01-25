@@ -13,6 +13,7 @@ namespace Pms.Common
         public void ShowFolderDialog(Action<IFolderDialogResult> callback);
         public void ShowFolderDialog(string startDirectory, Action<IFolderDialogResult> callback);
         public void ShowMultiFileDialog(Action<IFileDialogResult> callback);
+        public void ShowMultiFileDialog(Action<IFileDialogResult> callback, string filter);
         public void ShowFileDialog(Action<IFileDialogResult> callback);
     }
 
@@ -72,6 +73,20 @@ namespace Pms.Common
             var dialog = new Microsoft.Win32.OpenFileDialog()
             {
                 Multiselect = true
+            };
+
+            if (dialog.ShowDialog() ?? false)
+            {
+                callback.Invoke(new FileDialogResult(dialog.FileNames));
+            }
+        }
+
+        public void ShowMultiFileDialog(Action<IFileDialogResult> callback, string filter)
+        {
+            var dialog = new Microsoft.Win32.OpenFileDialog()
+            {
+                Multiselect = true,
+                Filter = filter
             };
 
             if (dialog.ShowDialog() ?? false)

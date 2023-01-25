@@ -1,0 +1,67 @@
+﻿<UserControl x:Class="Pms.Adjustments.Module.Views.BillingRecordListingView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"  
+             xmlns:local="clr-namespace:Pms.Adjustments.Module.Views"
+             xmlns:prism="http://prismlibrary.com/"
+             prism:ViewModelLocator.AutoWireViewModel="True"
+             mc:Ignorable="d"
+             d:DesignHeight="450" d:DesignWidth="800">
+    <Grid>
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="48"/>
+                <RowDefinition/>
+                <RowDefinition Height="45"/>
+            </Grid.RowDefinitions>
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <Button Command="{Binding DetailCommand}" Content="Add" />
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                <Button Command="{Binding ImportCommand}" Content="Import" />
+            </StackPanel>
+            <DataGrid Grid.Row="1" AutoGenerateColumns="False" ItemsSource="{Binding BillingRecords}" IsReadOnly="True">
+                <DataGrid.Columns>
+                    <DataGridTemplateColumn Header="">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Button Margin="3,1" Content="Detail" CommandParameter="{Binding}" Command="{Binding DataContext.DetailCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                    <DataGridTextColumn Header="EE ID" Binding="{Binding EEId}" />
+                    <DataGridTextColumn Header="Full Name" Binding="{Binding EE.Fullname}" />
+                    <DataGridTextColumn Header="Payroll Code" Binding="{Binding EE.PayrollCode}" />
+                    <DataGridTextColumn Header="Type" Binding="{Binding AdjustmentType}" />
+                    <DataGridTextColumn Header="Advances" Binding="{Binding Advances}" />
+                    <DataGridTextColumn Header="Amortization" Binding="{Binding Amortization}" />
+                    <DataGridTextColumn Header="Balance" Binding="{Binding Balance}" />
+                    <DataGridTextColumn Header="Deduct On" Binding="{Binding DeductionOption}" />
+                    <DataGridTextColumn Header="On" Binding="{Binding AdjustmentOption}" />
+                    <DataGridTextColumn Header="Effectivity Date" Binding="{Binding EffectivityDate, StringFormat={}{0:yyyy-MM-dd}}" />
+                </DataGrid.Columns>
+            </DataGrid>
+
+            <!--<Grid Grid.Row="3">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition Width="50"/>
+                    <ColumnDefinition Width="25"/>
+                    <ColumnDefinition Width="50"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition/>
+                    <RowDefinition Height="5"/>
+                </Grid.RowDefinitions>
+
+                <TextBlock Text="{Binding StatusMessage}" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="8,0"/>
+                <TextBlock Text="{Binding ProgressValue, StringFormat={}{0:N0}}" Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="8,0"/>
+                <TextBlock Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Center">of</TextBlock>
+                <TextBlock Grid.Column="3" Text="{Binding ProgressMaximum, StringFormat={}{0:N0}}" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="8,0"/>
+
+                <ProgressBar Grid.ColumnSpan="5" Grid.Row="1" Maximum="{Binding ProgressMaximum}" Value="{Binding ProgressValue}"/>
+            </Grid>-->
+        </Grid>
+    </Grid>
+</UserControl>

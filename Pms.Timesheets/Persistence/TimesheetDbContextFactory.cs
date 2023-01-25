@@ -21,7 +21,7 @@ namespace Pms.Timesheets.Persistence
         }
 
         public TimesheetDbContextFactory() =>
-            _connectionString = "server=192.168.56.101;database=payroll3Test_efdb;user=tim;password=tim@123;";
+            _connectionString = "server=192.168.56.101;database=payroll3_efdb;user=tim;password=tim@123;";
 
         public TimesheetDbContext CreateDbContext()
         {

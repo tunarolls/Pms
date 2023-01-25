@@ -22,6 +22,13 @@ namespace Pms.Timesheets.ServiceLayer.EfCore
             using TimesheetDbContext Context = _factory.CreateDbContext();
             return Context.Timesheets.Include(ts => ts.EE).ToList();
         }
+
+        public async Task<ICollection<Timesheet>> GetTimesheets(CancellationToken cancellationToken = default)
+        {
+            using var context = _factory.CreateDbContext();
+            return await context.Timesheets.Include(t => t.EE).ToListAsync(cancellationToken);
+        }
+
         public IEnumerable<Timesheet> GetTimesheets(string cutoffId)
         {
             using TimesheetDbContext Context = _factory.CreateDbContext();
@@ -59,7 +66,7 @@ namespace Pms.Timesheets.ServiceLayer.EfCore
         }
         public IEnumerable<Timesheet> GetTwoPeriodTimesheets(string cutoffId)
         {
-            Cutoff currentCutoff = new Cutoff(cutoffId);
+            Cutoff currentCutoff = new(cutoffId);
             using TimesheetDbContext Context = _factory.CreateDbContext();
             return Context.Timesheets
                 .Include(ts => ts.EE).ToList()
@@ -99,7 +106,7 @@ namespace Pms.Timesheets.ServiceLayer.EfCore
                 .FilterByCutoffId(cutoffId)
                 .FilterByPayrollCode(payrollCode);
 
-            if (timesheets.Count() > 0)
+            if (timesheets.Any())
                 return timesheets.Max(ts => ts.Page);
 
             return 0;

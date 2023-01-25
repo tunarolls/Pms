@@ -25,10 +25,6 @@ namespace Pms.Masterlists.Module
 
         public void RegisterTypes(IContainerRegistry containerRegistry)
         {
-            var config = new ConfigurationBuilder().AddJsonFile(PmsConstants.ConfigFilename, optional: false, reloadOnChange: true).Build();
-            var connectionString = config.GetConnectionString(PmsConstants.DevelopmentConnectionName) ?? string.Empty;
-            containerRegistry.RegisterInstance<IDbContextFactory<EmployeeDbContext>>(new EmployeeDbContextFactory(connectionString));
-            containerRegistry.RegisterInstance(HRMSAdapterFactory.CreateAdapter(config));
             containerRegistry.Register<Companies>();
             containerRegistry.Register<Employees>();
             containerRegistry.Register<PayrollCodes>();

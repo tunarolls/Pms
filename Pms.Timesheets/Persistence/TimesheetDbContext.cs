@@ -13,10 +13,6 @@ namespace Pms.Timesheets.Persistence
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            //if (isWeird)
-            //    optionsBuilder.UseMySQL(ConnectionString, options =>
-            //        options.MigrationsHistoryTable("TimesheetsMigrationHistoryName"))
-            //    .UseLazyLoadingProxies();
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

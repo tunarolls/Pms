@@ -77,6 +77,15 @@ namespace Pms.Timesheets.ServiceLayer.EfCore
                 .Select(ts => ts.CutoffId)
                 .ToList();
 
+        public static IEnumerable<string> CutoffIds(this IEnumerable<Timesheet> timesheets)
+        {
+            return timesheets
+                .GroupBy(t => t.CutoffId)
+                .Select(t => t.First())
+                .OrderByDescending(t => t.CutoffId)
+                .Select(t => t.CutoffId);
+        }
+
 
         public static List<TimesheetBankChoices> ExtractBanks(this IEnumerable<Timesheet> timesheets) =>
             timesheets

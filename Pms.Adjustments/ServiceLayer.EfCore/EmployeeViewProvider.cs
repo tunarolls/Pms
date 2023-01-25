@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Pms.Adjustments.ServiceLayer.EfCore
@@ -22,6 +23,12 @@ namespace Pms.Adjustments.ServiceLayer.EfCore
         {
             using AdjustmentDbContext context = _factory.CreateDbContext();
             return context.Employees.Find(eeId);
+        }
+
+        public async Task<EmployeeView?> FindEmployee(string eeId, CancellationToken cancellationToken = default)
+        {
+            using var context = _factory.CreateDbContext();
+            return await context.Employees.FindAsync(new object[] { eeId }, cancellationToken);
         }
     }
 }

@@ -16,6 +16,7 @@ namespace Pms.Common
 
         // adjustments navigation
         public const string BillingListingView = nameof(BillingListingView);
+        public const string BillingRecordListingView = nameof(BillingRecordListingView);
 
         // masterlists navigation
         public const string EmployeeListingView = nameof(EmployeeListingView);

@@ -154,6 +154,12 @@ namespace Pms.Payrolls.Module
         public string[] ListCutoffIds() =>
                     _provider.GetAllPayrolls().ExtractCutoffIds().ToArray();
 
+        public async Task<string[]> ListCutoffIds(CancellationToken cancellationToken = default)
+        {
+            var payrolls = await _provider.GetAllPayrolls(cancellationToken);
+            return payrolls.CutoffIds().ToArray();
+        }
+
         public IEnumerable<string> ListNoEEPayrolls() =>
             _provider.GetNoEEPayrolls().ExtractEEIds();
 

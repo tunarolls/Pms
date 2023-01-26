@@ -23,20 +23,24 @@ namespace Pms.Payrolls
 
         public Cutoff()
         {
-            int year = DateTime.Now.Year;
-            int month = DateTime.Now.Month;
-            var cutoffDate = DateTime.Now.Day < 20
-                ? new DateTime(year, month, 15)
-                : new DateTime(year, month, DateTime.DaysInMonth(year, month));
-
+            var cutoffDate = GetCutoffDate();
             CutoffDate = cutoffDate;
             CutoffId = GetCutoffId(cutoffDate);
         }
 
-        public Cutoff(string cutoffId)
+        public Cutoff(string? cutoffId)
         {
-            CutoffId = cutoffId;
-            CutoffDate = GetCutoffDate(cutoffId);
+            if (string.IsNullOrEmpty(cutoffId))
+            {
+                var cutoffDate = GetCutoffDate();
+                CutoffDate = cutoffDate;
+                CutoffId = GetCutoffId(cutoffDate);
+            }
+            else
+            {
+                CutoffId = cutoffId;
+                CutoffDate = GetCutoffDate(cutoffId);
+            }
         }
 
         public Cutoff(DateTime cutoffDate)
@@ -45,20 +49,30 @@ namespace Pms.Payrolls
             CutoffId = GetCutoffId(cutoffDate);
         }
 
-        private void GetCutoffDate()
+        //private void GetCutoffDate()
+        //{
+        //    int year = int.Parse(CutoffId.Substring(0, 2));
+        //    int month = int.Parse(CutoffId.Substring(2, 2));
+        //    int dayIdx = int.Parse(CutoffId[5..]);
+        //    int day = 15;
+
+
+        //    if (dayIdx == 2)
+        //        day = DateTime.DaysInMonth(year, month);
+        //    else if (dayIdx != 1)
+        //        day = dayIdx;
+
+        //    CutoffDate = new DateTime(year + 2000, month, day); // update year to 3000 at the end of the millennium
+        //}
+
+        private DateTime GetCutoffDate()
         {
-            int year = int.Parse(CutoffId.Substring(0, 2));
-            int month = int.Parse(CutoffId.Substring(2, 2));
-            int dayIdx = int.Parse(CutoffId[5..]);
-            int day = 15;
+            int year = DateTime.Now.Year;
+            int month = DateTime.Now.Month;
 
-
-            if (dayIdx == 2)
-                day = DateTime.DaysInMonth(year, month);
-            else if (dayIdx != 1)
-                day = dayIdx;
-
-            CutoffDate = new DateTime(year + 2000, month, day); // update year to 3000 at the end of the millennium
+            return DateTime.Now.Day < 20
+                ? new DateTime(year, month, 15)
+                : new DateTime(year, month, DateTime.DaysInMonth(year, month));
         }
 
         private DateTime GetCutoffDate(string cutoffId)
@@ -80,15 +94,15 @@ namespace Pms.Payrolls
             return new DateTime(year + 2000, month, day);
         }
 
-        private void GetCutoffId()
-        {
-            if (CutoffDate.Day == 13)
-                CutoffId = $"{CutoffDate:yyMM}-13";
-            else if (CutoffDate.Day <= 15)
-                CutoffId = $"{CutoffDate:yyMM}-1";
-            else
-                CutoffId = $"{CutoffDate:yyMM}-2";
-        }
+        //private void GetCutoffId()
+        //{
+        //    if (CutoffDate.Day == 13)
+        //        CutoffId = $"{CutoffDate:yyMM}-13";
+        //    else if (CutoffDate.Day <= 15)
+        //        CutoffId = $"{CutoffDate:yyMM}-1";
+        //    else
+        //        CutoffId = $"{CutoffDate:yyMM}-2";
+        //}
 
         private string GetCutoffId(DateTime cutoffDate)
         {

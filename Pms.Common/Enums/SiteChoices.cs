@@ -9,7 +9,6 @@ namespace Pms.Common.Enums
     public enum SiteChoices
     {
         MANILA = 30,
-        LEYTE = 31,
-        UNKNOWN = 0
+        LEYTE = 31
     }
 }

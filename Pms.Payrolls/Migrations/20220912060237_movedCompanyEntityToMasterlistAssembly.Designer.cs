@@ -8,15 +8,15 @@ using Pms.Payrolls.Persistence;
 namespace Pms.Payrolls.Migrations
 {
     [DbContext(typeof(PayrollDbContext))]
-    [Migration("20230112052852_init")]
-    partial class init
+    [Migration("20220912060237_movedCompanyEntityToMasterlistAssembly")]
+    partial class movedCompanyEntityToMasterlistAssembly
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("Relational:MaxIdentifierLength", 64)
-                .HasAnnotation("ProductVersion", "5.0.13");
+                .HasAnnotation("ProductVersion", "5.0.17");
 
             modelBuilder.Entity("Pms.Payrolls.CompanyView", b =>
                 {
@@ -24,7 +24,6 @@ namespace Pms.Payrolls.Migrations
                         .HasColumnType("varchar(767)");
 
                     b.Property<string>("Acronym")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<int>("BranchCode")
@@ -34,19 +33,15 @@ namespace Pms.Payrolls.Migrations
                         .HasColumnType("double");
 
                     b.Property<string>("Region")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("RegisteredName")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("Site")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("TIN")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.HasKey("CompanyId");
@@ -60,46 +55,33 @@ namespace Pms.Payrolls.Migrations
                         .HasColumnType("varchar(767)");
 
                     b.Property<string>("AccountNumber")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<int>("Bank")
                         .HasColumnType("int");
 
+                    b.Property<string>("BankCategory")
+                        .HasColumnType("text");
+
                     b.Property<string>("CardNumber")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("FirstName")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("JobCode")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("LastName")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("Location")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("MiddleName")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("NameExtension")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("PayrollCode")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("TIN")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.HasKey("EEId");
@@ -161,7 +143,6 @@ namespace Pms.Payrolls.Migrations
                         .HasColumnType("DOUBLE(6,2)");
 
                     b.Property<string>("PayrollCode")
-                        .IsRequired()
                         .HasColumnType("VARCHAR(6)");
 
                     b.Property<double>("RegHours")
@@ -186,6 +167,54 @@ namespace Pms.Payrolls.Migrations
                     b.ToTable("payroll");
                 });
 
+            modelBuilder.Entity("Pms.Payrolls.TimesheetView", b =>
+                {
+                    b.Property<string>("TimesheetId")
+                        .HasColumnType("VARCHAR(35)")
+                        .HasColumnName("Id");
+
+                    b.Property<string>("BankCategory")
+                        .HasColumnType("text");
+
+                    b.Property<string>("CutoffId")
+                        .HasColumnType("text");
+
+                    b.Property<string>("EEId")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Id")
+                        .IsRequired()
+                        .HasColumnType("VARCHAR(35)");
+
+                    b.Property<string>("PayrollCode")
+                        .HasColumnType("text");
+
+                    b.Property<double>("TotalHOT")
+                        .HasColumnType("double");
+
+                    b.Property<double>("TotalHours")
+                        .HasColumnType("double");
+
+                    b.Property<double>("TotalND")
+                        .HasColumnType("double");
+
+                    b.Property<double>("TotalOT")
+                        .HasColumnType("double");
+
+                    b.Property<double>("TotalRDOT")
+                        .HasColumnType("double");
+
+                    b.Property<double>("TotalTardy")
+                        .HasColumnType("double");
+
+                    b.HasKey("TimesheetId");
+
+                    b.HasIndex("Id")
+                        .IsUnique();
+
+                    b.ToView("timesheet");
+                });
+
             modelBuilder.Entity("Pms.Payrolls.Payroll", b =>
                 {
                     b.HasOne("Pms.Payrolls.EmployeeView", "EE")
@@ -195,6 +224,20 @@ namespace Pms.Payrolls.Migrations
                         .IsRequired();
 
                     b.Navigation("EE");
+                });
+
+            modelBuilder.Entity("Pms.Payrolls.TimesheetView", b =>
+                {
+                    b.HasOne("Pms.Payrolls.Payroll", null)
+                        .WithOne("TS")
+                        .HasForeignKey("Pms.Payrolls.TimesheetView", "Id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Pms.Payrolls.Payroll", b =>
+                {
+                    b.Navigation("TS");
                 });
 #pragma warning restore 612, 618
         }

@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Pms.Common
+namespace Pms.Masterlists.Entities
 {
     public class PayrollCode
     {

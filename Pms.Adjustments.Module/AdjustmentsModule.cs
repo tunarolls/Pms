@@ -28,7 +28,6 @@ namespace Pms.Adjustments.Module
 
         public void RegisterTypes(IContainerRegistry containerRegistry)
         {
-            containerRegistry.Register<IMessageBoxService, DummyMessageBoxService>();
             containerRegistry.Register<Models.Timesheets>();
             containerRegistry.Register<Billings>();
             containerRegistry.Register<IManageBillingService, BillingManager>();
@@ -36,6 +35,7 @@ namespace Pms.Adjustments.Module
             containerRegistry.Register<IGenerateBillingService, BillingGenerator>();
             containerRegistry.Register<IProvideTimesheetService, TimesheetProvider>();
             containerRegistry.Register<TimesheetManager>();
+
             containerRegistry.RegisterForNavigation<BillingListingView>(ViewNames.BillingListingView);
         }
     }

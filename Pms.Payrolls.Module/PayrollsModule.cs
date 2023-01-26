@@ -22,7 +22,7 @@ namespace Pms.Payrolls.Module
             containerRegistry.Register<IManagePayrollService, PayrollManager>();
             containerRegistry.Register<IProvidePayrollService, PayrollProvider>();
             containerRegistry.Register<Payrolls>();
-            containerRegistry.Register<IFileDialogService, FileDialogService>();
+            
             containerRegistry.RegisterForNavigation<PayrollView>(ViewNames.PayrollsView);
             containerRegistry.RegisterForNavigation<AlphalistView>(ViewNames.ImportAlphalistView);
         }

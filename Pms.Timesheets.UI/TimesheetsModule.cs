@@ -30,11 +30,13 @@ namespace Pms.Timesheets.Module
             containerRegistry.Register<IProvideTimesheetService, TimesheetProvider>();
             containerRegistry.Register<TimesheetManager>();
             containerRegistry.Register<Timesheets>();
+
             containerRegistry.RegisterDialog<TimesheetDetailView>(ViewNames.TimesheetDetailView);
+
             containerRegistry.RegisterForNavigation<TimesheetListingView>(ViewNames.Timesheets);
 
 #if DEBUG
-            containerRegistry.Register<TimesheetListingViewModel, DummyListingViewModel>();
+            //containerRegistry.Register<TimesheetListingViewModel, DummyListingViewModel>();
 #endif
         }
     }

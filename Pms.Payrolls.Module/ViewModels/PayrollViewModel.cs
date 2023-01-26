@@ -98,17 +98,13 @@ namespace Pms.Payrolls.Module.ViewModels
         {
             try
             {
-                if (Main == null) throw new Exception(ErrorMessages.MainIsNull);
-                if (Main.Company == null) throw new Exception(ErrorMessages.CompanyIsNull);
-                if (Main.PayrollCode == null) throw new Exception(ErrorMessages.PayrollCodeIsNull);
-
-                var cutoff = new Cutoff(Main.CutoffId);
-                var company = Main.Company;
-                var payrollCode = Main.PayrollCode;
+                var cutoff = new Cutoff(Main?.CutoffId);
+                var companyId = Main?.Company?.CompanyId ?? string.Empty;
+                var payrollCode = Main?.PayrollCode?.PayrollCodeId ?? string.Empty;
 
                 OnMessageSent("Retrieving payrolls...");
-                var employeePayrolls = await m_Payrolls.GetYearlyPayrollsByEmployee(cutoff.YearCovered, payrollCode.PayrollCodeId,
-                    company.CompanyId, cancellationToken);
+                var employeePayrolls = await m_Payrolls.GetYearlyPayrollsByEmployee(cutoff.YearCovered, payrollCode,
+                    companyId, cancellationToken);
                 var payrollsGroup = employeePayrolls.GroupBy(t => t.EEId);
                 var payrolls = new List<Payroll>();
 
@@ -134,8 +130,12 @@ namespace Pms.Payrolls.Module.ViewModels
                 }
 
                 // io bound, refactor later
-                m_Payrolls.ExportBankReport(payrolls, $"{cutoff.CutoffDate:yy}{12}-13", payrollCode.PayrollCodeId);
-
+                OnMessageSent("Exporting...");
+                await Task.Run(() =>
+                {
+                    m_Payrolls.ExportBankReport(payrolls, $"{cutoff.CutoffDate:yy}{12}-13", payrollCode);
+                }, cancellationToken);
+                
                 OnTaskCompleted();
             }
             catch (TaskCanceledException) { OnTaskException(); }
@@ -160,9 +160,7 @@ namespace Pms.Payrolls.Module.ViewModels
         {
             try
             {
-                if (Main == null) throw new Exception(ErrorMessages.MainIsNull);
-                if (Main.Company == null) throw new Exception(ErrorMessages.CompanyIsNull);
-                if (Main.PayrollCode == null) throw new Exception(ErrorMessages.PayrollCodeIsNull);
+                if (Main?.Company == null) throw new Exception(ErrorMessages.CompanyIsNull);
 
                 var cutoff = new Cutoff(Main.CutoffId);
                 var company = Main.Company;
@@ -211,18 +209,19 @@ namespace Pms.Payrolls.Module.ViewModels
         {
             try
             {
-                if (Main == null) throw new Exception(ErrorMessages.MainIsNull);
-                if (Main.Company == null) throw new Exception(ErrorMessages.CompanyIsNull);
-                if (Main.PayrollCode == null) throw new Exception(ErrorMessages.PayrollCodeIsNull);
+                //if (Main == null) throw new Exception(ErrorMessages.MainIsNull);
+                //if (Main.Company == null) throw new Exception(ErrorMessages.CompanyIsNull);
+                //if (Main.PayrollCode == null) throw new Exception(ErrorMessages.PayrollCodeIsNull);
 
-                var cutoffId = Main.CutoffId;
-                var payrollCode = Main.PayrollCode.PayrollCodeId;
+                var cutoff = new Cutoff(Main?.CutoffId);
+                var payrollCode = Main?.PayrollCode?.PayrollCodeId ?? string.Empty;
 
                 OnMessageSent("Retrieving payrolls...");
-                var payrolls = await m_Payrolls.Get(cutoffId, payrollCode, cancellationToken);
+                var payrolls = await m_Payrolls.Get(cutoff.CutoffId, payrollCode, cancellationToken);
 
                 // io bound, refactor later
-                m_Payrolls.ExportBankReport(payrolls, cutoffId, payrollCode);
+                OnMessageSent("Exporting...");
+                m_Payrolls.ExportBankReport(payrolls, cutoff.CutoffId, payrollCode);
 
                 OnTaskCompleted();
             }
@@ -347,18 +346,14 @@ namespace Pms.Payrolls.Module.ViewModels
         {
             try
             {
-                if (Main == null) throw new Exception(ErrorMessages.MainIsNull);
-                if (Main.Company == null) throw new Exception(ErrorMessages.CompanyIsNull);
-                if (Main.PayrollCode == null) throw new Exception(ErrorMessages.PayrollCodeIsNull);
-
-                var cutoffId = Main.CutoffId;
-                var company = Main.Company;
-                var payrollCode = Main.PayrollCode;
+                var cutoff = new Cutoff(Main?.CutoffId);
+                var company = Main?.Company?.CompanyId ?? string.Empty;
+                var payrollCode = Main?.PayrollCode?.PayrollCodeId ?? string.Empty;
 
                 OnMessageSent("Retrieving payrolls...");
-                var payrolls = (await m_Payrolls.Get(cutoffId, cancellationToken))
-                    .SetCompanyId(company.CompanyId)
-                    .SetPayrollCode(payrollCode.PayrollCodeId);
+                var payrolls = (await m_Payrolls.Get(cutoff.CutoffId, cancellationToken))
+                    .SetCompanyId(company)
+                    .SetPayrollCode(payrollCode);
 
                 Payrolls = payrolls;
                 ChkCount = payrolls.Count(t => t.EE.Bank == BankChoices.CHK);
@@ -373,8 +368,8 @@ namespace Pms.Payrolls.Module.ViewModels
                 MtacTotal = payrolls.Where(p => p.EE.Bank == BankChoices.MTAC).Sum(p => p.NetPay);
                 MpaloTotal = payrolls.Where(p => p.EE.Bank == BankChoices.MPALO).Sum(p => p.NetPay);
 
-                UnknownEECount = payrolls.Count(p => p.EE == null || p.EE.FirstName == string.Empty);
-                UnknownEETotal = payrolls.Where(p => p.EE == null || p.EE.FirstName == string.Empty).Sum(p => p.NetPay);
+                UnknownEECount = payrolls.Count(p => string.IsNullOrEmpty(p.EE.FirstName));
+                UnknownEETotal = payrolls.Where(p => string.IsNullOrEmpty(p.EE.FirstName)).Sum(p => p.NetPay);
 
                 GrandCount = payrolls.Count();
                 GrandTotal = payrolls.Sum(p => p.NetPay);

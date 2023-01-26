@@ -127,12 +127,13 @@ namespace Pms.Payrolls.Module
         public async Task<ICollection<Payroll>> GetYearlyPayrollsByEmployee(int yearCovered, string payrollCodeId, string companyId,
             CancellationToken cancellationToken = default)
         {
-            var payrolls = await _provider.GetAllPayrolls(cancellationToken);
-            return payrolls.Where(t => t.YearCovered == yearCovered)
-                .Where(t => t.EE != null)
+            var payrolls = await _provider.GetYearlyPayrolls(yearCovered, cancellationToken);
+            return payrolls
+                .Where(t => t.PayrollCode == payrollCodeId)
+                .Where(t => t.CompanyId == companyId)
                 .GroupBy(t => t.EEId)
                 .Where(t => t.Any(u => u.Cutoff.CutoffDate.Month == 11))
-                .SelectMany(t => t.Where(u => u.PayrollCode == payrollCodeId))
+                .SelectMany(t => t)
                 .ToList();
         }
 
@@ -142,12 +143,12 @@ namespace Pms.Payrolls.Module
             return importer.StartImport(payregFilePath);
         }
 
-        public async Task<IEnumerable<Payroll>> Import(string payregFilePath, ImportProcessChoices processType, CancellationToken cancellationToken = default)
+        public async Task<ICollection<Payroll>> Import(string payregFilePath, ImportProcessChoices processType, CancellationToken cancellationToken = default)
         {
             return await Task.Run(() =>
             {
                 PayrollRegisterImportBase importer = new(processType);
-                return importer.StartImport(payregFilePath);
+                return importer.StartImport(payregFilePath).ToList();
             }, cancellationToken);
         }
 

@@ -9,109 +9,17 @@ using Pms.Masterlists.Persistence;
 namespace Pms.Masterlists.Migrations
 {
     [DbContext(typeof(EmployeeDbContext))]
-    [Migration("20230111093658_init")]
-    partial class init
+    [Migration("20220919212743_addedCompanyIdToEmployeeEntity")]
+    partial class addedCompanyIdToEmployeeEntity
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("Relational:MaxIdentifierLength", 64)
-                .HasAnnotation("ProductVersion", "5.0.13");
+                .HasAnnotation("ProductVersion", "5.0.17");
 
-            modelBuilder.Entity("Pms.Masterlists.Entities.Employee", b =>
-                {
-                    b.Property<string>("EEId")
-                        .HasColumnType("VARCHAR(8)");
-
-                    b.Property<string>("AccountNumber")
-                        .IsRequired()
-                        .HasColumnType("VARCHAR(30)");
-
-                    b.Property<bool>("Active")
-                        .HasColumnType("tinyint(1)");
-
-                    b.Property<byte>("Bank")
-                        .HasColumnType("TINYINT");
-
-                    b.Property<DateTime>("BirthDate")
-                        .HasColumnType("DATE");
-
-                    b.Property<string>("CardNumber")
-                        .IsRequired()
-                        .HasColumnType("VARCHAR(30)");
-
-                    b.Property<string>("CompanyId")
-                        .IsRequired()
-                        .HasColumnType("VARCHAR(25)");
-
-                    b.Property<DateTime>("DateCreated")
-                        .HasColumnType("datetime");
-
-                    b.Property<DateTime>("DateModified")
-                        .HasColumnType("DATETIME");
-
-                    b.Property<DateTime>("DateResigned")
-                        .HasColumnType("DATE");
-
-                    b.Property<string>("FirstName")
-                        .IsRequired()
-                        .HasColumnType("VARCHAR(45)");
-
-                    b.Property<string>("Gender")
-                        .IsRequired()
-                        .HasColumnType("VARCHAR(1)");
-
-                    b.Property<string>("JobCode")
-                        .IsRequired()
-                        .HasColumnType("VARCHAR(25)");
-
-                    b.Property<string>("LastName")
-                        .IsRequired()
-                        .HasColumnType("VARCHAR(45)");
-
-                    b.Property<string>("Location")
-                        .IsRequired()
-                        .HasColumnType("VARCHAR(45)");
-
-                    b.Property<string>("MiddleName")
-                        .IsRequired()
-                        .HasColumnType("VARCHAR(45)");
-
-                    b.Property<string>("NameExtension")
-                        .IsRequired()
-                        .HasColumnType("VARCHAR(6)");
-
-                    b.Property<string>("Pagibig")
-                        .IsRequired()
-                        .HasColumnType("VARCHAR(20)");
-
-                    b.Property<string>("PayrollCode")
-                        .IsRequired()
-                        .HasColumnType("VARCHAR(6)");
-
-                    b.Property<string>("PhilHealth")
-                        .IsRequired()
-                        .HasColumnType("VARCHAR(20)");
-
-                    b.Property<string>("SSS")
-                        .IsRequired()
-                        .HasColumnType("VARCHAR(20)");
-
-                    b.Property<string>("Site")
-                        .IsRequired()
-                        .HasColumnType("VARCHAR(25)");
-
-                    b.Property<string>("TIN")
-                        .IsRequired()
-                        .HasColumnType("VARCHAR(20)");
-
-                    b.HasKey("EEId");
-
-                    b.ToTable("masterlist");
-                });
-
-            modelBuilder.Entity("Pms.Masterlists.ValueObjects.Company", b =>
+            modelBuilder.Entity("Pms.Masterlists.Entities.Company", b =>
                 {
                     b.Property<string>("CompanyId")
                         .HasColumnType("VARCHAR(35)");
@@ -127,7 +35,6 @@ namespace Pms.Masterlists.Migrations
                         .HasColumnType("DOUBLE(6,2)");
 
                     b.Property<string>("Region")
-                        .IsRequired()
                         .HasColumnType("VARCHAR(10)");
 
                     b.Property<string>("RegisteredName")
@@ -135,11 +42,9 @@ namespace Pms.Masterlists.Migrations
                         .HasColumnType("VARCHAR(100)");
 
                     b.Property<string>("Site")
-                        .IsRequired()
                         .HasColumnType("VARCHAR(20)");
 
                     b.Property<string>("TIN")
-                        .IsRequired()
                         .HasColumnType("VARCHAR(20)");
 
                     b.HasKey("CompanyId");
@@ -147,7 +52,80 @@ namespace Pms.Masterlists.Migrations
                     b.ToTable("company");
                 });
 
-            modelBuilder.Entity("Pms.Masterlists.ValueObjects.PayrollCode", b =>
+            modelBuilder.Entity("Pms.Masterlists.Entities.Employee", b =>
+                {
+                    b.Property<string>("EEId")
+                        .HasColumnType("VARCHAR(8)");
+
+                    b.Property<string>("AccountNumber")
+                        .HasColumnType("VARCHAR(30)");
+
+                    b.Property<bool>("Active")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<byte>("Bank")
+                        .HasColumnType("TINYINT");
+
+                    b.Property<DateTime>("BirthDate")
+                        .HasColumnType("DATE");
+
+                    b.Property<string>("CardNumber")
+                        .HasColumnType("VARCHAR(30)");
+
+                    b.Property<string>("CompanyId")
+                        .HasColumnType("VARCHAR(25)");
+
+                    b.Property<DateTime>("DateCreated")
+                        .HasColumnType("datetime");
+
+                    b.Property<DateTime>("DateModified")
+                        .HasColumnType("DATETIME");
+
+                    b.Property<string>("FirstName")
+                        .HasColumnType("VARCHAR(45)");
+
+                    b.Property<string>("Gender")
+                        .HasColumnType("VARCHAR(1)");
+
+                    b.Property<string>("JobCode")
+                        .HasColumnType("text");
+
+                    b.Property<string>("LastName")
+                        .HasColumnType("VARCHAR(45)");
+
+                    b.Property<string>("Location")
+                        .HasColumnType("VARCHAR(45)");
+
+                    b.Property<string>("MiddleName")
+                        .HasColumnType("VARCHAR(45)");
+
+                    b.Property<string>("NameExtension")
+                        .HasColumnType("VARCHAR(6)");
+
+                    b.Property<string>("Pagibig")
+                        .HasColumnType("VARCHAR(20)");
+
+                    b.Property<string>("PayrollCode")
+                        .HasColumnType("VARCHAR(6)");
+
+                    b.Property<string>("PhilHealth")
+                        .HasColumnType("VARCHAR(20)");
+
+                    b.Property<string>("SSS")
+                        .HasColumnType("VARCHAR(20)");
+
+                    b.Property<string>("Site")
+                        .HasColumnType("VARCHAR(25)");
+
+                    b.Property<string>("TIN")
+                        .HasColumnType("VARCHAR(20)");
+
+                    b.HasKey("EEId");
+
+                    b.ToTable("masterlist");
+                });
+
+            modelBuilder.Entity("Pms.Masterlists.Entities.PayrollCode", b =>
                 {
                     b.Property<string>("PayrollCodeId")
                         .HasColumnType("VARCHAR(12)");

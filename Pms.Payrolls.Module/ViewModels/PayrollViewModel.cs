@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore.Metadata.Conventions;
+using MySqlX.XDevAPI.Common;
 using NPOI.OpenXmlFormats.Spreadsheet;
 using NPOI.OpenXmlFormats.Wordprocessing;
 using Org.BouncyCastle.Crypto;
@@ -9,6 +10,7 @@ using Pms.Payrolls.Exceptions;
 using Prism.Commands;
 using Prism.Mvvm;
 using Prism.Regions;
+using Prism.Services.Dialogs;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -20,15 +22,12 @@ using System.Windows.Input;
 
 namespace Pms.Payrolls.Module.ViewModels
 {
-    public class PayrollViewModel : BindableBase, INavigationAware, IRegionMemberLifetime
+    public class PayrollViewModel : CancellableBase, INavigationAware
     {
-        #region properties
         private int _cbcCount;
         private double _cbcTotal;
         private int _chkCount;
         private double _chkTotal;
-        private Company _company = new();
-        private Cutoff _cutoff = new();
         private int _grandCount;
         private double _grandTotal;
         private int _lbpCount;
@@ -37,10 +36,28 @@ namespace Pms.Payrolls.Module.ViewModels
         private double _mpaloTotal;
         private int _mtacCount;
         private double _mtacTotal;
-        private PayrollCode _payrollCode = new();
         private IEnumerable<Payroll> _payrolls = Enumerable.Empty<Payroll>();
         private int _unknownEECount;
         private double _unknownEETotal;
+
+        private readonly Payrolls m_Payrolls;
+        private readonly IFileDialogService s_FileDialog;
+        private readonly IDialogService s_Dialog;
+        private readonly IMessageBoxService s_Message;
+
+        public PayrollViewModel(IDialogService dialog, IFileDialogService fileDialog, IMessageBoxService message, Payrolls payrolls)
+        {
+            s_Dialog = dialog;
+            s_FileDialog = fileDialog;
+            s_Message = message;
+            m_Payrolls = payrolls;
+
+            Export13thMonthCommand = new DelegateCommand(Export13thMonth);
+            ExportAlphalistCommand = new DelegateCommand(ExportAlphalist);
+            ExportBankReportCommand = new DelegateCommand(ExportBankReport);
+            ImportCommand = new DelegateCommand(Import);
+            ExportMacroCommand = new DelegateCommand(ExportMacro);
+        }
 
         public int CbcCount { get => _cbcCount; set => SetProperty(ref _cbcCount, value); }
         public double CbcTotal { get => _cbcTotal; set => SetProperty(ref _cbcTotal, value); }
@@ -57,23 +74,8 @@ namespace Pms.Payrolls.Module.ViewModels
         public IEnumerable<Payroll> Payrolls { get => _payrolls; set => SetProperty(ref _payrolls, value); }
         public int UnknownEECount { get => _unknownEECount; set => SetProperty(ref _unknownEECount, value); }
         public double UnknownEETotal { get => _unknownEETotal; set => SetProperty(ref _unknownEETotal, value); }
-        #endregion
 
-        private IPayrollsMain? _main;
-        private readonly Payrolls _payroll;
-        private readonly IFileDialogService _fileDialog;
-
-        public PayrollViewModel(IFileDialogService fileDialog, Payrolls payroll)
-        {
-            _fileDialog = fileDialog;
-            _payroll = payroll;
-
-            Export13thMonthCommand = new DelegateCommand(Export13thMonth);
-            ExportAlphalistCommand = new DelegateCommand(ExportAlphalist);
-            ExportBankReportCommand = new DelegateCommand(ExportBankReport);
-            ImportCommand = new DelegateCommand(Import);
-            ExportMacroCommand = new DelegateCommand(ExportMacro);
-        }
+        public IPayrollsMain? Main { get; set; }
 
         #region Commands
         public DelegateCommand Export13thMonthCommand { get; }
@@ -81,41 +83,32 @@ namespace Pms.Payrolls.Module.ViewModels
         public DelegateCommand ExportBankReportCommand { get; }
         public DelegateCommand ExportMacroCommand { get; }
         public DelegateCommand ImportCommand { get; }
+        #endregion
 
+        #region Export13thMonth
         private void Export13thMonth()
         {
-            _ = Export13thMonth(default);
+            var cts = GetCancellationTokenSource();
+            var dialogParameters = CreateDialogParameters(this, cts);
+            s_Dialog.Show(DialogNames.CancelDialog, dialogParameters, (_) => { });
+            _ = Export13thMonth(cts.Token);
         }
-
-        private void ExportAlphalist()
-        {
-            _ = ExportAlphalist(default);
-        }
-
-        private void ExportBankReport()
-        {
-            _ = ExportBankReport(default);
-        }
-
-        private void Import()
-        {
-            StartImportPayroll();
-        }
-
-        private void ExportMacro()
-        {
-            _ = ExportMacro(default);
-        }
-        #endregion
 
         private async Task Export13thMonth(CancellationToken cancellationToken = default)
         {
             try
             {
-                var cutoff = new Cutoff(_cutoff.CutoffId);
-                var company = _company;
-                var employeePayrolls = await _payroll.GetYearlyPayrollsByEmployee(cutoff.YearCovered, _payrollCode.PayrollCodeId,
-                    _company.CompanyId, cancellationToken);
+                if (Main == null) throw new Exception(ErrorMessages.MainIsNull);
+                if (Main.Company == null) throw new Exception(ErrorMessages.CompanyIsNull);
+                if (Main.PayrollCode == null) throw new Exception(ErrorMessages.PayrollCodeIsNull);
+
+                var cutoff = new Cutoff(Main.CutoffId);
+                var company = Main.Company;
+                var payrollCode = Main.PayrollCode;
+
+                OnMessageSent("Retrieving payrolls...");
+                var employeePayrolls = await m_Payrolls.GetYearlyPayrollsByEmployee(cutoff.YearCovered, payrollCode.PayrollCodeId,
+                    company.CompanyId, cancellationToken);
                 var payrollsGroup = employeePayrolls.GroupBy(t => t.EEId);
                 var payrolls = new List<Payroll>();
 
@@ -131,35 +124,57 @@ namespace Pms.Payrolls.Module.ViewModels
                         YearCovered = payroll.YearCovered,
                         NetPay = employeePayroll.Sum(p =>
                         {
-                            if (p.RegHours > 96)
-                                return p.RegularPay / p.RegHours * 96;
-                            return p.RegularPay;
+                            return p.RegHours > 96
+                                ? p.RegularPay / p.RegHours * 96
+                                : p.RegularPay;
                         }) / 12,
                     };
 
                     payrolls.Add(v_13thMonthPayroll);
                 }
 
-                _payroll.ExportBankReport(payrolls, $"{cutoff.CutoffDate:yy}{12}-13", _payrollCode.PayrollCodeId);
+                // io bound, refactor later
+                m_Payrolls.ExportBankReport(payrolls, $"{cutoff.CutoffDate:yy}{12}-13", payrollCode.PayrollCodeId);
+
+                OnTaskCompleted();
             }
-            catch
+            catch (TaskCanceledException) { OnTaskException(); }
+            catch (Exception ex)
             {
-                throw;
+                OnTaskException();
+                s_Message.ShowError(ex.Message);
             }
+        }
+        #endregion
+
+        #region ExportAlphalist
+        private void ExportAlphalist()
+        {
+            var cts = GetCancellationTokenSource();
+            var dialogParameters = CreateDialogParameters(this, cts);
+            s_Dialog.Show(DialogNames.CancelDialog, dialogParameters, (_) => { });
+            _ = ExportAlphalist(cts.Token);
         }
 
         private async Task ExportAlphalist(CancellationToken cancellationToken = default)
         {
             try
             {
-                var cutoff = new Cutoff(_cutoff.CutoffId);
-                var employeePayrolls = await _payroll.GetYearlyPayrollsByEmployee(cutoff.YearCovered, _company.CompanyId, cancellationToken);
-                var payrollsGroup = employeePayrolls.GroupBy(t => t.EEId);
+                if (Main == null) throw new Exception(ErrorMessages.MainIsNull);
+                if (Main.Company == null) throw new Exception(ErrorMessages.CompanyIsNull);
+                if (Main.PayrollCode == null) throw new Exception(ErrorMessages.PayrollCodeIsNull);
+
+                var cutoff = new Cutoff(Main.CutoffId);
+                var company = Main.Company;
+
+                OnMessageSent("Retrieving payrolls...");
+                var yearlyPayrolls = await m_Payrolls.GetYearlyPayrollsByEmployee(cutoff.YearCovered, company.CompanyId, cancellationToken);
+                var payrollByEmployee = yearlyPayrolls.GroupBy(t => t.EEId);
                 var alphalists = new List<AlphalistDetail>();
 
-                foreach (var employeePayroll in payrollsGroup)
+                foreach (var payrolls in payrollByEmployee)
                 {
-                    var alphaDetailFactory = new AutomatedAlphalistDetail(employeePayroll, _company.MinimumRate, cutoff.YearCovered);
+                    var alphaDetailFactory = new AutomatedAlphalistDetail(payrolls, company.MinimumRate, cutoff.YearCovered);
                     var alphalistDetail = alphaDetailFactory.CreateAlphalistDetail();
 
                     if (!string.IsNullOrEmpty(alphalistDetail.EEId))
@@ -168,90 +183,182 @@ namespace Pms.Payrolls.Module.ViewModels
                     }
                 }
 
-                _payroll.ExportAlphalist(alphalists, cutoff.YearCovered, _company);
-                _payroll.ExportAlphalistVerifier(payrollsGroup, cutoff.YearCovered, _company);
+                // io bound, refactor later
+                m_Payrolls.ExportAlphalist(alphalists, cutoff.YearCovered, company);
+                m_Payrolls.ExportAlphalistVerifier(payrollByEmployee, cutoff.YearCovered, company);
+
+                OnTaskCompleted();
             }
-            catch
+            catch (TaskCanceledException) { OnTaskException(); }
+            catch (Exception ex)
             {
-                throw;
+                OnTaskException();
+                s_Message.ShowError(ex.Message);
             }
+        }
+        #endregion
+
+        #region ExportBankReport
+        private void ExportBankReport()
+        {
+            var cts = GetCancellationTokenSource();
+            var dialogParameters = CreateDialogParameters(this, cts);
+            s_Dialog.Show(DialogNames.CancelDialog, dialogParameters, (_) => { });
+            _ = ExportBankReport(cts.Token);
         }
 
         private async Task ExportBankReport(CancellationToken cancellationToken = default)
         {
             try
             {
-                string cutoffId = _cutoff.CutoffId;
-                string payrollCode = _payrollCode.PayrollCodeId;
-                var payrolls = await _payroll.Get(cutoffId, payrollCode, cancellationToken);
-                _payroll.ExportBankReport(payrolls, cutoffId, payrollCode);
+                if (Main == null) throw new Exception(ErrorMessages.MainIsNull);
+                if (Main.Company == null) throw new Exception(ErrorMessages.CompanyIsNull);
+                if (Main.PayrollCode == null) throw new Exception(ErrorMessages.PayrollCodeIsNull);
+
+                var cutoffId = Main.CutoffId;
+                var payrollCode = Main.PayrollCode.PayrollCodeId;
+
+                OnMessageSent("Retrieving payrolls...");
+                var payrolls = await m_Payrolls.Get(cutoffId, payrollCode, cancellationToken);
+
+                // io bound, refactor later
+                m_Payrolls.ExportBankReport(payrolls, cutoffId, payrollCode);
+
+                OnTaskCompleted();
             }
-            catch
+            catch (TaskCanceledException) { OnTaskException(); }
+            catch (Exception ex)
             {
-                throw;
+                OnTaskException();
+                s_Message.ShowError(ex.Message);
             }
         }
+        #endregion
 
-        private async Task ExportMacro(CancellationToken cancellationToken = default)
+        #region import payroll
+        private void Import()
         {
-            try
-            {
-                var cutoff = new Cutoff(_cutoff.CutoffId);
-                var company = _company;
-                var payrolls = await _payroll.GetMonthlyPayrolls(cutoff.CutoffDate.Month, company.CompanyId, cancellationToken);
-                _payroll.ExportMacro(payrolls, cutoff, company.CompanyId);
-                _payroll.ExportMacroB(payrolls, cutoff, company.CompanyId);
-            }
-            catch
-            {
-                throw;
-            }
+            StartImportPayroll();
         }
 
         private void StartImportPayroll()
         {
-            _fileDialog.ShowMultiFileDialog(ImportPayrollCallback);
+            s_FileDialog.ShowMultiFileDialog(ImportPayrollCallback);
         }
 
         private void ImportPayrollCallback(IFileDialogResult result)
         {
-            _ = ImportPayroll(result.FileNames);
+            var cts = GetCancellationTokenSource();
+            var dialogParameters = CreateDialogParameters(this, cts);
+            s_Dialog.Show(DialogNames.CancelDialog, dialogParameters, (_) => { });
+            _ = ImportPayroll(result.FileNames, cts.Token);
         }
 
         private async Task ImportPayroll(string[] fileNames, CancellationToken cancellationToken = default)
         {
             try
             {
+                if (Main == null) throw new Exception(ErrorMessages.MainIsNull);
+                if (Main.Company == null) throw new Exception(ErrorMessages.CompanyIsNull);
+                if (Main.PayrollCode == null) throw new Exception(ErrorMessages.PayrollCodeIsNull);
+
+                var payrollCode = Main.PayrollCode;
+                var company = Main.Company;
+
                 foreach (var payRegister in fileNames)
                 {
-                    var extractedPayrolls = await _payroll.Import(payRegister, (ImportProcessChoices)_payrollCode.Process, cancellationToken);
+                    OnProgressStart();
+                    OnMessageSent($"Importing payrolls from '{payRegister}'");
+                    var extractedPayrolls = await m_Payrolls.Import(payRegister, (ImportProcessChoices)payrollCode.Process, cancellationToken);
 
+                    OnProgressStart(extractedPayrolls.Count);
                     foreach (var payroll in extractedPayrolls)
                     {
-                        await _payroll.Save(payroll, _payrollCode.PayrollCodeId, _company.CompanyId, cancellationToken);
+                        await m_Payrolls.Save(payroll, payrollCode.PayrollCodeId, company.CompanyId, cancellationToken);
+                        OnProgressIncrement();
                     }
                 }
 
-                //var noEEPayrolls = _payroll.ListNoEEPayrolls();
-                await Listing(cancellationToken);
+                //await Listing(cancellationToken);
+
+                OnTaskCompleted();
             }
-            catch (PayrollRegisterHeaderNotFoundException)
+            catch (TaskCanceledException) { OnTaskException(); }
+            catch (PayrollRegisterHeaderNotFoundException ex)
             {
-                throw;
+                OnTaskException();
+                s_Message.ShowError($"{ex.Header} not found in {ex.PayrollRegisterFilePath}.");
             }
-            catch
+            catch (Exception ex)
             {
-                throw;
+                OnTaskException();
+                s_Message.ShowError(ex.Message);
             }
+        }
+        #endregion
+
+        #region export macro
+        private void ExportMacro()
+        {
+            var cts = GetCancellationTokenSource();
+            var dialogParameters = CreateDialogParameters(this, cts);
+            s_Dialog.Show(DialogNames.CancelDialog, dialogParameters, (_) => { });
+            _ = ExportMacro(cts.Token);
+        }
+
+        private async Task ExportMacro(CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                if (Main == null) throw new Exception(ErrorMessages.MainIsNull);
+                if (Main.Company == null) throw new Exception(ErrorMessages.CompanyIsNull);
+                if (Main.PayrollCode == null) throw new Exception(ErrorMessages.PayrollCodeIsNull);
+
+                var cutoff = new Cutoff(Main.CutoffId);
+                var company = Main.Company;
+
+                OnMessageSent("Retrieving payrolls...");
+                var payrolls = await m_Payrolls.GetMonthlyPayrolls(cutoff.CutoffDate.Month, company.CompanyId, cancellationToken);
+                
+                // io bound, refactor later
+                m_Payrolls.ExportMacro(payrolls, cutoff, company.CompanyId);
+                m_Payrolls.ExportMacroB(payrolls, cutoff, company.CompanyId);
+
+                OnTaskCompleted();
+            }
+            catch (TaskCanceledException) { OnTaskException(); }
+            catch (Exception ex)
+            {
+                OnTaskException();
+                s_Message.ShowError(ex.Message);
+            }
+        }
+        #endregion
+
+        private void LoadValues()
+        {
+            var cts = GetCancellationTokenSource();
+            var dialogParameters = CreateDialogParameters(this, cts);
+            s_Dialog.Show(DialogNames.CancelDialog, dialogParameters, (_) => { });
+            _ = Listing(cts.Token);
         }
 
         private async Task Listing(CancellationToken cancellationToken = default)
         {
             try
             {
-                var payrolls = (await _payroll.Get(_cutoff.CutoffId, cancellationToken))
-                    .SetCompanyId(_company.CompanyId)
-                    .SetPayrollCode(_payrollCode.PayrollCodeId);
+                if (Main == null) throw new Exception(ErrorMessages.MainIsNull);
+                if (Main.Company == null) throw new Exception(ErrorMessages.CompanyIsNull);
+                if (Main.PayrollCode == null) throw new Exception(ErrorMessages.PayrollCodeIsNull);
+
+                var cutoffId = Main.CutoffId;
+                var company = Main.Company;
+                var payrollCode = Main.PayrollCode;
+
+                OnMessageSent("Retrieving payrolls...");
+                var payrolls = (await m_Payrolls.Get(cutoffId, cancellationToken))
+                    .SetCompanyId(company.CompanyId)
+                    .SetPayrollCode(payrollCode.PayrollCodeId);
 
                 Payrolls = payrolls;
                 ChkCount = payrolls.Count(t => t.EE.Bank == BankChoices.CHK);
@@ -271,17 +378,16 @@ namespace Pms.Payrolls.Module.ViewModels
 
                 GrandCount = payrolls.Count();
                 GrandTotal = payrolls.Sum(p => p.NetPay);
+
+                OnTaskCompleted();
             }
-            catch
+            catch (TaskCanceledException) { OnTaskException(); }
+            catch (Exception ex)
             {
-                throw;
+                OnTaskException();
+                s_Message.ShowError(ex.Message);
             }
         }
-
-
-        #region IRegionMemberLifetime
-        public bool KeepAlive => true;
-        #endregion
 
         #region INavigationAware
         public bool IsNavigationTarget(NavigationContext navigationContext)
@@ -291,39 +397,28 @@ namespace Pms.Payrolls.Module.ViewModels
 
         public void OnNavigatedFrom(NavigationContext navigationContext)
         {
-            if (_main != null)
+            if (Main != null)
             {
-                _main.PropertyChanged -= Main_PropertyChanged;
+                Main.PropertyChanged -= Main_PropertyChanged;
             }
         }
 
         public void OnNavigatedTo(NavigationContext navigationContext)
         {
-            _main = navigationContext.Parameters.GetValue<IPayrollsMain?>(PmsConstants.Main);
-            if (_main != null)
+            Main = navigationContext.Parameters.GetValue<IPayrollsMain?>(PmsConstants.Main);
+
+            if (Main != null)
             {
-                _main.PropertyChanged += Main_PropertyChanged;
+                Main.PropertyChanged += Main_PropertyChanged;
             }
 
-            _ = LoadValues();
+            LoadValues();
         }
         #endregion
 
-        private async Task LoadValues(CancellationToken cancellationToken = default)
-        {
-            if (_main != null)
-            {
-                _cutoff = !string.IsNullOrEmpty(_main.CutoffId) ? new Cutoff(_main.CutoffId) : new Cutoff();
-                _payrollCode = _main.PayrollCode ?? new PayrollCode();
-                _company = _main.Company ?? new();
-
-                await Listing(cancellationToken);
-            }
-        }
-
         private void Main_PropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
-            _ = LoadValues();
+            LoadValues();
         }
     }
 }

@@ -26,7 +26,7 @@ namespace Pms.Payrolls.ServiceLayer.Files
     {
         public static string GetValue(this ICell? cell, HSSFFormulaEvaluator? formulator = null)
         {
-            if (cell is null) return string.Empty;
+            if (cell == null) return string.Empty;
 
             switch (cell.CellType)
             {

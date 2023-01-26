@@ -10,28 +10,27 @@ namespace Pms.Payrolls.ServiceLayer.Files.Exports.Governments.Macros
 {
     public class BenefitsMacroExporter
     {
-        private readonly string ExportDirectory;
-        private readonly string ExportFilename;
-        private readonly string TemplateFilename;
-
+        private readonly string _exportDirectory;
+        private readonly string _exportFilename;
+        private readonly string _templateFilename;
 
         public BenefitsMacroExporter(Cutoff cutoff, string companyId)
         {
             string startupPath = AppDomain.CurrentDomain.BaseDirectory;
-            ExportDirectory = $@"{startupPath}\EXPORT\{cutoff.CutoffId}\GOVERNMENT\MACRO";
-            ExportFilename = $@"{ExportDirectory}\{companyId}_{cutoff.CutoffDate:yyyyMMdd}-MACRO.xls";
-            TemplateFilename = $@"{startupPath}\TEMPLATES\MACRO.xls";
+            _exportDirectory = $@"{startupPath}\EXPORT\{cutoff.CutoffId}\GOVERNMENT\MACRO";
+            _exportFilename = $@"{_exportDirectory}\{companyId}_{cutoff.CutoffDate:yyyyMMdd}-MACRO.xls";
+            _templateFilename = $@"{startupPath}\TEMPLATES\MACRO.xls";
 
-            Directory.CreateDirectory(ExportDirectory);
+            Directory.CreateDirectory(_exportDirectory);
         }
 
 
         public void StartExport(IEnumerable<Payroll> payrolls)
         {
-            File.Copy(TemplateFilename, ExportFilename, true);
+            File.Copy(_templateFilename, _exportFilename, true);
 
             IWorkbook nWorkbook;
-            using (var nTemplateFile = new FileStream(ExportFilename, FileMode.Open, FileAccess.ReadWrite))
+            using (var nTemplateFile = new FileStream(_exportFilename, FileMode.Open, FileAccess.ReadWrite))
                 nWorkbook = new HSSFWorkbook(nTemplateFile);
 
 
@@ -59,7 +58,7 @@ namespace Pms.Payrolls.ServiceLayer.Files.Exports.Governments.Macros
 
 
 
-            using (var nReportFile = new FileStream(ExportFilename, FileMode.Open, FileAccess.Write))
+            using (var nReportFile = new FileStream(_exportFilename, FileMode.Open, FileAccess.Write))
                 nWorkbook.Write(nReportFile, false);
         }
 

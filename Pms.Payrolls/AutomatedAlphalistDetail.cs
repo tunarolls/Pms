@@ -27,9 +27,9 @@ namespace Pms.Payrolls
 
         private int FactorUsed { get; set; }
 
-        private double PresentTaxableSalary;
+        private double PresentTaxableSalary = 0;
 
-        private double PresentTaxable13thMonth;
+        private double PresentTaxable13thMonth = 0;
 
         #region PerDay-specific Properties
         private double ActualHourlyRate = 0;

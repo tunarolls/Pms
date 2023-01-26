@@ -33,7 +33,7 @@ namespace Pms.Payrolls.ServiceLayer.Files.Import.PayrollRegister
 
         private DateTime CutoffDate { get; set; }
 
-        private string PayrollRegisterFilePath { get; set; }
+        private string PayrollRegisterFilePath { get; set; } = string.Empty;
 
 
         public void ValidatePayRegisterFile()
@@ -138,11 +138,11 @@ namespace Pms.Payrolls.ServiceLayer.Files.Import.PayrollRegister
             {
                 var fullname_raw = reader.GetString(nameIdx).Trim(')').Split('(');
                 if (fullname_raw.Length < 2)
-                    return null;
+                    return Array.Empty<string>();
 
                 return new[] { fullname_raw[0].Trim(), fullname_raw[1].Trim() };
             }
-            return null;
+            return Array.Empty<string>();
         }
 
     }

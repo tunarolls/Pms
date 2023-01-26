@@ -77,7 +77,7 @@ namespace Pms.Payrolls.ServiceLayer.Files.Export.BankReport
         {
             filename = Path.ChangeExtension(filename, "txt");
 
-            IWorkbook nWorkbook;
+            //IWorkbook nWorkbook;
             using (var writer = new StreamWriter(filename))
             {
                 WriteDTL(payrolls, writer);

@@ -12,103 +12,124 @@ namespace Pms.Payrolls.ServiceLayer.Files.Import.PayrollRegister
 {
     public class PayrollRegisterKSImport : IImportPayrollService
     {
-        private int NameIndex;
+        private int _employeePagibigIndex;
+        private int _employeePhilHealthIndex;
+        private int _employeeSSSIndex;
+        private int _employerPagibigIndex;
+        private int _employerSSSIndex;
+        private int _grossPayIndex;
+        private int _nameIndex;
 
-        private int RegularHoursIndex;
+        private int _netpayIndex;
+        private int _nightDifferentialIndex;
+        //private int Adjust2Index;
+        private string _payrollRegisterFilePath = string.Empty;
 
-        private int GrossPayIndex;
+        private int _regularHoursIndex;
+        private int _withholdingTaxIndex;
 
-        private int NightDifferentialIndex;
-
-        private int EmployeePagibigIndex;
-        private int EmployerPagibigIndex;
-
-        private int EmployeeSSSIndex;
-        private int EmployerSSSIndex;
-
-        private int EmployeePhilHealthIndex;
-
-        private int WithholdingTaxIndex;
-
-        private int Adjust1Index;
-
-        private int Adjust2Index;
-
-        private int NetpayIndex;
-
-        private string PayrollRegisterFilePath;
-
+        //private int Adjust1Index;
         DateTime CutoffDate { get; set; }
-
-        public void ValidatePayRegisterFile()
-        {
-            if (CutoffDate == default)
-                throw new PayrollRegisterHeaderNotFoundException("Cutoff Date", PayrollRegisterFilePath);
-        }
-
 
         public IEnumerable<Payroll> StartImport(string payrollRegisterFilePath)
         {
-            PayrollRegisterFilePath = payrollRegisterFilePath;
+            var payrolls = new List<Payroll>();
+            using var stream = File.Open(payrollRegisterFilePath, FileMode.Open, FileAccess.Read);
+            using var reader = ExcelReaderFactory.CreateReader(stream);
 
+            _payrollRegisterFilePath = payrollRegisterFilePath;
             CutoffDate = default;
-            List<Payroll> payrolls = new();
-            using (var stream = File.Open(payrollRegisterFilePath, FileMode.Open, FileAccess.Read))
+
+            System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
+
+            FindCutoffDate(reader);
+            ValidatePayRegisterFile();
+            SetHeaderIndexes();
+
+            var cutoff = new Cutoff(CutoffDate);
+
+            do
             {
-                System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
-                using (var reader = ExcelReaderFactory.CreateReader(stream))
+                string eeId = string.Empty;
+                var nameArgs = ParseEmployeeDetail(reader, _nameIndex);
+
+                if (nameArgs.Length == 0) continue;
+
+                eeId = nameArgs[1].Trim();
+
+                var newPayroll = new Payroll
                 {
-                    FindCutoffDate(reader);
+                    EEId = eeId,
+                    CutoffId = cutoff.CutoffId,
+                    YearCovered = cutoff.YearCovered,
+                    RegHours = reader.GetDouble(_regularHoursIndex),
+                    RegularPay = reader.GetDouble(_grossPayIndex),
+                    GrossPay = reader.GetDouble(_grossPayIndex),
+                    NightDifferential = reader.GetDouble(_nightDifferentialIndex),
+                    EmployeePagibig = reader.GetDouble(_employeePagibigIndex),
+                    EmployerPagibig = reader.GetDouble(_employerPagibigIndex),
+                    EmployeeSSS = reader.GetDouble(_employeeSSSIndex),
+                    EmployerSSS = reader.GetDouble(_employerSSSIndex),
+                    EmployeePhilHealth = reader.GetDouble(_employeePhilHealthIndex),
+                    WithholdingTax = reader.GetDouble(_withholdingTaxIndex),
+                    NetPay = reader.GetDouble(_netpayIndex)
+                };
 
-                    ValidatePayRegisterFile();
+                newPayroll.PayrollId = Payroll.GenerateId(newPayroll);
 
-                    SetHeaderIndexes();
+                payrolls.Add(newPayroll);
 
-                    Cutoff cutoff = new Cutoff(CutoffDate);
-                    do
-                    {
-                        string eeId = "";
-                        var name_args = ParseEmployeeDetail(reader, NameIndex);
-                        if (name_args is null)
-                            continue;
-                        eeId = name_args[1].Trim();
-
-                        var newPayroll = new Payroll()
-                        {
-                            EEId = eeId,
-                            CutoffId = cutoff.CutoffId,
-                            YearCovered = cutoff.YearCovered,
-                        };
-
-                        newPayroll.RegHours = reader.GetDouble(RegularHoursIndex);
-
-                        newPayroll.RegularPay = reader.GetDouble(GrossPayIndex);
-                        newPayroll.GrossPay = reader.GetDouble(GrossPayIndex);
-
-                        newPayroll.NightDifferential = reader.GetDouble(NightDifferentialIndex);
-
-                        newPayroll.EmployeePagibig = reader.GetDouble(EmployeePagibigIndex);
-                        newPayroll.EmployerPagibig = reader.GetDouble(EmployerPagibigIndex);
-
-                        newPayroll.EmployeeSSS = reader.GetDouble(EmployeeSSSIndex);
-                        newPayroll.EmployerSSS = reader.GetDouble(EmployerSSSIndex);
-
-                        newPayroll.EmployeePhilHealth = reader.GetDouble(EmployeePhilHealthIndex);
-
-                        newPayroll.WithholdingTax = reader.GetDouble(WithholdingTaxIndex);
-
-                        newPayroll.NetPay = reader.GetDouble(NetpayIndex);
-                        newPayroll.PayrollId = Payroll.GenerateId(newPayroll);
-
-                        payrolls.Add(newPayroll);
-
-                    } while (reader.Read());
-                }
-            }
+            } while (reader.Read());
 
             return payrolls;
         }
 
+        public void ValidatePayRegisterFile()
+        {
+            if (CutoffDate == default)
+            {
+                throw new PayrollRegisterHeaderNotFoundException("Cutoff Date", _payrollRegisterFilePath);
+            }
+        }
+
+        private static string[] ParseEmployeeDetail(IExcelDataReader reader, int nameIdx)
+        {
+            if (reader.GetValue(nameIdx) != null)
+            {
+                var fullnameRaw = reader.GetString(nameIdx).Trim(')').Split('(');
+
+                if (fullnameRaw.Length < 2)
+                {
+                    return Array.Empty<string>();
+                }
+
+                return new[] { fullnameRaw[0].Trim(), fullnameRaw[1].Trim() };
+            }
+
+            return Array.Empty<string>();
+        }
+
+        private void CheckCutoffDate(IExcelDataReader reader)
+        {
+            if (CutoffDate == default)
+            {
+                string payrollDateRaw = string.Empty;
+
+                if (reader.GetValue(0) != null)
+                {
+                    payrollDateRaw = reader.GetString(0).Split(':')[1].Trim();
+                }
+                else if (reader.GetValue(1) != null)
+                {
+                    payrollDateRaw = reader.GetString(1).Trim().Replace("*", "").Trim();
+                }
+
+                if (payrollDateRaw != string.Empty)
+                {
+                    CutoffDate = DateTime.ParseExact(payrollDateRaw, "dd MMMM yyyy", CultureInfo.InvariantCulture);
+                }
+            }
+        }
 
         private void FindCutoffDate(IExcelDataReader reader)
         {
@@ -120,32 +141,19 @@ namespace Pms.Payrolls.ServiceLayer.Files.Import.PayrollRegister
             CheckCutoffDate(reader);
             reader.Read();
         }
-        private void CheckCutoffDate(IExcelDataReader reader)
-        {
-            if (CutoffDate == default)
-            {
-                string payrollDateRaw = "";
-                if (reader.GetValue(0) is not null)
-                    payrollDateRaw = reader.GetString(0).Split(':')[1].Trim();
-                else if (reader.GetValue(1) is not null)
-                    payrollDateRaw = reader.GetString(1).Trim().Replace("*", "").Trim();
 
-                if (payrollDateRaw != "")
-                    CutoffDate = DateTime.ParseExact(payrollDateRaw, "dd MMMM yyyy", CultureInfo.InvariantCulture);
-            }
-        }
         private void SetHeaderIndexes()
         {
-            NameIndex = 1;
-            RegularHoursIndex = 2;
-            GrossPayIndex = 5;
-            NightDifferentialIndex = 6;
-            EmployeePagibigIndex = 7;
-            EmployerPagibigIndex = 8;
-            EmployeeSSSIndex = 9;
-            EmployerSSSIndex = 10;
-            EmployeePhilHealthIndex = 11;
-            WithholdingTaxIndex = 12;
+            _nameIndex = 1;
+            _regularHoursIndex = 2;
+            _grossPayIndex = 5;
+            _nightDifferentialIndex = 6;
+            _employeePagibigIndex = 7;
+            _employerPagibigIndex = 8;
+            _employeeSSSIndex = 9;
+            _employerSSSIndex = 10;
+            _employeePhilHealthIndex = 11;
+            _withholdingTaxIndex = 12;
 
 
             //if (CutoffDate.Day == 15) // there is no adjust 1 column on every 15th cutoff
@@ -154,20 +162,7 @@ namespace Pms.Payrolls.ServiceLayer.Files.Import.PayrollRegister
             //    NetpayIndex = 14;
             //}
             //else
-            NetpayIndex = 15;
-        }
-
-        private static string[] ParseEmployeeDetail(IExcelDataReader reader, int nameIdx)
-        {
-            if (reader.GetValue(nameIdx) is not null)
-            {
-                var fullname_raw = reader.GetString(nameIdx).Trim(')').Split('(');
-                if (fullname_raw.Length < 2)
-                    return null;
-
-                return new[] { fullname_raw[0].Trim(), fullname_raw[1].Trim() };
-            }
-            return null;
+            _netpayIndex = 15;
         }
     }
 }

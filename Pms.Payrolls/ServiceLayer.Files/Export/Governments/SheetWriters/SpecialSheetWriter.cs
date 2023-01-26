@@ -11,7 +11,6 @@ namespace Pms.Payrolls.ServiceLayer.Files.Exports.Governments
 {
     public class SpecialSheetWriter : ISheetWriter
     {
-        public IRowWriter RowWriter;
         private readonly Dictionary<string, Dictionary<string, List<Payroll>>> PayrollsByPayrollAndJobCode;
 
         public SpecialSheetWriter(IEnumerable<Payroll> payrolls, IRowWriter rowWriter)
@@ -19,18 +18,20 @@ namespace Pms.Payrolls.ServiceLayer.Files.Exports.Governments
             PayrollsByPayrollAndJobCode = new();
             RowWriter = rowWriter;
 
-            initPayrolls(payrolls);
+            InitPayrolls(payrolls);
         }
-
 
         public SpecialSheetWriter(IEnumerable<Payroll> payrolls )
         {
             PayrollsByPayrollAndJobCode = new();
-            initPayrolls(payrolls);
+
+            InitPayrolls(payrolls);
         }
 
+        public IRowWriter? RowWriter { get; set; }
 
-        private void initPayrolls(IEnumerable<Payroll> payrolls)
+
+        private void InitPayrolls(IEnumerable<Payroll> payrolls)
         {
             List<List<Payroll>> payrollCodePayrolls = payrolls
                 .GroupBy(p => p.EE.PayrollCode)
@@ -54,16 +55,6 @@ namespace Pms.Payrolls.ServiceLayer.Files.Exports.Governments
             }
         }
 
-
-
-
-
-
-
-
-
-
-
         public void Write(ISheet sheet, int startIndex = 0)
         {
             int index = startIndex;
@@ -77,39 +68,40 @@ namespace Pms.Payrolls.ServiceLayer.Files.Exports.Governments
                 PayrollRegister payrollRegisterByPayrollCode = new(payrollCode);
 
                 int sequence = 0;
-                sheet.GetOrCreateRow(append(ref index)).GetOrCreateCell(0).SetCellValue(payrollCode);
+                sheet.GetOrCreateRow(Append(ref index)).GetOrCreateCell(0).SetCellValue(payrollCode);
                 foreach (string jobCode in PayrollsByPayrollAndJobCode[payrollCode].Keys)
                 {
-                    append(ref index);
-                    sheet.GetOrCreateRow(append(ref index)).GetOrCreateCell(0).SetCellValue($"*** Status Code = {jobCode}");
-                    append(ref index);
+                    Append(ref index);
+                    sheet.GetOrCreateRow(Append(ref index)).GetOrCreateCell(0).SetCellValue($"*** Status Code = {jobCode}");
+                    Append(ref index);
 
                     foreach (Payroll payroll in PayrollsByPayrollAndJobCode[payrollCode][jobCode])
-                        RowWriter.Write(sheet.GetOrCreateRow(append(ref index)), payroll, append(ref sequence));
+                    {
+                        RowWriter?.Write(sheet.GetOrCreateRow(Append(ref index)), payroll, Append(ref sequence));
+                    }
 
-                    append(ref index);
-                    append(ref index);
+                    Append(ref index);
+                    Append(ref index);
 
                     PayrollRegister payrollRegisterByJobCode = new(jobCode, PayrollsByPayrollAndJobCode[payrollCode][jobCode]);
-                    RowWriter.WriteTotal(sheet.GetOrCreateRow(append(ref index)), payrollRegisterByJobCode);
+                    RowWriter?.WriteTotal(sheet.GetOrCreateRow(Append(ref index)), payrollRegisterByJobCode);
                     payrollRegisterByPayrollCode.Merge(payrollRegisterByJobCode);
 
                     grandTotaRecords++;
                 }
 
-                append(ref index);
-                RowWriter.WriteTotal(sheet.GetOrCreateRow(append(ref index)), payrollRegisterByPayrollCode);
+                Append(ref index);
+                RowWriter?.WriteTotal(sheet.GetOrCreateRow(Append(ref index)), payrollRegisterByPayrollCode);
 
                 grandPayrollRegister.Merge(payrollRegisterByPayrollCode);
                 grandTotal += sequence;
             }
 
-            append(ref index);
-            RowWriter.WriteTotal(sheet.GetOrCreateRow(append(ref index)), grandPayrollRegister);
+            Append(ref index);
+            RowWriter?.WriteTotal(sheet.GetOrCreateRow(Append(ref index)), grandPayrollRegister);
         }
 
-
-        private static int append(ref int index)
+        private static int Append(ref int index)
         {
             index++;
             return index;

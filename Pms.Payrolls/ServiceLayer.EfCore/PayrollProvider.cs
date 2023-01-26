@@ -32,7 +32,6 @@ namespace Pms.Payrolls.ServiceLayer.EfCore
             return await context.Payrolls.Include(t => t.EE).ToListAsync(cancellationToken);
         }
 
-
         public IEnumerable<Payroll> GetPayrolls(string cutoffId)
         {
             using PayrollDbContext context = _factory.CreateDbContext();
@@ -63,7 +62,8 @@ namespace Pms.Payrolls.ServiceLayer.EfCore
         public async Task<ICollection<Payroll>> GetPayrolls(string cutoffId, string payrollCode, CancellationToken cancellationToken = default)
         {
             using var context = _factory.CreateDbContext();
-            return await context.Payrolls.Include(t => t.EE)
+            return await context.Payrolls
+                .Include(t => t.EE)
                 .Where(t => t.CutoffId == cutoffId && t.PayrollCode == payrollCode)
                 .ToListAsync(cancellationToken);
         }
@@ -84,7 +84,8 @@ namespace Pms.Payrolls.ServiceLayer.EfCore
         public async Task<ICollection<Payroll>> GetPayrolls(int yearsCovered, string companyId, CancellationToken cancellationToken = default)
         {
             using PayrollDbContext context = _factory.CreateDbContext();
-            return await context.Payrolls.Include(t => t.EE)
+            return await context.Payrolls
+                .Include(t => t.EE)
                 .Where(t => t.YearCovered == yearsCovered || t.Cutoff.CutoffDate.Year == yearsCovered)
                 .Where(t => t.CompanyId == companyId)
                 .ToListAsync(cancellationToken);

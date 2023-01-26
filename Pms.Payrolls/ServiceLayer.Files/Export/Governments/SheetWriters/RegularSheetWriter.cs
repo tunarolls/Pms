@@ -8,33 +8,50 @@ namespace Pms.Payrolls.ServiceLayer.Files.Exports.Governments
 {
     public class RegularSheetWriter : ISheetWriter
     {
-        public IRowWriter RowWriter;
-        readonly IEnumerable<Payroll> Payrolls;
+        readonly IEnumerable<Payroll> _payrolls;
 
         public RegularSheetWriter(IEnumerable<Payroll> payrolls, IRowWriter rowWriter)
         {
             RowWriter = rowWriter;
-            Payrolls = payrolls.OrderBy(p => p.EE.Fullname);
+            _payrolls = payrolls.OrderBy(p => p.EE.Fullname);
         }
 
-        public RegularSheetWriter(IEnumerable<Payroll> payrolls) =>
-            Payrolls = payrolls.OrderBy(p => p.EE.Fullname);
+        public RegularSheetWriter(IEnumerable<Payroll> payrolls)
+        {
+            _payrolls = payrolls.OrderBy(p => p.EE.Fullname);
+        }
 
-
+        public IRowWriter? RowWriter { get; set; }
 
         public void Write(ISheet sheet, int startIndex = 1)
         {
             int index = startIndex;
             int sequence = 0;
-            foreach (Payroll payroll in Payrolls)
-                RowWriter.Write(sheet.GetOrCreateRow(append(ref index)), payroll, append(ref sequence));
 
-            PayrollRegister payrollRegister = new("GRAND", Payrolls);
-            RowWriter.WriteTotal(sheet.GetOrCreateRow(append(ref index)), payrollRegister);
+            foreach (var payroll in _payrolls)
+            {
+                RowWriter?.Write(sheet.GetOrCreateRow(Append(ref index)), payroll, Append(ref sequence));
+            }
+
+            var payrollRegister = new PayrollRegister("GRAND", _payrolls);
+            RowWriter?.WriteTotal(sheet.GetOrCreateRow(Append(ref index)), payrollRegister);
         }
 
+        //public static void Write(IEnumerable<Payroll> payrolls, IRowWriter rowWriter, ISheet sheet, int startIndex = 1)
+        //{
+        //    int index = startIndex;
+        //    int sequence = 0;
 
-        private static int append(ref int index)
+        //    foreach (var payroll in payrolls)
+        //    {
+        //        rowWriter.Write(sheet.GetOrCreateRow(Append(ref index)), payroll, Append(ref sequence));
+        //    }
+
+        //    var payrollRegister = new PayrollRegister("GRAND", payrolls);
+        //    rowWriter.WriteTotal(sheet.GetOrCreateRow(Append(ref index)), payrollRegister);
+        //}
+
+        private int Append(ref int index)
         {
             index++;
             return index;

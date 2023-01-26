@@ -21,9 +21,14 @@ namespace Pms.Payrolls.ServiceLayer.Files.Import.PayrollRegister
         public IEnumerable<Payroll> StartImport(string payRegisterFilePath)
         {
             if (_process == ImportProcessChoices.PD)
+            {
                 return new PayrollRegisterPDImport().StartImport(payRegisterFilePath);
+            }
             else if (_process == ImportProcessChoices.KS)
+            {
                 return new PayrollRegisterKSImport().StartImport(payRegisterFilePath);
+            }
+
             throw new Exception("Please Select a Process type.");
         }
 

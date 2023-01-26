@@ -8,10 +8,11 @@ namespace Pms.Payrolls.Exceptions
 {
     public class BankReportTemplateNotFoundException : Exception
     {
-        public string TemplateFile { get; set; }
         public BankReportTemplateNotFoundException(string templateFile)
         {
             TemplateFile = templateFile;
         }
+
+        public string TemplateFile { get; set; }
     }
 }

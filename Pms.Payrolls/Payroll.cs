@@ -8,18 +8,18 @@ namespace Pms.Payrolls
 {
     public class Payroll
     {
-        public string PayrollId { get; set; }
+        public string PayrollId { get; set; } = string.Empty;
 
-        public string EEId { get; set; }
-        public virtual EmployeeView EE { get; set; }
+        public string EEId { get; set; } = string.Empty;
+        public virtual EmployeeView EE { get; set; } = new();
 
-        public string CutoffId { get; set; }
+        public string CutoffId { get; set; } = string.Empty;
         public Cutoff Cutoff { get => new Cutoff(CutoffId); }
 
-        public string CompanyId { get; set; }
+        public string CompanyId { get; set; } = string.Empty;
         //public Company Company { get; set; }
 
-        public string PayrollCode { get; set; }
+        public string PayrollCode { get; set; } = string.Empty;
 
         public double RegHours { get; set; }
 

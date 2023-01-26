@@ -6,10 +6,14 @@ using Pms.Common;
 using Pms.Common.Views;
 using Pms.Masterlists.Module;
 using Pms.Masterlists.Persistence;
+using Pms.Masterlists.ServiceLayer.EfCore;
 using Pms.Masterlists.ServiceLayer.Hrms.Adapter;
+using Pms.Payrolls.App.ViewModels;
 using Pms.Payrolls.App.Views;
 using Pms.Payrolls.Module;
 using Pms.Payrolls.Persistence;
+using Pms.Payrolls.ServiceLayer.EfCore;
+using Pms.Payrolls.Services;
 using Pms.Timesheets;
 using Pms.Timesheets.Module;
 using Pms.Timesheets.Persistence;
@@ -51,16 +55,25 @@ namespace Pms.Payrolls.App
             containerRegistry.RegisterInstance<IDbContextFactory<PayrollDbContext>>(new PayrollDbContextFactory(connectionString));
             containerRegistry.RegisterInstance<IDbContextFactory<EmployeeDbContext>>(new EmployeeDbContextFactory(connectionString));
 
-            containerRegistry.Register<Timesheets.Module.Timesheets>();
             containerRegistry.Register<IDownloadContentProvider, DownloadContentProvider>();
             containerRegistry.Register<IProvideTimesheetService, TimesheetProvider>();
             containerRegistry.Register<TimesheetManager>();
+            containerRegistry.Register<Timesheets.Module.Timesheets>();
 
+            containerRegistry.Register<IManagePayrollService, PayrollManager>();
+            containerRegistry.Register<IProvidePayrollService, PayrollProvider>();
             containerRegistry.Register<Module.Payrolls>();
+
+            containerRegistry.Register<CompanyManager>();
+            containerRegistry.Register<PayrollManager>();
             containerRegistry.Register<PayrollCodes>();
             containerRegistry.Register<Companies>();
+
             containerRegistry.Register<IMessageBoxService, MessageBoxService>();
+            containerRegistry.Register<IFileDialogService, FileDialogService>();
             containerRegistry.RegisterDialog<CancelDialogView>(DialogNames.CancelDialog);
+
+            //containerRegistry.Register<MainWindowViewModel, DummyMainViewModel>();
         }
 
         protected override void ConfigureModuleCatalog(IModuleCatalog moduleCatalog)

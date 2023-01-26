@@ -20,6 +20,25 @@ namespace Pms.Payrolls.App.ViewModels
     {
     }
 
+    public class DummyMainViewModel : MainWindowViewModel
+    {
+        public DummyMainViewModel(IRegionManager regionManager,
+            IDialogService dialog,
+            IMessageBoxService message,
+            Timesheets.Module.Timesheets timesheets,
+            Companies companies,
+            PayrollCodes payrollCodes,
+            Module.Payrolls payrolls)
+            : base(regionManager, dialog, message, timesheets, companies, payrollCodes, payrolls)
+        {
+        }
+
+        protected override void Listing()
+        {
+            // do nothing
+        }
+    }
+
     public class MainWindowViewModel : CancellableBase, IMain
     {
         #region properties
@@ -47,24 +66,27 @@ namespace Pms.Payrolls.App.ViewModels
 
         private readonly IRegionManager _regionManager;
         private readonly Timesheets.Module.Timesheets m_Timesheets;
-        private readonly Payrolls.Module.Payrolls m_Payrolls;
-        private readonly Masterlists.Module.Companies m_Companies;
-        private readonly Masterlists.Module.PayrollCodes m_PayrollCodes;
+        private readonly Module.Payrolls m_Payrolls;
+        private readonly Companies m_Companies;
+        private readonly PayrollCodes m_PayrollCodes;
         private readonly IDialogService s_Dialog;
         private readonly IMessageBoxService s_Message;
 
         public MainWindowViewModel(IRegionManager regionManager,
             IDialogService dialog,
             IMessageBoxService message,
-            Pms.Timesheets.Module.Timesheets timesheets)
+            Pms.Timesheets.Module.Timesheets timesheets,
+            Pms.Masterlists.Module.Companies companies,
+            Pms.Masterlists.Module.PayrollCodes payrollCodes,
+            Pms.Payrolls.Module.Payrolls payrolls)
         {
             s_Dialog = dialog;
             s_Message = message;
             _regionManager = regionManager;
             m_Timesheets = timesheets;
-            //m_PayrollCodes = payrollCodes;
-            //m_Payrolls = payrolls;
-            //m_Companies = companies;
+            m_PayrollCodes = payrollCodes;
+            m_Payrolls = payrolls;
+            m_Companies = companies;
 
             AlphalistCommand = new DelegateCommand(Alphalist);
             BillingCommand = new DelegateCommand(Billing);
@@ -152,7 +174,7 @@ namespace Pms.Payrolls.App.ViewModels
         #endregion
 
         #region Load filter
-        private void Listing()
+        protected virtual void Listing()
         {
             var cts = GetCancellationTokenSource();
             var dialogParameters = CreateDialogParameters(this, cts);
@@ -169,18 +191,18 @@ namespace Pms.Payrolls.App.ViewModels
 
                 OnMessageSent("Retrieving cutoff ids...");
                 var timesheetCutoffIds = await m_Timesheets.ListCutoffIds(cancellationToken);
-                //var payrollCutoffIds = await m_Payrolls.ListCutoffIds(cancellationToken);
-                //var cutoffIds = timesheetCutoffIds.Union(payrollCutoffIds).OrderByDescending(t => t).ToArray();
+                var payrollCutoffIds = await m_Payrolls.ListCutoffIds(cancellationToken);
+                var cutoffIds = timesheetCutoffIds.Union(payrollCutoffIds).OrderByDescending(t => t).ToArray();
 
                 OnMessageSent("Retrieving payroll codes...");
-                //var payrollCodes = await m_PayrollCodes.ListPayrollCodes(cancellationToken);
+                var payrollCodes = await m_PayrollCodes.ListPayrollCodes(cancellationToken);
 
                 OnMessageSent("Retrieving companies...");
-                //var companies = await m_Companies.ListCompanies(cancellationToken);
+                var companies = await m_Companies.ListCompanies(cancellationToken);
 
-                //Companies = companies;
-                //PayrollCodes = payrollCodes;
-                //CutoffIds = cutoffIds;
+                Companies = companies;
+                PayrollCodes = payrollCodes;
+                CutoffIds = cutoffIds;
 
                 OnTaskCompleted();
             }

@@ -15,7 +15,7 @@ namespace Pms.Masterlists.Persistence
         public EmployeeDbContextFactory()
         {
             //_connectionString = "server=localhost;database=payroll3Test_efdb;user=root;password=Soft1234;";
-            _connectionString = "server=192.168.56.101;database=payroll3Test_efdb;user=tim;password=tim@123";
+            _connectionString = "server=192.168.56.101;database=payroll3_efdb;user=tim;password=tim@123";
         }
 
         public EmployeeDbContext CreateDbContext()

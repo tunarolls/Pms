@@ -51,7 +51,7 @@ namespace Pms.Adjustments.Module.ViewModels
             //ListBillings.Execute(null);
         }
 
-        public IMain? Main { get; set; }
+        public IAdjustmentMain? Main { get; set; }
         public AdjustmentTypes AdjustmentName { get => _adjustmentName; set => SetProperty(ref _adjustmentName, value); }
         public IEnumerable<BillingRecord> BillingRecords { get => _billingRecords; set => SetProperty(ref _billingRecords, value); }
 

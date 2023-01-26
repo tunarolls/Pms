@@ -16,6 +16,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Pms.Common\Pms.Common.csproj" />
+    <ProjectReference Include="..\Pms.Masterlists\Pms.Masterlists.csproj" />
     <ProjectReference Include="..\Pms.Payrolls\Pms.Payrolls.csproj" />
   </ItemGroup>
 

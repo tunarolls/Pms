@@ -1,5 +1,5 @@
-﻿using Pms.Common;
-using Pms.Common.Enums;
+﻿using Pms.Common.Enums;
+using Pms.Masterlists.Entities;
 using Pms.Payrolls.ServiceLayer.EfCore;
 using Pms.Payrolls.ServiceLayer.Files.Export.Alphalist;
 using Pms.Payrolls.ServiceLayer.Files.Export.BankReport;

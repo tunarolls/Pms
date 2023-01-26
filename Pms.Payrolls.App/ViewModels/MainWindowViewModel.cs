@@ -1,23 +1,25 @@
-﻿using Pms.Common;
+﻿using Pms.Adjustments.Module;
+using Pms.Common;
 using Pms.Common.Enums;
+using Pms.Masterlists.Entities;
+using Pms.Masterlists.Module;
+using Pms.Payrolls.Module;
 using Pms.Timesheets.Module;
 using Prism.Commands;
-using Prism.Common;
-using Prism.Mvvm;
 using Prism.Regions;
 using Prism.Services.Dialogs;
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
-using System.Reflection;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows.Input;
 
 namespace Pms.Payrolls.App.ViewModels
 {
+    public interface IMain : ITimesheetsMain, IPayrollsMain, IMasterlistsMain, IAdjustmentMain
+    {
+    }
+
     public class MainWindowViewModel : CancellableBase, IMain
     {
         #region properties
@@ -63,7 +65,7 @@ namespace Pms.Payrolls.App.ViewModels
             //m_PayrollCodes = payrollCodes;
             //m_Payrolls = payrolls;
             //m_Companies = companies;
-            
+
             AlphalistCommand = new DelegateCommand(Alphalist);
             BillingCommand = new DelegateCommand(Billing);
             BillingRecordCommand = new DelegateCommand(BillingRecord);
@@ -167,18 +169,18 @@ namespace Pms.Payrolls.App.ViewModels
 
                 OnMessageSent("Retrieving cutoff ids...");
                 var timesheetCutoffIds = await m_Timesheets.ListCutoffIds(cancellationToken);
-                var payrollCutoffIds = await m_Payrolls.ListCutoffIds(cancellationToken);
-                var cutoffIds = timesheetCutoffIds.Union(payrollCutoffIds).OrderByDescending(t => t).ToArray();
+                //var payrollCutoffIds = await m_Payrolls.ListCutoffIds(cancellationToken);
+                //var cutoffIds = timesheetCutoffIds.Union(payrollCutoffIds).OrderByDescending(t => t).ToArray();
 
                 OnMessageSent("Retrieving payroll codes...");
-                var payrollCodes = await m_PayrollCodes.ListPayrollCodes(cancellationToken);
+                //var payrollCodes = await m_PayrollCodes.ListPayrollCodes(cancellationToken);
 
                 OnMessageSent("Retrieving companies...");
-                var companies = await m_Companies.ListCompanies(cancellationToken);
+                //var companies = await m_Companies.ListCompanies(cancellationToken);
 
-                Companies = companies;
-                PayrollCodes = payrollCodes;
-                CutoffIds = cutoffIds;
+                //Companies = companies;
+                //PayrollCodes = payrollCodes;
+                //CutoffIds = cutoffIds;
 
                 OnTaskCompleted();
             }

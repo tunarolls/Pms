@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Pms.Common;
+using Pms.Masterlists.Entities;
 
 namespace Pms.Masterlists.Persistence
 {

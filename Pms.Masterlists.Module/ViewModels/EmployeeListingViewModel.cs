@@ -33,7 +33,6 @@ namespace Pms.Masterlists.Module.ViewModels
         private readonly IDialogService s_Dialog;
         private readonly IFileDialogService s_FileDialog;
         private readonly IMessageBoxService s_Message;
-        private IMain? _main;
 
         public EmployeeListingViewModel(Employees employees,
             IMessageBoxService message,
@@ -72,7 +71,7 @@ namespace Pms.Masterlists.Module.ViewModels
         //private SiteChoices _site = SiteChoices.MANILA;
 
 
-        public IMain? Main { get; set; }
+        public IMasterlistsMain? Main { get; set; }
         public int ActiveEECount { get => _activeEECount; set => SetProperty(ref _activeEECount, value); }
 
         //public string CompanyId { get => _companyId; set => SetProperty(ref _companyId, value); }
@@ -373,7 +372,7 @@ namespace Pms.Masterlists.Module.ViewModels
         #region INavigationAware
         public void OnNavigatedTo(NavigationContext navigationContext)
         {
-            Main = navigationContext.Parameters.GetValue<IMain?>(PmsConstants.Main);
+            Main = navigationContext.Parameters.GetValue<IMasterlistsMain?>(PmsConstants.Main);
             if (Main != null)
             {
                 Main.PropertyChanged += Main_PropertyChanged;

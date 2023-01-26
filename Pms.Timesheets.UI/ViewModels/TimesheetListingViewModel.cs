@@ -11,6 +11,7 @@ using System.Windows;
 using Microsoft.Xaml.Behaviors.Media;
 using Pms.Common;
 using Pms.Common.Enums;
+using Pms.Masterlists.Entities;
 using Pms.Timesheets.ServiceLayer.EfCore;
 using Pms.Timesheets.ServiceLayer.Files;
 using Prism;
@@ -61,7 +62,7 @@ namespace Pms.Timesheets.Module.ViewModels
 
         private readonly IDialogService _dialog;
         private readonly Timesheets _timesheet;
-        private IMain? _main;
+        private ITimesheetsMain? _main;
         private Cutoff _cutoff = new();
         private SemaphoreSlim _busyLock = new(1);
         private PayrollCode _payrollCode = new PayrollCode();
@@ -449,7 +450,7 @@ namespace Pms.Timesheets.Module.ViewModels
         #region INavigationAware
         public void OnNavigatedTo(NavigationContext navigationContext)
         {
-            _main = navigationContext.Parameters.GetValue<IMain?>(PmsConstants.Main);
+            _main = navigationContext.Parameters.GetValue<ITimesheetsMain?>(PmsConstants.Main);
             if (_main != null)
             {
                 _main.PropertyChanged += Main_PropertyChanged;
@@ -483,7 +484,6 @@ namespace Pms.Timesheets.Module.ViewModels
             {
                 _cutoff = !string.IsNullOrEmpty(_main.CutoffId) ? new Cutoff(_main.CutoffId) : new Cutoff();
                 _payrollCode = _main.PayrollCode ?? new PayrollCode();
-                _site = _main.Site ?? SiteChoices.UNKNOWN;
 
                 await LoadTimesheets(cancellationToken);
             }

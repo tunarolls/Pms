@@ -4,6 +4,7 @@ using NPOI.OpenXmlFormats.Wordprocessing;
 using Org.BouncyCastle.Crypto;
 using Pms.Common;
 using Pms.Common.Enums;
+using Pms.Masterlists.Entities;
 using Pms.Payrolls.Exceptions;
 using Prism.Commands;
 using Prism.Mvvm;
@@ -58,7 +59,7 @@ namespace Pms.Payrolls.Module.ViewModels
         public double UnknownEETotal { get => _unknownEETotal; set => SetProperty(ref _unknownEETotal, value); }
         #endregion
 
-        private IMain? _main;
+        private IPayrollsMain? _main;
         private readonly Payrolls _payroll;
         private readonly IFileDialogService _fileDialog;
 
@@ -298,7 +299,7 @@ namespace Pms.Payrolls.Module.ViewModels
 
         public void OnNavigatedTo(NavigationContext navigationContext)
         {
-            _main = navigationContext.Parameters.GetValue<IMain?>(PmsConstants.Main);
+            _main = navigationContext.Parameters.GetValue<IPayrollsMain?>(PmsConstants.Main);
             if (_main != null)
             {
                 _main.PropertyChanged += Main_PropertyChanged;

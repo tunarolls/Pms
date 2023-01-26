@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using System.Threading;
 using Prism.Services.Dialogs;
 using Prism.Regions;
+using Pms.Masterlists.Entities;
 
 namespace Pms.Adjustments.Module.ViewModels
 {
@@ -65,7 +66,8 @@ namespace Pms.Adjustments.Module.ViewModels
         public AdjustmentTypes AdjustmentName { get => _adjustmentName; set => SetProperty(ref _adjustmentName, value); }
         public IEnumerable<AdjustmentTypes> AdjustmentNames { get; }
         public IEnumerable<Billing> Billings { get => _billings; set => SetProperty(ref _billings, value); }
-        public IMain? Main { get; set; }
+        //public IMain? Main { get; set; }
+        public IAdjustmentMain? Main { get; set; }
 
         #region commands
         public DelegateCommand<object?> AddToAdjustmentCommand { get; }
@@ -280,7 +282,8 @@ namespace Pms.Adjustments.Module.ViewModels
         #region INavigationAware
         public void OnNavigatedTo(NavigationContext navigationContext)
         {
-            Main = navigationContext.Parameters.GetValue<IMain?>(PmsConstants.Main);
+            Main = navigationContext.Parameters.GetValue<IAdjustmentMain?>(PmsConstants.Main);
+
             if (Main != null)
             {
                 Main.PropertyChanged += Main_PropertyChanged;

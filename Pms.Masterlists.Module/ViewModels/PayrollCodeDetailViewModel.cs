@@ -1,5 +1,6 @@
 ﻿using Pms.Common;
 using Pms.Common.Enums;
+using Pms.Masterlists.Entities;
 using Prism.Commands;
 using Prism.Services.Dialogs;
 using System;

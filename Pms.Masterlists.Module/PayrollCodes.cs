@@ -1,4 +1,5 @@
 ﻿using Pms.Common;
+using Pms.Masterlists.Entities;
 using Pms.Masterlists.ServiceLayer.EfCore;
 using System.Collections.Generic;
 using System.Linq;

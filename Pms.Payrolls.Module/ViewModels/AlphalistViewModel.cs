@@ -1,14 +1,13 @@
 ﻿using Pms.Common;
-using Pms.Payrolls;
 using Prism.Mvvm;
 using Prism.Regions;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Threading.Tasks;
 using System.Threading;
-using System.Windows.Input;
 using Prism.Commands;
 using Pms.Payrolls.ServiceLayer.Files.Import.Alphalist;
+using Pms.Masterlists.Entities;
 
 namespace Pms.Payrolls.Module.ViewModels
 {
@@ -17,7 +16,7 @@ namespace Pms.Payrolls.Module.ViewModels
         private Company _company = new();
         private Cutoff _cutoff = new();
         private string _payrollCodeId = string.Empty;
-        private IMain? _main;
+        private IPayrollsMain? _main;
         private readonly IFileDialogService _fileDialog;
         public AlphalistViewModel(IFileDialogService fileDialog)
         {
@@ -86,7 +85,7 @@ namespace Pms.Payrolls.Module.ViewModels
 
         public void OnNavigatedTo(NavigationContext navigationContext)
         {
-            _main = navigationContext.Parameters.GetValue<IMain?>(PmsConstants.Main);
+            _main = navigationContext.Parameters.GetValue<IPayrollsMain?>(PmsConstants.Main);
             if (_main != null)
             {
                 _main.PropertyChanged += Main_PropertyChanged;

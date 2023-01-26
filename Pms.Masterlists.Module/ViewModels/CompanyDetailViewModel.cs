@@ -1,4 +1,5 @@
 ﻿using Pms.Common;
+using Pms.Masterlists.Entities;
 using Prism.Commands;
 using Prism.Mvvm;
 using System;

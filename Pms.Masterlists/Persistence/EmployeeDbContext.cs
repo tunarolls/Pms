@@ -1,7 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Pms.Common;
 using Pms.Masterlists.Entities;
-using Pms.Masterlists.ValueObjects;
 
 namespace Pms.Masterlists.Persistence
 {

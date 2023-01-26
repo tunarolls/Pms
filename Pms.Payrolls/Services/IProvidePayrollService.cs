@@ -17,6 +17,8 @@ namespace Pms.Payrolls.Services
 
         Task<ICollection<Payroll>> GetAllPayrolls(CancellationToken cancellationToken = default);
 
+        Task<ICollection<Payroll>> GetYearlyPayrolls(int year, CancellationToken cancellationToken = default);
+
         /// <summary>
         /// Used for generating Government Computation.
         /// </summary>

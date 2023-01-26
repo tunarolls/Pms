@@ -11,7 +11,7 @@ namespace Pms.Payrolls
         public string PayrollId { get; set; } = string.Empty;
 
         public string EEId { get; set; } = string.Empty;
-        public virtual EmployeeView EE { get; set; } = new();
+        public virtual EmployeeView EE { get; set; } = null!;
 
         public string CutoffId { get; set; } = string.Empty;
         public Cutoff Cutoff { get => new Cutoff(CutoffId); }

@@ -34,6 +34,8 @@ namespace Pms.Common
         public const string Title = nameof(Title);
         public const string TaskCompletion = nameof(TaskCompletion);
         public const string CancellationTokenSource = nameof(CancellationTokenSource);
+        public const string PromptDialogButton = nameof(PromptDialogButton);
+        public const string PromptDialogResult = nameof(PromptDialogResult);
     }
 
     public class FileFilters

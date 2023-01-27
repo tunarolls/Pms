@@ -1,4 +1,5 @@
-﻿using Pms.Timesheets;
+﻿using Pms.Common.Enums;
+using Pms.Timesheets;
 using Pms.Timesheets.ServiceLayer.EfCore;
 using Pms.Timesheets.ServiceLayer.TimeSystem;
 using System;
@@ -35,14 +36,46 @@ namespace Pms.Timesheets.Module
             return new List<Timesheet>();
         }
 
+        public async Task<ICollection<Timesheet>> DownloadContent(Cutoff cutoff, string payrollCodeName, int page, CancellationToken cancellationToken = default)
+        {
+            var rawTimesheets = await _downloadProvider.DownloadTimesheets(cutoff.CutoffRange, payrollCodeName, page, cutoff.Site, cancellationToken);
+
+            if (rawTimesheets?.Message != null)
+            {
+                foreach (var timesheet in rawTimesheets.Message)
+                {
+                    await _timesheetManager.SaveTimesheet(timesheet, cutoff.CutoffId, page, cancellationToken);
+                }
+
+                return rawTimesheets.Message.ToList();
+            }
+
+            return Enumerable.Empty<Timesheet>().ToList();
+        }
+
         public async Task<DownloadSummary<Timesheet>?> DownloadContentSummary(Cutoff cutoff, string payrollCode, string site) =>
              await _downloadProvider.GetTimesheetSummary(cutoff.CutoffRange, payrollCode, site);
+
+        public async Task<DownloadSummary<Timesheet>?> DownloadContentSummary(Cutoff cutoff, string payrollCode, CancellationToken cancellationToken = default)
+        {
+            return await _downloadProvider.GetTimesheetSummary(cutoff.CutoffRange, payrollCode, cutoff.Site, cancellationToken);
+        }
 
         public EmployeeView FindEmployeeView(string eeId) =>
             _timesheetProvider.FindEmployeeView(eeId);
 
+        public async Task<EmployeeView?> FindEmployeeView(string eeId, CancellationToken cancellationToken = default)
+        {
+            return await _timesheetProvider.FindEmployeeView(eeId, cancellationToken);
+        }
+
         public int[] GetMissingPages(string cutoffId, string payrollCode) =>
             _timesheetProvider.GetMissingPages(cutoffId, payrollCode).ToArray();
+
+        public async Task<int[]> GetMissingPages(string cutoffId, string payrollCode, CancellationToken cancellationToken = default)
+        {
+            return await _timesheetProvider.GetMissingPages(cutoffId, payrollCode, cancellationToken);
+        }
 
         public int[] GetPageWithUnconfirmedTS(Cutoff cutoff, string payrollCode) =>
             _timesheetProvider.GetPageWithUnconfirmedTS(cutoff.CutoffId, payrollCode).ToArray();
@@ -52,11 +85,26 @@ namespace Pms.Timesheets.Module
             return await _timesheetProvider.GetTimesheets(cutoffId, cancellationToken);
         }
 
+        public async Task<ICollection<Timesheet>> GetTimesheets(string cutoffId, string payrollCode, CancellationToken cancellationToken = default)
+        {
+            return await _timesheetProvider.GetTimesheets(cutoffId, payrollCode, cancellationToken);
+        }
+
         //public IEnumerable<Timesheet> GetTimesheets(string cutoffId, string payrollCodeId) =>
         //    _timesheetProvider.GetTimesheets(cutoffId, payrollCodeId);
 
         public IEnumerable<Timesheet> GetTwoPeriodTimesheets(string cutoffId) =>
             _timesheetProvider.GetTwoPeriodTimesheets(cutoffId);
+
+        public async Task<ICollection<Timesheet>> GetTwoPeriodTimesheets(string cutoffId, CancellationToken cancellationToken = default)
+        {
+            return await _timesheetProvider.GetTwoPeriodTimesheets(cutoffId, cancellationToken);
+        }
+
+        public async Task<ICollection<Timesheet>> GetTwoPeriodTimesheets(string cutoffId, string payrollCode, CancellationToken cancellationToken = default)
+        {
+            return await _timesheetProvider.GetTwoPeriodTimesheets(cutoffId, payrollCode, cancellationToken);
+        }
 
         public string[] ListCutoffIds() =>
             _timesheetProvider.GetTimesheets().ExtractCutoffIds().ToArray();

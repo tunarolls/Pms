@@ -1,6 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Pms.Timesheets.Persistence
 {
@@ -33,6 +35,20 @@ namespace Pms.Timesheets.Persistence
                 ((Timesheet)entityEntry.Entity).DateCreated = DateTime.Now;
 
             return base.SaveChanges();
+        }
+
+        public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+        {
+            var timesheetEntries = ChangeTracker.Entries()
+                .Where(e =>
+                    e.Entity is Timesheet && (
+                        e.State == EntityState.Added ||
+                        e.State == EntityState.Modified)
+                    );
+            foreach (var entityEntry in timesheetEntries)
+                ((Timesheet)entityEntry.Entity).DateCreated = DateTime.Now;
+
+            return base.SaveChangesAsync(cancellationToken);
         }
     }
 }

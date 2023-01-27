@@ -8,9 +8,11 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Data;
 using Microsoft.Xaml.Behaviors.Media;
 using Pms.Common;
 using Pms.Common.Enums;
+using Pms.Common.Exceptions;
 using Pms.Masterlists.Entities;
 using Pms.Timesheets.ServiceLayer.EfCore;
 using Pms.Timesheets.ServiceLayer.Files;
@@ -24,19 +26,12 @@ namespace Pms.Timesheets.Module.ViewModels
 {
     public class DummyListingViewModel : TimesheetListingViewModel
     {
-        public DummyListingViewModel(IDialogService dialog, Timesheets timesheets) : base(dialog, timesheets)
+        public DummyListingViewModel(IDialogService dialog, IMessageBoxService message, Timesheets timesheets) : base(dialog, message, timesheets)
         {
-            Timesheets.Add(new Timesheet()
-            {
-                TotalHours = 100.0,
-                TotalOT = 100.0,
-                TotalTardy = 100.0,
-                TotalND = 100.0
-            });
         }
     }
 
-    public class TimesheetListingViewModel : BindableBase, INavigationAware, IActiveAware, IRegionMemberLifetime
+    public class TimesheetListingViewModel : CancellableBase, INavigationAware
     {
         #region Properties
         private int _confirmed;
@@ -55,90 +50,107 @@ namespace Pms.Timesheets.Module.ViewModels
 
         public string SearchInput { get => _searchInput; set => SetProperty(ref _searchInput, value); }
 
-        public ObservableCollection<Timesheet> Timesheets { get; set; } = new();
+        public ObservableCollection<Timesheet> Timesheets { get; set; }
 
         public int TotalTimesheets { get => _totalTimesheets; set => SetProperty(ref _totalTimesheets, value); }
         #endregion
 
-        private readonly IDialogService _dialog;
-        private readonly Timesheets _timesheet;
-        private ITimesheetsMain? _main;
+        private readonly IDialogService s_Dialog;
+        private readonly IMessageBoxService s_Message;
+        private readonly Timesheets m_Timesheets;
         private Cutoff _cutoff = new();
-        private SemaphoreSlim _busyLock = new(1);
         private PayrollCode _payrollCode = new PayrollCode();
         private SiteChoices _site = SiteChoices.MANILA;
-        private const int _busyTimeout = 1000;
 
-        #region IActiveAware
-        public bool IsActive { get; set; }
-        public event EventHandler? IsActiveChanged;
-        #endregion
-
-        public TimesheetListingViewModel(IDialogService dialog, Timesheets timesheets)
+        public TimesheetListingViewModel(IDialogService dialog, IMessageBoxService message, Timesheets timesheets)
         {
-            _dialog = dialog;
-            _timesheet = timesheets;
+            s_Dialog = dialog;
+            s_Message = message;
+            m_Timesheets = timesheets;
 
-            LoadTimesheetsCommand = new DelegateCommand(ExecuteLoadTimesheets);
-            LoadSummaryCommand = new DelegateCommand(ExecuteLoadSummary);
-            EvaluateCommand = new DelegateCommand<object?>(ExecuteEvaluate);
-            ExportCommand = new DelegateCommand(ExecuteExport);
-            DownloadCommand = new DelegateCommand<object?>(ExecuteDownload);
+            LoadTimesheetsCommand = new DelegateCommand(LoadTimesheets);
+            LoadSummaryCommand = new DelegateCommand(LoadSummary);
+            ExportCommand = new DelegateCommand(Export);
+            DownloadCommand = new DelegateCommand<object?>(Download);
             DetailTimesheetCommand = new DelegateCommand<object?>(ExecuteDetailTimesheet);
+
+            Timesheets = new();
+            var source = CollectionViewSource.GetDefaultView(Timesheets);
+            source.Filter = t => FilterTimesheets(t);
         }
 
         public Cutoff Cutoff { get => _cutoff; set => SetProperty(ref _cutoff, value); }
-
         public PayrollCode PayrollCode { get => _payrollCode; set => SetProperty(ref _payrollCode, value); }
-
         public SiteChoices Site { get => _site; set => SetProperty(ref _site, value); }
+        public ITimesheetsMain? Main { get; set; }
+
+        #region commands
+        public DelegateCommand<object?> DetailTimesheetCommand { get; }
+        public DelegateCommand<object?> DownloadCommand { get; }
+        public DelegateCommand ExportCommand { get; }
+        public DelegateCommand LoadSummaryCommand { get; }
+        public DelegateCommand LoadTimesheetsCommand { get; }
+        #endregion
+
+        #region download
+        private void Download(object? parameter)
+        {
+            var cts = GetCancellationTokenSource();
+            var dialogParameters = CreateDialogParameters(this, cts);
+            s_Dialog.Show(DialogNames.CancelDialog, dialogParameters, (_) => { });
+            _ = Download(parameter, cts.Token);
+        }
 
         private async Task Download(object? parameter, CancellationToken cancellationToken = default)
         {
-            if (await _busyLock.WaitAsync(_busyTimeout, cancellationToken))
+            try
             {
-                try
-                {
-                    string site = Site.ToString();
-                    string payrollCode = PayrollCode.Name;
-                    Cutoff cutoff = Cutoff;
-                    cutoff.SetSite(site);
+                OnMessageSent("Downloading timesheets...");
 
-                    if (parameter is int page)
-                    {
-                        await Download(page, cutoff, payrollCode, site, cancellationToken);
-                    }
-                    else if (parameter is int[] pages)
-                    {
-                        await Download(pages, cutoff, payrollCode, site, cancellationToken);
-                    }
-                    else
-                    {
-                        var summary = await _timesheet.DownloadContentSummary(cutoff, payrollCode, site);
-                        pages = summary != null
-                            ? Enumerable.Range(0, int.Parse(summary.TotalPage) + 1).ToArray()
-                            : Array.Empty<int>();
-                        await Download(pages, cutoff, payrollCode, site, cancellationToken);
-                    }
-                }
-                catch
+                var site = Main?.Site ?? SiteChoices.MANILA;
+                var payrollCode = Main?.PayrollCode?.Name;
+                var cutoff = new Cutoff(Main?.CutoffId, site);
+
+                if (string.IsNullOrEmpty(payrollCode)) throw new Exception(ErrorMessages.PayrollCodeIsEmpty);
+
+                if (parameter is int page)
                 {
-                    throw;
+                    await Download(new int[] { page }, cutoff, payrollCode, cancellationToken: cancellationToken);
                 }
-                finally
+                else if (parameter is int[] pages)
                 {
-                    _busyLock.Release();
+                    await Download(pages, cutoff, payrollCode, cancellationToken: cancellationToken);
                 }
+                else
+                {
+                    var summary = await m_Timesheets.DownloadContentSummary(cutoff, payrollCode, cancellationToken);
+                    pages = summary != null
+                        ? Enumerable.Range(0, int.Parse(summary.TotalPage) + 1).ToArray()
+                        : Array.Empty<int>();
+
+                    await Download(pages, cutoff, payrollCode, cancellationToken: cancellationToken);
+                }
+
+                OnTaskCompleted();
+            }
+            catch (TaskCanceledException) { OnTaskException(); }
+            catch (Exception ex)
+            {
+                OnTaskException();
+                s_Message.ShowError(ex.Message);
             }
         }
 
-        private async Task Download(int[] pages, Cutoff cutoff, string payrollCode, string site, CancellationToken cancellationToken = default)
+        private async Task Download(int[] pages, Cutoff cutoff, string payrollCode, int startIndex = 0, CancellationToken cancellationToken = default)
         {
             try
             {
-                foreach (int page in pages)
+                OnProgressStart(pages.Length);
+
+                for (int i = startIndex; i < pages.Length; i++)
                 {
-                    await Download(page, cutoff, payrollCode, site, cancellationToken);
+                    await m_Timesheets.DownloadContent(cutoff, payrollCode, i, cancellationToken);
+                    OnProgressIncrement();
                 }
             }
             catch
@@ -146,118 +158,118 @@ namespace Pms.Timesheets.Module.ViewModels
                 throw;
             }
         }
-
-        private async Task Download(int page, Cutoff cutoff, string payrollCOde, string site, CancellationToken cancellationToken = default)
-        {
-            try
-            {
-                var timesheets = await _timesheet.DownloadContent(cutoff, payrollCOde, site, page);
-
-                foreach (var timesheet in timesheets)
-                {
-                    var ee = _timesheet.FindEmployeeView(timesheet.EEId);
-                    timesheet.EE = ee;
-                    timesheet.CutoffId = cutoff.CutoffId;
-
-                    Timesheets.Add(timesheet);
-                }
-            }
-            catch
-            {
-                throw;
-            }
-        }
-
-        private async Task Evaluate(object? parameter, CancellationToken cancellationToken = default)
-        {
-            if (await _busyLock.WaitAsync(_busyTimeout, cancellationToken))
-            {
-                try
-                {
-                    string cutoffId = Cutoff.CutoffId;
-                    string payrollCode = PayrollCode.PayrollCodeId;
-                    int[] missingPages = _timesheet.GetMissingPages(cutoffId, payrollCode);
-
-                    if (missingPages.Length == 0)
-                    {
-                        var noEETimesheets = _timesheet.ListTimesheetNoEETimesheet(cutoffId);
-                    }
-                    else
-                    {
-                        await Download(missingPages, cancellationToken);
-                    }
-
-                    await LoadTimesheets(cancellationToken);
-                }
-                catch
-                {
-                    throw;
-                }
-                finally
-                {
-                    _busyLock.Release();
-                }
-            }
-        }
+        #endregion
 
         #region export
-        private async Task Export(CancellationToken cancellationToken = default)
+        private void Export()
         {
-            if (await _busyLock.WaitAsync(_busyTimeout, cancellationToken))
+            var cts = GetCancellationTokenSource();
+            var dialogParameters = CreateDialogParameters(this, cts);
+            s_Dialog.Show(DialogNames.CancelDialog, dialogParameters, (_) => { });
+            _ = Export(cts.Token);
+        }
+
+        private async Task Export(IEnumerable<Timesheet> timesheets, Cutoff cutoff, string payrollCode, CancellationToken cancellationToken = default)
+        {
+            try
             {
-                try
+                var twoPeriodTimesheets = await m_Timesheets.GetTwoPeriodTimesheets(cutoff.CutoffId, payrollCode, cancellationToken);
+                var bankCategories = twoPeriodTimesheets.ExtractBanks();
+                var tasks = new List<Task>();
+
+                foreach (var bankCategory in bankCategories)
                 {
-                    var cutoff = Cutoff;
-                    var cutoffId = cutoff.CutoffId;
-                    var payrollCode = PayrollCode.PayrollCodeId;
-                    cutoff.SetSite(PayrollCode.Site);
-                    var timesheets = await _timesheet.GetTimesheets(cutoffId, cancellationToken);
-                    var filtered = timesheets.FilterByPayrollCode(payrollCode);
+                    var timesheetsByBank = timesheets.FilterByBank(bankCategory);
+                    var twoPeriodTimesheetsByBank = twoPeriodTimesheets.FilterByBank(bankCategory);
 
-                    // if (timesheets.Any(t => !t.IsValid)) // IsValid property doesn't exist
-                    // {
-                    //     // prompt to proceed
-                    // }
-
-                    IEnumerable<Timesheet> twoPeriodTimesheets = _timesheet.GetTwoPeriodTimesheets(cutoffId).FilterByPayrollCode(payrollCode);
-                    List<TimesheetBankChoices> bankCategories = filtered.ExtractBanks();
-                    var bankTasks = new List<Task>();
-
-                    foreach (var bankCategory in bankCategories)
+                    if (timesheetsByBank.Any())
                     {
-                        var bankTask = Task.Run(() =>
+                        var exportable = timesheetsByBank.Exportable().ToList();
+                        var unconfirmed = timesheetsByBank.UnconfirmedWithAttendance().ToList();
+                        var unconfirmedWithoutAttendance = timesheetsByBank.UnconfirmedWithoutAttendance().ToList();
+                        var monthlyExportable = twoPeriodTimesheetsByBank.Exportable().TimesheetsByEEId().ToList();
+
+                        var dbfTask = Task.Run(() =>
                         {
-                            var timesheetsByBankCategory = filtered.FilterByBank(bankCategory);
-                            var twoPeriodTimesheetsByBankCategory = twoPeriodTimesheets.FilterByBank(bankCategory);
-
-                            if (timesheetsByBankCategory.Any())
-                            {
-                                var exportable = timesheetsByBankCategory.ByExportable().ToList();
-                                var unconfirmedTimesheetsWithAttendance = timesheetsByBankCategory.ByUnconfirmedWithAttendance().ToList();
-                                var unconfirmedTimesheetsWithoutAttendance = timesheetsByBankCategory.ByUnconfirmedWithoutAttendance().ToList();
-                                var monthlyExportable = twoPeriodTimesheetsByBankCategory.ByExportable().GroupTimesheetsByEEId().ToList();
-
-                                ExportDbf(cutoff, payrollCode, bankCategory, exportable);
-                                ExportFeedback(cutoff, payrollCode, bankCategory, exportable,
-                                    unconfirmedTimesheetsWithAttendance,
-                                    unconfirmedTimesheetsWithoutAttendance);
-                                ExportEFile(cutoff, payrollCode, bankCategory, monthlyExportable);
-                            }
+                            ExportDbf(cutoff, payrollCode, bankCategory, exportable);
                         }, cancellationToken);
 
-                        bankTasks.Add(bankTask);
-                    }
+                        var feedbackTask = Task.Run(() =>
+                        {
+                            ExportFeedback(cutoff, payrollCode, bankCategory, exportable, unconfirmed, unconfirmedWithoutAttendance);
+                        }, cancellationToken);
 
-                    await Task.WhenAll(bankTasks);
+                        var eFileTask = Task.Run(() =>
+                        {
+                            ExportEFile(cutoff, payrollCode, bankCategory, monthlyExportable);
+                        }, cancellationToken);
+
+                        tasks.AddRange(new[] { dbfTask, feedbackTask, eFileTask });
+                    }
                 }
-                catch
-                {
-                    throw;
-                }
-                finally
-                {
-                    _busyLock.Release();
-                }
+
+                await Task.WhenAll(tasks);
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
+        private async Task Export(CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                var payrollCode = Main?.PayrollCode;
+                if (payrollCode == null) throw new Exception(ErrorMessages.PayrollCodeIsEmpty);
+                var cutoff = new Cutoff(Main?.CutoffId);
+                cutoff.SetSite(payrollCode.Site);
+                var timesheets = await m_Timesheets.GetTimesheets(cutoff.CutoffId, payrollCode.PayrollCodeId, cancellationToken);
+
+                await Export(timesheets, cutoff, payrollCode.PayrollCodeId, cancellationToken);
+                // if (timesheets.Any(t => !t.IsValid)) // IsValid property doesn't exist
+                // {
+                //     // prompt to proceed
+                // }
+
+                //IEnumerable<Timesheet> twoPeriodTimesheets = m_Timesheets.GetTwoPeriodTimesheets(cutoffId).FilterByPayrollCode(payrollCode);
+                //List<TimesheetBankChoices> bankCategories = filtered.ExtractBanks();
+                //var bankTasks = new List<Task>();
+
+                //foreach (var bankCategory in bankCategories)
+                //{
+                //    var bankTask = Task.Run(() =>
+                //    {
+                //        var timesheetsByBankCategory = filtered.FilterByBank(bankCategory);
+                //        var twoPeriodTimesheetsByBankCategory = twoPeriodTimesheets.FilterByBank(bankCategory);
+
+                //        if (timesheetsByBankCategory.Any())
+                //        {
+                //            var exportable = timesheetsByBankCategory.ByExportable().ToList();
+                //            var unconfirmedTimesheetsWithAttendance = timesheetsByBankCategory.ByUnconfirmedWithAttendance().ToList();
+                //            var unconfirmedTimesheetsWithoutAttendance = timesheetsByBankCategory.ByUnconfirmedWithoutAttendance().ToList();
+                //            var monthlyExportable = twoPeriodTimesheetsByBankCategory.ByExportable().GroupTimesheetsByEEId().ToList();
+
+                //            ExportDbf(cutoff, payrollCode, bankCategory, exportable);
+                //            ExportFeedback(cutoff, payrollCode, bankCategory, exportable,
+                //                unconfirmedTimesheetsWithAttendance,
+                //                unconfirmedTimesheetsWithoutAttendance);
+                //            ExportEFile(cutoff, payrollCode, bankCategory, monthlyExportable);
+                //        }
+                //    }, cancellationToken);
+
+                //    bankTasks.Add(bankTask);
+                //}
+
+                //await Task.WhenAll(bankTasks);
+
+                OnTaskCompleted();
+            }
+            catch (TaskCanceledException) { OnTaskException(); }
+            catch (Exception ex)
+            {
+                OnTaskException();
+                s_Message.ShowError(ex.Message);
             }
         }
 
@@ -325,10 +337,10 @@ namespace Pms.Timesheets.Module.ViewModels
                 {
                     var dialogParams = new DialogParameters
                     {
-                        { PmsConstants.Timesheets, _timesheet },
+                        { PmsConstants.Timesheets, m_Timesheets },
                         { PmsConstants.Timesheet, timesheet }
                     };
-                    _dialog.ShowDialog(ViewNames.TimesheetDetailView, dialogParams, (_) => { });
+                    s_Dialog.ShowDialog(ViewNames.TimesheetDetailView, dialogParams, (_) => { });
                 }
             }
             catch
@@ -337,38 +349,13 @@ namespace Pms.Timesheets.Module.ViewModels
             }
         }
 
-        private void ExecuteDownload(object? parameter)
-        {
-            _ = Download(parameter);
-        }
-
-        private void ExecuteEvaluate(object? parameter)
-        {
-            _ = Evaluate(parameter);
-        }
-
-        private void ExecuteExport()
-        {
-            _ = Export();
-        }
-
-        private void ExecuteLoadSummary()
-        {
-            _ = LoadSummary();
-        }
-
-        private void ExecuteLoadTimesheets()
-        {
-            _ = LoadTimesheets();
-        }
-
         private async Task FillEmployeeDetail(CancellationToken cancellationToken = default)
         {
             try
             {
                 if (Cutoff != null)
                 {
-                    var timesheets = (await _timesheet.GetTimesheets(Cutoff.CutoffId, cancellationToken))
+                    var timesheets = (await m_Timesheets.GetTimesheets(Cutoff.CutoffId, cancellationToken))
                         .Where(t => t.EE?.PayrollCode == PayrollCode.PayrollCodeId);
 
                     foreach (var timesheet in timesheets)
@@ -384,79 +371,93 @@ namespace Pms.Timesheets.Module.ViewModels
             }
         }
 
+        #region load summary
+        private void LoadSummary()
+        {
+            var cts = GetCancellationTokenSource();
+            var dialogParameters = CreateDialogParameters(this, cts);
+            s_Dialog.Show(DialogNames.CancelDialog, dialogParameters, (_) => { });
+            _ = LoadSummary(cts.Token);
+        }
+
         private async Task LoadSummary(CancellationToken cancellationToken = default)
         {
-            if (await _busyLock.WaitAsync(_busyTimeout, cancellationToken))
+            try
             {
-                try
-                {
-                    string site = Site.ToString();
-                    string payrollCode = PayrollCode.Name;
-                    Cutoff cutoff = Cutoff;
-                    cutoff.SetSite(site);
-                    var summary = await _timesheet.DownloadContentSummary(cutoff, payrollCode, site);
-                    if (summary == null) throw new Exception("Summary is null.");
-                    var timesheets = _timesheet.MapEmployeeView(summary.UnconfirmedTimesheet);
+                //string site = Site.ToString();
+                //string payrollCode = PayrollCode.Name;
+                //Cutoff cutoff = Cutoff;
+                //cutoff.SetSite(site);
+                //var summary = await m_Timesheets.DownloadContentSummary(cutoff, payrollCode, site);
+                //if (summary == null) throw new Exception("Summary is null.");
+                //var timesheets = m_Timesheets.MapEmployeeView(summary.UnconfirmedTimesheet);
 
-                    Timesheets.Clear();
-                    Timesheets.AddRange(timesheets);
-                    NotConfirmed = Timesheets.Count;
-                    Confirmed = int.Parse(summary.TotalConfirmed);
-                    TotalTimesheets = int.Parse(summary.TotalCount);
-                }
-                catch
-                {
-                    throw;
-                }
-                finally
-                {
-                    _busyLock.Release();
-                }
+                //Timesheets.Clear();
+                //Timesheets.AddRange(timesheets);
+                //NotConfirmed = Timesheets.Count;
+                //Confirmed = int.Parse(summary.TotalConfirmed);
+                //TotalTimesheets = int.Parse(summary.TotalCount);
             }
+            catch (TaskCanceledException) { OnTaskException(); }
+            catch (Exception ex)
+            {
+                OnTaskException();
+                s_Message.ShowError(ex.Message);
+            }
+        }
+
+        #endregion
+
+        #region load timesheets
+        private void LoadTimesheets()
+        {
+            var cts = GetCancellationTokenSource();
+            var dialogParameters = CreateDialogParameters(this, cts);
+            s_Dialog.Show(DialogNames.CancelDialog, dialogParameters, (_) => { });
+            _ = LoadTimesheets(cts.Token);
         }
 
         private async Task LoadTimesheets(CancellationToken cancellationToken = default)
         {
-            if (await _busyLock.WaitAsync(_busyTimeout, cancellationToken))
+            try
             {
-                try
-                {
-                    if (Cutoff != null && PayrollCode != null)
-                    {
-                        var timesheets = (await _timesheet.GetTimesheets(Cutoff.CutoffId, cancellationToken))
-                            .FilterPayrollCode(PayrollCode.PayrollCodeId)
-                            .FilterSearchInput(SearchInput);
+                var timesheets = await m_Timesheets.GetTimesheets(Cutoff.CutoffId, cancellationToken);
 
-                        Timesheets.Clear();
-                        Timesheets.AddRange(timesheets);
-                        Confirmed = Timesheets.Count(t => t.TotalHours > 0 && t.IsConfirmed);
-                        ConfirmedWithoutAttendance = Timesheets.Count(t => t.TotalHours == 0 && t.IsConfirmed);
-                        NotConfirmed = Timesheets.Count(t => !t.IsConfirmed);
-                        NotConfirmedWithAttendance = Timesheets.Count(t => t.TotalHours > 0 && !t.IsConfirmed);
-                        TotalTimesheets = Timesheets.Count;
-                    }
-                }
-                catch
-                {
-                    throw;
-                }
-                finally
-                {
-                    _busyLock.Release();
-                }
+                //Timesheets = timesheets.FilterByPayrollCode(PayrollCode.PayrollCodeId)
+                //    .FilterSearchInput(SearchInput);
+
+                //Timesheets.Clear();
+                //Timesheets.AddRange(timesheets);
+                //Confirmed = Timesheets.Count(t => t.TotalHours > 0 && t.IsConfirmed);
+                //ConfirmedWithoutAttendance = Timesheets.Count(t => t.TotalHours == 0 && t.IsConfirmed);
+                //NotConfirmed = Timesheets.Count(t => !t.IsConfirmed);
+                //NotConfirmedWithAttendance = Timesheets.Count(t => t.TotalHours > 0 && !t.IsConfirmed);
+                //TotalTimesheets = Timesheets.Count;
+
+                OnTaskCompleted();
+            }
+            catch (TaskCanceledException) { OnTaskException(); }
+            catch (Exception ex)
+            {
+                OnTaskException();
+                s_Message.ShowError(ex.Message);
             }
         }
+        #endregion
+
+
 
         #region INavigationAware
         public void OnNavigatedTo(NavigationContext navigationContext)
         {
-            _main = navigationContext.Parameters.GetValue<ITimesheetsMain?>(PmsConstants.Main);
-            if (_main != null)
+            Main = navigationContext.Parameters.GetValue<ITimesheetsMain?>(PmsConstants.Main);
+
+            if (Main != null)
             {
-                _main.PropertyChanged += Main_PropertyChanged;
+                Main.PropertyChanged += Main_PropertyChanged;
             }
 
-            _ = LoadValues();
+            LoadTimesheets();
         }
 
         public bool IsNavigationTarget(NavigationContext navigationContext)
@@ -466,41 +467,37 @@ namespace Pms.Timesheets.Module.ViewModels
 
         public void OnNavigatedFrom(NavigationContext navigationContext)
         {
-            if (_main != null)
+            if (Main != null)
             {
-                _main.PropertyChanged -= Main_PropertyChanged;
+                Main.PropertyChanged -= Main_PropertyChanged;
             }
         }
         #endregion
 
         private void Main_PropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
-            _ = LoadValues();
+            LoadTimesheets();
         }
 
-        private async Task LoadValues(CancellationToken cancellationToken = default)
+        private bool FilterTimesheets(object t)
         {
-            if (_main != null)
+            if (t is Timesheet timesheet)
             {
-                _cutoff = !string.IsNullOrEmpty(_main.CutoffId) ? new Cutoff(_main.CutoffId) : new Cutoff();
-                _payrollCode = _main.PayrollCode ?? new PayrollCode();
 
-                await LoadTimesheets(cancellationToken);
             }
+
+            return true;
         }
 
-        #region commands
-        public DelegateCommand<object?> DetailTimesheetCommand { get; }
-        public DelegateCommand<object?> DownloadCommand { get; }
-        public DelegateCommand<object?> EvaluateCommand { get; }
-        public DelegateCommand ExportCommand { get; }
-        public DelegateCommand LoadSummaryCommand { get; }
-        public DelegateCommand LoadTimesheetsCommand { get; }
-        #endregion
+        private bool FilterByPayrollCode(Timesheet t, string payrollCode)
+        {
+            return t.EE.PayrollCode == payrollCode;
+        }
 
-        #region IRegionMemberLifetime
-        public bool KeepAlive => true;
-        #endregion
+        private bool FilterByCutoffId(Timesheet t, string cutoffId)
+        {
+            return t.CutoffId == cutoffId;
+        }
     }
 }
 

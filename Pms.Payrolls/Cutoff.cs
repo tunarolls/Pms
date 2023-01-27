@@ -8,19 +8,6 @@ namespace Pms.Payrolls
 {
     public class Cutoff
     {
-        public string CutoffId { get; private set; }
-        public DateTime CutoffDate { get; private set; }
-
-        public int YearCovered
-        {
-            get
-            {
-                return CutoffDate.Month == 12
-                    ? CutoffDate.Year + 1
-                    : CutoffDate.Year;
-            }
-        }
-
         public Cutoff()
         {
             var cutoffDate = GetCutoffDate();
@@ -49,6 +36,17 @@ namespace Pms.Payrolls
             CutoffId = GetCutoffId(cutoffDate);
         }
 
+        public DateTime CutoffDate { get; private set; }
+        public string CutoffId { get; private set; }
+        public int YearCovered
+        {
+            get
+            {
+                return CutoffDate.Month == 12
+                    ? CutoffDate.Year + 1
+                    : CutoffDate.Year;
+            }
+        }
         //private void GetCutoffDate()
         //{
         //    int year = int.Parse(CutoffId.Substring(0, 2));
@@ -64,6 +62,8 @@ namespace Pms.Payrolls
 
         //    CutoffDate = new DateTime(year + 2000, month, day); // update year to 3000 at the end of the millennium
         //}
+
+        public override string ToString() => CutoffId;
 
         private DateTime GetCutoffDate()
         {
@@ -116,7 +116,5 @@ namespace Pms.Payrolls
                     return $"{cutoffDate:yyMM}-2";
             }
         }
-
-        public override string ToString() => CutoffId;
     }
 }

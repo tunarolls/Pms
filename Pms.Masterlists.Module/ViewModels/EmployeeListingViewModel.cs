@@ -129,7 +129,7 @@ namespace Pms.Masterlists.Module.ViewModels
             try
             {
                 if (Main == null) throw new Exception(ErrorMessages.MainIsNull);
-                if (Main.Site == null) throw new Exception(ErrorMessages.SiteIsNull);
+                if (Main.Site == null) throw new Exception(ErrorMessages.SiteIsEmpty);
 
                 var exceptions = new List<Exception>();
                 var site = Main.Site.Value;
@@ -199,7 +199,7 @@ namespace Pms.Masterlists.Module.ViewModels
             try
             {
                 if (Main == null) throw new Exception(ErrorMessages.MainIsNull);
-                if (Main.Site == null) throw new Exception(ErrorMessages.SiteIsNull);
+                if (Main.Site == null) throw new Exception(ErrorMessages.SiteIsEmpty);
 
                 var site = Main.Site.Value;
                 var exceptions = new List<Exception>();
@@ -258,7 +258,7 @@ namespace Pms.Masterlists.Module.ViewModels
             try
             {
                 if (Main == null) throw new Exception(ErrorMessages.MainIsNull);
-                if (Main.Site == null) throw new Exception(ErrorMessages.SiteIsNull);
+                if (Main.Site == null) throw new Exception(ErrorMessages.SiteIsEmpty);
                 if (Main.PayrollCode == null) throw new Exception(ErrorMessages.PayrollCodeIsEmpty);
 
                 var site = Main.Site.Value;

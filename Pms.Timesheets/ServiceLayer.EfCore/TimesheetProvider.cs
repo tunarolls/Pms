@@ -51,6 +51,16 @@ namespace Pms.Timesheets.ServiceLayer.EfCore
                 .ToListAsync(cancellationToken);
         }
 
+        public async Task<ICollection<Timesheet>> GetTimesheets(string cutoffId, string payrollCode, CancellationToken cancellationToken = default)
+        {
+            using var context = _factory.CreateDbContext();
+            return await context.Timesheets
+                .Include(t => t.EE)
+                .FilterByCutoffId(cutoffId)
+                .FilterByPayrollCode(payrollCode)
+                .ToListAsync(cancellationToken);
+        }
+
         public IEnumerable<Timesheet> GetTimesheets(string cutoffId, string payrollCodeId)
         {
             using TimesheetDbContext Context = _factory.CreateDbContext();
@@ -73,6 +83,30 @@ namespace Pms.Timesheets.ServiceLayer.EfCore
                 .Where(ts => ts.CutoffId == cutoffId || ts.CutoffId == currentCutoff.GetPreviousCutoff())
                 .OrderBy(ts => ts.CutoffId);
         }
+
+        public async Task<ICollection<Timesheet>> GetTwoPeriodTimesheets(string cutoffId, CancellationToken cancellationToken = default)
+        {
+            var currentCutoff = new Cutoff(cutoffId);
+            using var context = _factory.CreateDbContext();
+            return await context.Timesheets
+                .Include(t => t.EE)
+                .Where(t => t.CutoffId == cutoffId || t.CutoffId == currentCutoff.GetPreviousCutoff())
+                .OrderBy(t => t.CutoffId)
+                .ToListAsync(cancellationToken);
+        }
+
+        public async Task<ICollection<Timesheet>> GetTwoPeriodTimesheets(string cutoffId, string payrollCode, CancellationToken cancellationToken = default)
+        {
+            var currentCutoff = new Cutoff(cutoffId);
+            using var context = _factory.CreateDbContext();
+            return await context.Timesheets
+                .Include(t => t.EE)
+                .Where(t => t.CutoffId == cutoffId || t.CutoffId == currentCutoff.GetPreviousCutoff())
+                .Where(t => t.EE.PayrollCode == payrollCode)
+                .OrderBy(t => t.CutoffId)
+                .ToListAsync(cancellationToken);
+        }
+
         public IEnumerable<Timesheet> GetTimesheetsByMonth(int month)
         {
             using TimesheetDbContext Context = _factory.CreateDbContext();
@@ -156,10 +190,27 @@ namespace Pms.Timesheets.ServiceLayer.EfCore
             return new List<int>();
         }
 
+        public async Task<int[]> GetMissingPages(string cutoffId, string payrollCode, CancellationToken cancellationToken = default)
+        {
+            using var context = _factory.CreateDbContext();
+            return await context.Timesheets
+                .FilterByCutoffId(cutoffId)
+                .FilterByPayrollCode(payrollCode)
+                .GroupBy(t => t.Page, t => t.Page)
+                .Select((page, _) => page.First())
+                .ToArrayAsync(cancellationToken);
+        }
+
         public EmployeeView FindEmployeeView(string eeId)
         {
             using TimesheetDbContext Context = _factory.CreateDbContext();
             return Context.Employees.Find(eeId);
+        }
+
+        public async Task<EmployeeView?> FindEmployeeView(string eeId, CancellationToken cancellationToken = default)
+        {
+            using var context = _factory.CreateDbContext();
+            return await context.Employees.FindAsync(new object[] { eeId }, cancellationToken);
         }
     }
 }

@@ -52,7 +52,6 @@
             <StackPanel Grid.Row="1" Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Right">
                 <Button Content="Load Summary" Command="{Binding LoadSummaryCommand}" Margin="4"/>
                 <Button Content="Download" Command="{Binding DownloadCommand}" Margin="4"/>
-                <!--<Button Content="Evaluate" Command="{Binding EvaluateCommand}" Margin="4" />-->
                 <Button Content="Export" Command="{Binding ExportCommand}" Margin="4" />
             </StackPanel>
 

@@ -15,7 +15,7 @@ namespace Pms.Timesheets
 
         [JsonProperty("employee_id")]
         public string EEId { get; set; } = string.Empty;
-        public virtual EmployeeView EE { get; set; } = new();
+        public virtual EmployeeView EE { get; set; } = null!;
 
         public string CutoffId { get; set; } = string.Empty;
         public Cutoff Cutoff => new(CutoffId);

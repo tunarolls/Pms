@@ -13,8 +13,8 @@ namespace Pms.Common
 
         // main errors
         public const string MainIsNull = "Main is not initialized.";
-        public const string PayrollCodeIsNull = "Payroll code is empty.";
+        public const string PayrollCodeIsEmpty = "Payroll code is empty.";
         public const string SiteIsNull = "Site is empty.";
-        public const string CompanyIsNull = "Company is empty.";
+        public const string CompanyIsEmpty = "Company is empty.";
     }
 }

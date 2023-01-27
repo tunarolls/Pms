@@ -102,6 +102,9 @@ namespace Pms.Payrolls.Module.ViewModels
                 var companyId = Main?.Company?.CompanyId ?? string.Empty;
                 var payrollCode = Main?.PayrollCode?.PayrollCodeId ?? string.Empty;
 
+                if (string.IsNullOrEmpty(companyId)) throw new Exception(ErrorMessages.CompanyIsEmpty);
+                if (string.IsNullOrEmpty(payrollCode)) throw new Exception(ErrorMessages.PayrollCodeIsEmpty);
+
                 OnMessageSent("Retrieving payrolls...");
                 var employeePayrolls = await m_Payrolls.GetYearlyPayrollsByEmployee(cutoff.YearCovered, payrollCode,
                     companyId, cancellationToken);
@@ -160,7 +163,7 @@ namespace Pms.Payrolls.Module.ViewModels
         {
             try
             {
-                if (Main?.Company == null) throw new Exception(ErrorMessages.CompanyIsNull);
+                if (Main?.Company == null) throw new Exception(ErrorMessages.CompanyIsEmpty);
 
                 var cutoff = new Cutoff(Main.CutoffId);
                 var company = Main.Company;
@@ -258,8 +261,8 @@ namespace Pms.Payrolls.Module.ViewModels
             try
             {
                 if (Main == null) throw new Exception(ErrorMessages.MainIsNull);
-                if (Main.Company == null) throw new Exception(ErrorMessages.CompanyIsNull);
-                if (Main.PayrollCode == null) throw new Exception(ErrorMessages.PayrollCodeIsNull);
+                if (Main.Company == null) throw new Exception(ErrorMessages.CompanyIsEmpty);
+                if (Main.PayrollCode == null) throw new Exception(ErrorMessages.PayrollCodeIsEmpty);
 
                 var payrollCode = Main.PayrollCode;
                 var company = Main.Company;
@@ -310,8 +313,8 @@ namespace Pms.Payrolls.Module.ViewModels
             try
             {
                 if (Main == null) throw new Exception(ErrorMessages.MainIsNull);
-                if (Main.Company == null) throw new Exception(ErrorMessages.CompanyIsNull);
-                if (Main.PayrollCode == null) throw new Exception(ErrorMessages.PayrollCodeIsNull);
+                if (Main.Company == null) throw new Exception(ErrorMessages.CompanyIsEmpty);
+                if (Main.PayrollCode == null) throw new Exception(ErrorMessages.PayrollCodeIsEmpty);
 
                 var cutoff = new Cutoff(Main.CutoffId);
                 var company = Main.Company;

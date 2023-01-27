@@ -259,7 +259,7 @@ namespace Pms.Masterlists.Module.ViewModels
             {
                 if (Main == null) throw new Exception(ErrorMessages.MainIsNull);
                 if (Main.Site == null) throw new Exception(ErrorMessages.SiteIsNull);
-                if (Main.PayrollCode == null) throw new Exception(ErrorMessages.PayrollCodeIsNull);
+                if (Main.PayrollCode == null) throw new Exception(ErrorMessages.PayrollCodeIsEmpty);
 
                 var site = Main.Site.Value;
                 var exceptions = new List<Exception>();
@@ -440,7 +440,7 @@ namespace Pms.Masterlists.Module.ViewModels
             try
             {
                 if (Main == null) throw new Exception(ErrorMessages.MainIsNull);
-                if (Main.PayrollCode == null) throw new Exception(ErrorMessages.PayrollCodeIsNull);
+                if (Main.PayrollCode == null) throw new Exception(ErrorMessages.PayrollCodeIsEmpty);
 
                 var employees = (await m_Employees.GetEmployees(cancellationToken))
                     .HideArchived(HideArchived)
@@ -631,7 +631,7 @@ namespace Pms.Masterlists.Module.ViewModels
             try
             {
                 if (Main == null) throw new Exception(ErrorMessages.MainIsNull);
-                if (Main.PayrollCode == null) throw new Exception(ErrorMessages.PayrollCodeIsNull);
+                if (Main.PayrollCode == null) throw new Exception(ErrorMessages.PayrollCodeIsEmpty);
 
                 var employees = Employees.ToList();
                 await m_Employees.ExportMasterlist(employees, Main.PayrollCode, cancellationToken: cancellationToken);
@@ -661,7 +661,7 @@ namespace Pms.Masterlists.Module.ViewModels
             try
             {
                 if (Main == null) throw new Exception(ErrorMessages.MainIsNull);
-                if (Main.PayrollCode == null) throw new Exception(ErrorMessages.PayrollCodeIsNull);
+                if (Main.PayrollCode == null) throw new Exception(ErrorMessages.PayrollCodeIsEmpty);
 
                 var noTin = Employees.Where(t => string.IsNullOrEmpty(t.TIN)).ToList();
                 await m_Employees.ExportMasterlist(noTin, Main.PayrollCode, cancellationToken: cancellationToken);

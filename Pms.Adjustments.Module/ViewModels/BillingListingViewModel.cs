@@ -89,7 +89,7 @@ namespace Pms.Adjustments.Module.ViewModels
             try
             {
                 if (Main == null) throw new Exception(ErrorMessages.MainIsNull);
-                if (Main.PayrollCode == null) throw new Exception(ErrorMessages.PayrollCodeIsNull);
+                if (Main.PayrollCode == null) throw new Exception(ErrorMessages.PayrollCodeIsEmpty);
 
                 OnMessageSent("Exporting adjustments...");
                 OnProgressStart();

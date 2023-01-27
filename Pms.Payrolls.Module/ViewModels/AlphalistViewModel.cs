@@ -59,8 +59,8 @@ namespace Pms.Payrolls.Module.ViewModels
             try
             {
                 if (Main == null) throw new Exception(ErrorMessages.MainIsNull);
-                if (Main.Company == null) throw new Exception(ErrorMessages.CompanyIsNull);
-                if (Main.PayrollCode == null) throw new Exception(ErrorMessages.PayrollCodeIsNull);
+                if (Main.Company == null) throw new Exception(ErrorMessages.CompanyIsEmpty);
+                if (Main.PayrollCode == null) throw new Exception(ErrorMessages.PayrollCodeIsEmpty);
 
                 var cutoff = new Cutoff(Main.CutoffId);
                 var payrollCodeId = Main.PayrollCode.PayrollCodeId;

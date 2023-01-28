@@ -1,4 +1,5 @@
-﻿using Pms.Common.Enums;
+﻿using DryIoc;
+using Pms.Common.Enums;
 using Prism.Services.Dialogs;
 using System;
 using System.Collections.Generic;
@@ -14,6 +15,7 @@ namespace Pms.Common
         void Show(string message, string caption = "");
         void ShowError(string message, string caption = "");
         void ShowPrompt(string message, string caption = "");
+        void ShowDialog(string message, string title);
         void ShowDialog(string message, IDialogParameters parameters, Action<IDialogResult> callback,
             string title = "",
             PromptDialogButton button = PromptDialogButton.Ok);
@@ -41,6 +43,17 @@ namespace Pms.Common
             s_Dialog.ShowDialog(DialogNames.PromptDialog, parameters, callback);
         }
 
+        public void ShowDialog(string message, string title)
+        {
+            var dialogParameters = new DialogParameters()
+            {
+                { DialogParameterNames.Message, message },
+                { DialogParameterNames.Title, title },
+                { DialogParameterNames.PromptDialogButton, PromptDialogButton.Ok }
+            };
+            s_Dialog.ShowDialog(DialogNames.PromptDialog, dialogParameters, (_) => { });
+        }
+
         public void ShowError(string message, string caption = "")
         {
             MessageBox.Show(message, caption, button: MessageBoxButton.OK, icon: MessageBoxImage.Error);
@@ -62,6 +75,11 @@ namespace Pms.Common
         public void ShowDialog(string message, IDialogParameters parameters, Action<IDialogResult> callback, string caption = "", PromptDialogButton button = PromptDialogButton.Ok)
         {
             // do nothing
+        }
+
+        public void ShowDialog(string message, string title)
+        {
+            throw new NotImplementedException();
         }
 
         public void ShowError(string message, string caption = "")

@@ -85,7 +85,7 @@
         <StackPanel Orientation="Horizontal" Grid.Row="3" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="12">
             <Button Style="{DynamicResource YesButton}" Content="Yes" Command="{Binding PromptCommand}" CommandParameter="{x:Static prism:ButtonResult.Yes}" />
             <Button Style="{DynamicResource NoButton}" Content="No" Command="{Binding PromptCommand}" CommandParameter="{x:Static prism:ButtonResult.No}" />
-            <Button Style="{DynamicResource OkButton}" Content="OK" Command="{Binding PromptCommand}" CommandParameter="{x:Static prism:ButtonResult.OK}" />
+            <Button Style="{DynamicResource OkButton}" Content="Ok" Command="{Binding PromptCommand}" CommandParameter="{x:Static prism:ButtonResult.OK}" />
             <Button Style="{DynamicResource CancelButton}" Content="Cancel" Command="{Binding PromptCommand}" CommandParameter="{x:Static prism:ButtonResult.Cancel}" />
         </StackPanel>
     </Grid>

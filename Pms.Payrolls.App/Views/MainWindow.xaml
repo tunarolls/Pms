@@ -72,7 +72,7 @@
                 <Button Content="Alphalist" Command="{Binding AlphalistCommand}" />
                 <Button Content="Masterlist" Command="{Binding EmployeeCommand}" />
             </StackPanel>
-            <ContentControl prism:RegionManager.RegionName="{x:Static common:RegionNames.PayrollsContentRegion}" Grid.Row="2" Grid.Column="2" BorderBrush="#FF786F6F" BorderThickness="0.3" Margin="5,0,5,5" />
+            <ContentControl prism:RegionManager.RegionName="{x:Static common:RegionNames.PayrollsContentRegion}" Grid.Row="2" Grid.Column="2" BorderBrush="#FF786F6F" BorderThickness="0.3" Margin="8,0,8,8" />
 
 
             <!--<ContentControl Content="{Binding CurrentViewModel}" 

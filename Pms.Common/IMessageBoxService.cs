@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Pms.Common.Enums;
+using Prism.Services.Dialogs;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,13 +14,31 @@ namespace Pms.Common
         void Show(string message, string caption = "");
         void ShowError(string message, string caption = "");
         void ShowPrompt(string message, string caption = "");
+        void ShowDialog(string message, IDialogParameters parameters, Action<IDialogResult> callback,
+            string title = "",
+            PromptDialogButton button = PromptDialogButton.Ok);
     }
 
     public class MessageBoxService : IMessageBoxService
     {
+        private readonly IDialogService s_Dialog;
+
+        public MessageBoxService(IDialogService dialog)
+        {
+            s_Dialog = dialog;
+        }
+
         public void Show(string message, string caption = "")
         {
             MessageBox.Show(message, caption, button: MessageBoxButton.OK, icon: MessageBoxImage.None);
+        }
+
+        public void ShowDialog(string message, IDialogParameters parameters, Action<IDialogResult> callback, string title = "", PromptDialogButton button = PromptDialogButton.Ok)
+        {
+            parameters.Add(DialogParameterNames.Message, message);
+            parameters.Add(DialogParameterNames.Title, title);
+            parameters.Add(DialogParameterNames.PromptDialogButton, button);
+            s_Dialog.ShowDialog(DialogNames.PromptDialog, parameters, callback);
         }
 
         public void ShowError(string message, string caption = "")
@@ -35,6 +55,11 @@ namespace Pms.Common
     public class DummyMessageBoxService : IMessageBoxService
     {
         public void Show(string message, string caption = "")
+        {
+            // do nothing
+        }
+
+        public void ShowDialog(string message, IDialogParameters parameters, Action<IDialogResult> callback, string caption = "", PromptDialogButton button = PromptDialogButton.Ok)
         {
             // do nothing
         }

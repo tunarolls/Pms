@@ -18,6 +18,7 @@ namespace Pms.Common
         public void RegisterTypes(IContainerRegistry containerRegistry)
         {
             containerRegistry.RegisterDialog<CancelDialogView>(DialogNames.CancelDialog);
+            containerRegistry.RegisterDialog<PromptDialogView>(DialogNames.PromptDialog);
         }
     }
 }

@@ -26,6 +26,7 @@ namespace Pms.Common
     public class DialogNames
     {
         public const string CancelDialog = nameof(CancelDialog);
+        public const string PromptDialog = nameof(PromptDialog);
     }
 
     public class DialogParameterNames

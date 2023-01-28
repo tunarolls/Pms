@@ -11,7 +11,9 @@ namespace Pms.Timesheets.Tests
     [TestClass()]
     public class EmployeeViewTests
     {
+        [DataRow("Last", " ", " ", "Last")]
         [DataRow("Last, First M.", "First", "Middle", "Last")]
+        [DataRow("Last, First", "First", " ", "Last")]
         [DataRow("Last, First", "First", "", "Last")]
         [DataRow("Last", "", "", "Last")]
         [DataRow("First", "First")]

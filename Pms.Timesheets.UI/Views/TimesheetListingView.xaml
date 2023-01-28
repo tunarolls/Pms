@@ -114,7 +114,7 @@
                         </DataGridCheckBoxColumn.ElementStyle>
                     </DataGridCheckBoxColumn>
                     <DataGridTextColumn Header="EE Id" Binding="{Binding EEId}" />
-                    <DataGridTextColumn Header="Full Name" Binding="{Binding EE.Fullname}"/>
+                    <DataGridTextColumn Header="Full Name" Binding="{Binding EE.FullName}"/>
                     <DataGridTextColumn Header="EE Payroll Code" Binding="{Binding EE.PayrollCode}"/>
                     <DataGridTextColumn Header="Bank" Binding="{Binding EE.Bank}"/>
                     <DataGridTextColumn Header="Department" Binding="{Binding EE.Location}"/>

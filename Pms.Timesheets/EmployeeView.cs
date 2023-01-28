@@ -17,10 +17,10 @@ namespace Pms.Timesheets
         {
             get
             {
-                var fullName = string.Join(", ", new[] { LastName, FirstName }.Where(t => !string.IsNullOrEmpty(t)));
-                var end = string.Join(" ", new string[] { MiddleName.Length > 0 ? MiddleName[0].ToString() : "", NameExtension }.Where(t => !string.IsNullOrEmpty(t)));
-                end += !string.IsNullOrEmpty(end) ? "." : "";
-                return string.Join(" ", new[] { fullName, end }.Where(t => !string.IsNullOrEmpty(t)));
+                var fullName = string.Join(", ", new[] { LastName, FirstName }.Where(t => !string.IsNullOrWhiteSpace(t)));
+                var end = string.Join(" ", new string[] { MiddleName.Length > 0 ? MiddleName[0].ToString() : "", NameExtension }.Where(t => !string.IsNullOrWhiteSpace(t)));
+                end += !string.IsNullOrWhiteSpace(end) ? "." : "";
+                return string.Join(" ", new[] { fullName, end }.Where(t => !string.IsNullOrWhiteSpace(t)));
             }
         }
 

@@ -39,7 +39,7 @@ namespace Pms.Timesheets.Module
         public async Task<ICollection<Timesheet>> DownloadContent(Cutoff cutoff, string payrollCodeName, int page, CancellationToken cancellationToken = default)
         {
             var rawTimesheets = await _downloadProvider.DownloadTimesheets(cutoff.CutoffRange, payrollCodeName, page, cutoff.Site, cancellationToken);
-
+            
             if (rawTimesheets?.Message != null)
             {
                 foreach (var timesheet in rawTimesheets.Message)
@@ -50,7 +50,7 @@ namespace Pms.Timesheets.Module
                 return rawTimesheets.Message.ToList();
             }
 
-            return Enumerable.Empty<Timesheet>().ToList();
+            return rawTimesheets?.Message?.ToList() ?? new List<Timesheet>();
         }
 
         public async Task<DownloadSummary<Timesheet>?> DownloadContentSummary(Cutoff cutoff, string payrollCode, string site) =>
@@ -149,6 +149,21 @@ namespace Pms.Timesheets.Module
             return mappedTimesheets;
         }
 
+        public async Task<ICollection<Timesheet>> MapEmployeeView(Timesheet[]? timesheets, CancellationToken cancellationToken = default)
+        {
+            var mapped = new List<Timesheet>();
+            if (timesheets == null) return mapped;
+
+            foreach (var timesheet in timesheets)
+            {
+                var employee = await _timesheetProvider.FindEmployeeView(timesheet.EEId, cancellationToken);
+                timesheet.EE = employee ?? new();
+                mapped.Add(timesheet);
+            }
+
+            return mapped;
+        }
+
         public void SaveTimesheet(Timesheet? timesheet)
         {
             if (timesheet == null) throw new ArgumentNullException(nameof(timesheet));
@@ -159,6 +174,11 @@ namespace Pms.Timesheets.Module
         {
             if (timesheet == null) throw new ArgumentNullException(nameof(timesheet));
             await _timesheetManager.SaveTimesheet(timesheet, timesheet.CutoffId, 0, cancellationToken);
+        }
+
+        public async Task SaveTimesheet(Timesheet timesheet, Cutoff cutoff, int page, CancellationToken cancellationToken = default)
+        {
+            await _timesheetManager.SaveTimesheet(timesheet, cutoff.CutoffId, page, cancellationToken);
         }
     }
 }

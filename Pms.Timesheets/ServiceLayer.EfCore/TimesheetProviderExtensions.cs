@@ -35,17 +35,17 @@ namespace Pms.Timesheets.ServiceLayer.EfCore
 
         public static IEnumerable<Timesheet> Exportable(this IEnumerable<Timesheet> timesheets)
         {
-            return timesheets.Where(ts => ts.IsConfirmed && ts.TotalHours > 0).OrderBy(ts => ts.EE.Fullname);
+            return timesheets.Where(ts => ts.IsConfirmed && ts.TotalHours > 0).OrderBy(ts => ts.EE.FullName);
         }
 
         public static IEnumerable<Timesheet> UnconfirmedWithoutAttendance(this IEnumerable<Timesheet> timesheets)
         {
-            return timesheets.Where(ts => !ts.IsConfirmed && ts.TotalHours == 0).OrderBy(ts => ts.EE.Fullname);
+            return timesheets.Where(ts => !ts.IsConfirmed && ts.TotalHours == 0).OrderBy(ts => ts.EE.FullName);
         }
 
         public static IEnumerable<Timesheet> UnconfirmedWithAttendance(this IEnumerable<Timesheet> timesheets)
         {
-            return timesheets.Where(ts => !ts.IsConfirmed && ts.TotalHours > 0).OrderBy(ts => ts.EE.Fullname);
+            return timesheets.Where(ts => !ts.IsConfirmed && ts.TotalHours > 0).OrderBy(ts => ts.EE.FullName);
         }
 
         public static List<int> GroupByPage(this IEnumerable<Timesheet> timesheets) =>

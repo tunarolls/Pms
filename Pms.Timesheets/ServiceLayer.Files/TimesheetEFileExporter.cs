@@ -21,7 +21,7 @@ namespace Pms.Timesheets.ServiceLayer.Files
             _cutoff = cutoff;
             _bank = bank;
             _payrollCode = payrollCode;
-            _twoPeriodTimesheets = twoPeriodTimesheets.OrderBy(t => t.FirstOrDefault()?.EE?.Fullname).ToList();
+            _twoPeriodTimesheets = twoPeriodTimesheets.OrderBy(t => t.FirstOrDefault()?.EE?.FullName).ToList();
         }
 
         public void ExportEFile(string filePath)
@@ -74,7 +74,7 @@ namespace Pms.Timesheets.ServiceLayer.Files
             row.CreateCell(1).SetCellValue(_current.EEId);
             if (_current.EE is not null)
             {
-                row.CreateCell(2).SetCellValue(_current.EE.Fullname);
+                row.CreateCell(2).SetCellValue(_current.EE.FullName);
                 row.CreateCell(3).SetCellValue(_current.EE.Location);
             }
             row.CreateCell(4).SetCellValue(_previous.TotalHours);
@@ -106,7 +106,7 @@ namespace Pms.Timesheets.ServiceLayer.Files
                     row = sheet.CreateRow(currentRowIndex + r);
                     row.CreateCell(0).SetCellValue(r + 1);
                     row.CreateCell(1).SetCellValue(employees[r].EEId);
-                    row.CreateCell(2).SetCellValue(employees[r].Fullname);
+                    row.CreateCell(2).SetCellValue(employees[r].FullName);
                 }
             }
         }

@@ -18,7 +18,7 @@ namespace Pms.Timesheets.Module
         internal static IEnumerable<Timesheet> FilterSearchInput(this IEnumerable<Timesheet> timesheets, string filter)
         {
             return !string.IsNullOrEmpty(filter)
-                ? timesheets.Where(t => t.EEId.Contains(filter) || (t.EE != null && t.EE.Fullname.Contains(filter)))
+                ? timesheets.Where(t => t.EEId.Contains(filter) || (t.EE != null && t.EE.FullName.Contains(filter)))
                 : timesheets;
         }
     }

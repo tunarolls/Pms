@@ -58,7 +58,7 @@ namespace Pms.Timesheets.ServiceLayer.Files
             row.CreateCell(1).SetCellValue(timesheet.EEId);
             if (timesheet.EE is not null)
             {
-                row.CreateCell(2).SetCellValue(timesheet.EE.Fullname);
+                row.CreateCell(2).SetCellValue(timesheet.EE.FullName);
                 row.CreateCell(3).SetCellValue(timesheet.EE.Location);
             }
             row.CreateCell(4).SetCellValue(timesheet.TotalHours);

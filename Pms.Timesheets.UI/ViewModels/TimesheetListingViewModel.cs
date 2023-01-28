@@ -567,7 +567,7 @@ namespace Pms.Timesheets.Module.ViewModels
             {
                 var isEmpty = string.IsNullOrEmpty(SearchInput);
                 var idMatch = timesheet.EEId.Contains(SearchInput);
-                var nameMatch = timesheet.EE.Fullname.Contains(SearchInput);
+                var nameMatch = timesheet.EE.FullName.Contains(SearchInput);
 
                 return isEmpty || idMatch || nameMatch;
             }

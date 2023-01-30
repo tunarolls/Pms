@@ -62,7 +62,7 @@ namespace Pms.Timesheets.ServiceLayer.Files
         private static string[] ToDBFRecordFormat(Timesheet timesheet, int CODE, int DATER) =>
             new[] { DATER.ToString(),
                 CODE.ToString(),
-                timesheet.EEId,
+                timesheet.EEId ?? string.Empty,
                 timesheet.TotalHours.ToString(),
                 timesheet.TotalOT.ToString(),
                 timesheet.TotalRDOT.ToString(),

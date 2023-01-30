@@ -19,33 +19,33 @@ namespace Pms.Timesheets.ServiceLayer.EfCore
         }
 
         public static IEnumerable<Timesheet> FilterByPayrollCode(this IEnumerable<Timesheet> timesheets, string payrollCode) =>
-           timesheets
-                .Where(ts => ts.EE is not null)
-                .Where(ts => ts.EE.PayrollCode == payrollCode);
+           timesheets.Where(ts => ts.EE != null && ts.EE.PayrollCode == payrollCode);
 
-        public static IQueryable<Timesheet> FilterByPayrollCode(this IQueryable<Timesheet> timesheets, string payrollCode)
+        public static IQueryable<Timesheet> FilterByPayrollCode(this IQueryable<Timesheet> timesheets, string? payrollCode)
         {
-            return timesheets.Where(t => t.EE.PayrollCode == payrollCode);
+            return !string.IsNullOrEmpty(payrollCode)
+                ? timesheets.Where(t => t.EE != null && t.EE.PayrollCode == payrollCode)
+                : timesheets;
         }
 
         public static IEnumerable<Timesheet> FilterByBank(this IEnumerable<Timesheet> timesheets, TimesheetBankChoices bank)
         {
-            return timesheets.Where(ts => ts.EE.Bank == bank);
+            return timesheets.Where(ts => ts.EE != null && ts.EE.Bank == bank);
         }
 
         public static IEnumerable<Timesheet> Exportable(this IEnumerable<Timesheet> timesheets)
         {
-            return timesheets.Where(ts => ts.IsConfirmed && ts.TotalHours > 0).OrderBy(ts => ts.EE.FullName);
+            return timesheets.Where(ts => ts.IsConfirmed && ts.TotalHours > 0).OrderBy(ts => ts.EE?.FullName);
         }
 
         public static IEnumerable<Timesheet> UnconfirmedWithoutAttendance(this IEnumerable<Timesheet> timesheets)
         {
-            return timesheets.Where(ts => !ts.IsConfirmed && ts.TotalHours == 0).OrderBy(ts => ts.EE.FullName);
+            return timesheets.Where(ts => !ts.IsConfirmed && ts.TotalHours == 0).OrderBy(ts => ts.EE?.FullName);
         }
 
         public static IEnumerable<Timesheet> UnconfirmedWithAttendance(this IEnumerable<Timesheet> timesheets)
         {
-            return timesheets.Where(ts => !ts.IsConfirmed && ts.TotalHours > 0).OrderBy(ts => ts.EE.FullName);
+            return timesheets.Where(ts => !ts.IsConfirmed && ts.TotalHours > 0).OrderBy(ts => ts.EE?.FullName);
         }
 
         public static List<int> GroupByPage(this IEnumerable<Timesheet> timesheets) =>
@@ -91,22 +91,18 @@ namespace Pms.Timesheets.ServiceLayer.EfCore
         public static IEnumerable<TimesheetBankChoices> ExtractBanks(this IEnumerable<Timesheet> timesheets)
         {
             return timesheets
-                .GroupBy(t => t.EE.Bank)
-                .Select(t => t.First().EE.Bank)
+                .Where(t => t.EE != null)
+                .GroupBy(t => t.EE?.Bank)
+                .Select(t => t.First().EE?.Bank ?? default)
                 .OrderBy(t => t);
         }
 
 
-        public static List<string> ExtractPayrollCodes(this IEnumerable<Timesheet> timesheets) =>
+        public static IEnumerable<string> ExtractPayrollCodes(this IEnumerable<Timesheet> timesheets) =>
             timesheets
-                .Where(ts => ts.EE is not null)
-                .Where(ts => ts.EE.PayrollCode != "")
-                .GroupBy(ts => ts.EE.PayrollCode)
-                .Select(ts => ts.First())
-                .OrderBy(ts => ts.EE.PayrollCode)
-                .Select(ts => ts.EE.PayrollCode).ToList();
-
-        
-
+                .Where(t => !string.IsNullOrEmpty(t.EE?.PayrollCode))
+                .GroupBy(t => t.EE?.PayrollCode)
+                .Select(t => t.First().EE?.PayrollCode ?? string.Empty)
+                .OrderBy(t => t);
     }
 }

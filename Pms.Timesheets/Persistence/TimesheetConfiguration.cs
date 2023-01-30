@@ -9,7 +9,7 @@ namespace Pms.Timesheets.Persistence
         {
             builder.HasOne(ts => ts.EE).WithMany().HasForeignKey("EEId");
             builder.Property(cc => cc.TimesheetId).HasColumnType("VARCHAR(35)").IsRequired().ValueGeneratedOnAdd();
-            builder.Property(cc => cc.EEId).HasColumnType("VARCHAR(8)").IsRequired();
+            builder.Property(cc => cc.EEId).HasColumnType("VARCHAR(8)");
             builder.Property(cc => cc.CutoffId).HasColumnType("VARCHAR(6)").IsRequired();
             builder.Property(cc => cc.TotalHours).HasColumnType("DOUBLE(6,2)").IsRequired();
             builder.Property(cc => cc.TotalOT).HasColumnType("DOUBLE(6,2)").IsRequired();

@@ -85,7 +85,7 @@ namespace Pms.Timesheets.Module
             return await _timesheetProvider.GetTimesheets(cutoffId, cancellationToken);
         }
 
-        public async Task<ICollection<Timesheet>> GetTimesheets(string cutoffId, string payrollCode, CancellationToken cancellationToken = default)
+        public async Task<ICollection<Timesheet>> GetTimesheets(string cutoffId, string? payrollCode, CancellationToken cancellationToken = default)
         {
             return await _timesheetProvider.GetTimesheets(cutoffId, payrollCode, cancellationToken);
         }
@@ -123,7 +123,7 @@ namespace Pms.Timesheets.Module
             try
             {
                 var da = _timesheetProvider.GetTimesheetNoEETimesheet(cutoffId)
-                    .Select(ts => ts.EEId)
+                    .Select(ts => ts.EEId ?? string.Empty)
                     .ToList();
                 return da;
             }

@@ -72,7 +72,7 @@ namespace Pms.Timesheets.Module.ViewModels
                 OnMessageSent("Saving...");
                 await m_Timesheets.SaveTimesheet(_timesheet, cancellationToken);
                 OnTaskCompleted();
-                s_Message.Show("Timesheet saved.");
+                s_Message.ShowDialog("Timesheet saved.", "Save");
                 Close();
             }
             catch (TaskCanceledException) { OnTaskException(); }

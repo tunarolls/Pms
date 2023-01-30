@@ -495,17 +495,8 @@ namespace Pms.Timesheets.Module.ViewModels
                 var cutoff = new Cutoff(Main?.CutoffId);
 
                 OnMessageSent("Retrieving timesheets...");
-                if (payrollCode == null)
-                {
-                    var timesheets = await m_Timesheets.GetTimesheets(cutoff.CutoffId, cancellationToken);
-                    Timesheets = new ObservableCollection<Timesheet>(timesheets);
-                }
-                else
-                {
-                    var timesheets = await m_Timesheets.GetTimesheets(cutoff.CutoffId, payrollCode.PayrollCodeId, cancellationToken);
-                    Timesheets = new ObservableCollection<Timesheet>(timesheets);
-                }
-
+                var timesheets = await m_Timesheets.GetTimesheets(cutoff.CutoffId, payrollCode?.PayrollCodeId, cancellationToken);
+                Timesheets = new ObservableCollection<Timesheet>(timesheets);
                 RaisePropertyChanged(nameof(Timesheets));
                 var source = CollectionViewSource.GetDefaultView(Timesheets);
                 source.Filter = t => FilterTimesheets(t);
@@ -566,8 +557,8 @@ namespace Pms.Timesheets.Module.ViewModels
             if (t is Timesheet timesheet)
             {
                 var isEmpty = string.IsNullOrEmpty(SearchInput);
-                var idMatch = timesheet.EEId.Contains(SearchInput);
-                var nameMatch = timesheet.EE.FullName.Contains(SearchInput);
+                var idMatch = timesheet.EEId?.Contains(SearchInput) ?? false;
+                var nameMatch = timesheet.EE?.FullName?.Contains(SearchInput) ?? false;
 
                 return isEmpty || idMatch || nameMatch;
             }

@@ -9,8 +9,8 @@ namespace Pms.Timesheets
 {
     public interface IProvideTimesheetService
     {
-        EmployeeView FindEmployeeView(string eeId);
-        Task<EmployeeView?> FindEmployeeView(string eeId, CancellationToken cancellationToken = default);
+        EmployeeView FindEmployeeView(string? eeId);
+        Task<EmployeeView?> FindEmployeeView(string? eeId, CancellationToken cancellationToken = default);
         public int GetLastPage(string cutoffId, string payrollCode);
 
         public List<int> GetMissingPages(string cutoffId, string payrollCode);
@@ -29,7 +29,7 @@ namespace Pms.Timesheets
         IEnumerable<Timesheet> GetTimesheets(string cutoffId);
 
         Task<ICollection<Timesheet>> GetTimesheets(string cutoffId, CancellationToken cancellationToken = default);
-        Task<ICollection<Timesheet>> GetTimesheets(string cutoffId, string payrollCode, CancellationToken cancellationToken = default);
+        Task<ICollection<Timesheet>> GetTimesheets(string cutoffId, string? payrollCode, CancellationToken cancellationToken = default);
         IEnumerable<Timesheet> GetTimesheetsByMonth(int month);
 
         IEnumerable<Timesheet> GetTwoPeriodTimesheets(string cutoffId);

@@ -54,14 +54,6 @@ namespace Pms.Timesheets.ServiceLayer.EfCore
         public async Task<ICollection<Timesheet>> GetTimesheets(string cutoffId, string? payrollCode, CancellationToken cancellationToken = default)
         {
             using var context = _factory.CreateDbContext();
-            //var timesheets = from t in context.Timesheets
-            //                 join e in context.Employees on t.EEId equals e.EEId into grouping
-            //                 from g in grouping.DefaultIfEmpty()
-            //                 select t;
-            //return await timesheets
-            //    .FilterByCutoffId(cutoffId)
-            //    .FilterByPayrollCode(payrollCode)
-            //    .ToListAsync(cancellationToken);
             return await context.Timesheets
                 .Include(t => t.EE)
                 .FilterByCutoffId(cutoffId)
@@ -218,7 +210,7 @@ namespace Pms.Timesheets.ServiceLayer.EfCore
         public async Task<EmployeeView?> FindEmployeeView(string? eeId, CancellationToken cancellationToken = default)
         {
             using var context = _factory.CreateDbContext();
-            return await context.Employees.FindAsync(new object[] { eeId ?? string.Empty }, cancellationToken);
+            return await context.Employees.FindAsync(new object?[] { eeId }, cancellationToken);
         }
     }
 }

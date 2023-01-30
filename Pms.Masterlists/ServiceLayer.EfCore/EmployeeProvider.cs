@@ -6,6 +6,16 @@ using System.Linq;
 
 namespace Pms.Masterlists.ServiceLayer.EfCore
 {
+    static class EmployeeProviderExtensions
+    {
+        public static IQueryable<Employee> FilterByPayrollCode(this IQueryable<Employee> employees, string? payrollCode)
+        {
+            return !string.IsNullOrEmpty(payrollCode)
+                ? employees.Where(t => t.PayrollCode == payrollCode)
+                : employees;
+        }
+    }
+
     public class EmployeeProvider 
     {
         private readonly IDbContextFactory<EmployeeDbContext> _factory;
@@ -32,10 +42,10 @@ namespace Pms.Masterlists.ServiceLayer.EfCore
             return Context.Employees.Find(eeId);
         }
 
-        public async Task<Employee?> FindEmployee(string eeId, CancellationToken cancellationToken = default)
+        public async Task<Employee?> FindEmployee(string? eeId, CancellationToken cancellationToken = default)
         {
             using var context = _factory.CreateDbContext();
-            return await context.Employees.FindAsync(eeId, cancellationToken);
+            return await context.Employees.FindAsync(new object?[] { eeId }, cancellationToken);
         }
 
         public IQueryable<Employee> GetEmployees()
@@ -48,6 +58,12 @@ namespace Pms.Masterlists.ServiceLayer.EfCore
         {
             using var context = _factory.CreateDbContext();
             return await context.Employees.ToListAsync(cancellationToken);
+        }
+
+        public async Task<ICollection<Employee>> GetEmployees(string? payrollCode, CancellationToken cancellationToken = default)
+        {
+            using var context = _factory.CreateDbContext();
+            return await context.Employees.FilterByPayrollCode(payrollCode).ToListAsync(cancellationToken);
         }
     }
 }

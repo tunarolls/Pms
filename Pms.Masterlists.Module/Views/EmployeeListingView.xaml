@@ -29,7 +29,7 @@
             <RowDefinition Height="40"/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="450"/>
+            <ColumnDefinition Width="Auto" />
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
         <!--MENU-->
@@ -41,8 +41,8 @@
                 <MenuItem Header="Master File" Command="{Binding MasterFileImport}"/>
             </MenuItem>-->
             <MenuItem Header="Export" Margin="3">
-                <MenuItem Header="All" Command="{Binding MasterlistExportCommand}"/>
-                <MenuItem Header="No TIN" Command="{Binding NoTinEEExportCommand}"/>
+                <MenuItem Header="All" Command="{Binding MasterlistExportCommand}" />
+                <MenuItem Header="No TIN" Command="{Binding UnknownTinExportCommand}" />
             </MenuItem>
             <MenuItem Header="Sync from HRMS" Margin="3">
                 <MenuItem Header="Sync All" Command="{Binding SyncAllCommand}" />

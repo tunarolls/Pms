@@ -106,7 +106,7 @@ namespace Pms.Common.ViewModels
         }
         #endregion
 
-        private void Caller_ErrorFound(object? sender, EventArgs e)
+        private void Caller_ErrorFound(object? sender, Exception ex)
         {
             ErrorCount += 1;
             HasErrors = ErrorCount > 0;

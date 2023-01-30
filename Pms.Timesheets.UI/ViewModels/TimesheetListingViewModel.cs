@@ -56,7 +56,7 @@ namespace Pms.Timesheets.Module.ViewModels
                 if (SetProperty(ref _searchInput, value))
                 {
                     var source = CollectionViewSource.GetDefaultView(Timesheets);
-                    source.Filter = t => FilterTimesheets(t);
+                    source.Refresh();
                 }
             }
         }
@@ -409,7 +409,7 @@ namespace Pms.Timesheets.Module.ViewModels
                 {
                     { PmsConstants.Timesheet, timesheet }
                 };
-                s_Dialog.ShowDialog(ViewNames.TimesheetDetailView, dialogParams, (_) => { });
+                s_Dialog.Show(ViewNames.TimesheetDetailView, dialogParams, (_) => { });
             }
         }
         #endregion

@@ -157,7 +157,7 @@ namespace Pms.Timesheets.Module
             foreach (var timesheet in timesheets)
             {
                 var employee = await _timesheetProvider.FindEmployeeView(timesheet.EEId, cancellationToken);
-                timesheet.EE = employee ?? new();
+                timesheet.EE = employee;
                 mapped.Add(timesheet);
             }
 

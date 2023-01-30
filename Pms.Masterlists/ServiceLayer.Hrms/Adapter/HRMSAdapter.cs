@@ -59,36 +59,32 @@ namespace Pms.Masterlists.ServiceLayer.Hrms.Adapter
 
         public async Task<T?> GetEmployeeFromHRMS<T>(string eeId, string site, CancellationToken cancellationToken = default)
         {
-            try
+            _parameter.BodyArgs["idno"] = eeId;
+            _parameter.BodyArgs["field"] = "acctg";
+            var content = new FormUrlEncodedContent(_parameter.BodyArgs);
+            var response = await _client.PostAsync(_parameter.Urls[site], content, cancellationToken);
+            var responseString = await response.Content.ReadAsStringAsync(cancellationToken);
+
+            if (response.IsSuccessStatusCode)
             {
-                _parameter.BodyArgs["field"] = "acctg";
-                var content = new FormUrlEncodedContent(_parameter.BodyArgs);
-                var response = await _client.PostAsync(_parameter.Urls[site], content, cancellationToken);
-                string responseString = await response.Content.ReadAsStringAsync(cancellationToken);
-
-                if (response.IsSuccessStatusCode)
+                var jsonSettings = new JsonSerializerSettings
                 {
-                    var jsonSettings = new JsonSerializerSettings
-                    {
-                        NullValueHandling = NullValueHandling.Ignore
-                    };
-
-                    HRMSResponse<T>? employee = JsonConvert.DeserializeObject<HRMSResponse<T>>(responseString, jsonSettings);
-                    if (employee != null) return employee.Message.FirstOrDefault();
-                }
-                else
+                    NullValueHandling = NullValueHandling.Ignore
+                };
+                var employee = JsonConvert.DeserializeObject<HRMSResponse<T>>(responseString, jsonSettings);
+                if (employee != null) return employee.Message.ElementAtOrDefault(0);
+            }
+            else
+            {
+                switch (response.StatusCode)
                 {
-                    switch (response.StatusCode)
-                    {
-                        case (System.Net.HttpStatusCode)400:
-                            throw new InvalidRequestException();
-                        case (System.Net.HttpStatusCode)404:
-                            throw new EmployeeNotFoundException(eeId);
-                    }
+                    case (System.Net.HttpStatusCode)400:
+                        throw new InvalidRequestException($"Status: {response.StatusCode}\nReason: {response.ReasonPhrase}");
+                    case (System.Net.HttpStatusCode)404:
+                        throw new EmployeeNotFoundException(eeId);
                 }
             }
-            catch (InvalidRequestException) { }
-            catch (EmployeeNotFoundException) { }
+
             return default;
         }
 
@@ -100,7 +96,7 @@ namespace Pms.Masterlists.ServiceLayer.Hrms.Adapter
                 _parameter.BodyArgs["joined_date_start"] = fromDate.ToString("yyyy-MM-dd");
                 var content = new FormUrlEncodedContent(_parameter.BodyArgs);
                 var response = await _client.PostAsync(_parameter.Urls[site], content, cancellationToken);
-                string responseString = await response.Content.ReadAsStringAsync(cancellationToken);
+                var responseString = await response.Content.ReadAsStringAsync(cancellationToken);
 
                 if (response.IsSuccessStatusCode)
                 {
@@ -109,7 +105,7 @@ namespace Pms.Masterlists.ServiceLayer.Hrms.Adapter
                         NullValueHandling = NullValueHandling.Ignore
                     };
 
-                    HRMSResponse<T>? employee = JsonConvert.DeserializeObject<HRMSResponse<T>>(responseString, jsonSettings);
+                    var employee = JsonConvert.DeserializeObject<HRMSResponse<T>?>(responseString, jsonSettings);
                     if (employee != null) return employee.Message.ToList();
                 }
                 else
@@ -180,7 +176,7 @@ namespace Pms.Masterlists.ServiceLayer.Hrms.Adapter
                         NullValueHandling = NullValueHandling.Ignore
                     };
 
-                    var employee = JsonConvert.DeserializeObject<HRMSResponse<T>>(responseString, jsonSettings);
+                    var employee = JsonConvert.DeserializeObject<HRMSResponse<T>?>(responseString, jsonSettings);
                     if (employee != null) return employee.Message.ToList();
                 }
                 else

@@ -8,6 +8,13 @@ namespace Pms.Masterlists.ServiceLayer.Hrms.Exceptions
 {
     public class InvalidRequestException : Exception
     {
-        public InvalidRequestException() { }
+        public InvalidRequestException() : base()
+        {
+
+        }
+
+        public InvalidRequestException(string? response) : base(response)
+        {
+        }
     }
 }

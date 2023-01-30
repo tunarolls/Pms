@@ -21,7 +21,9 @@ namespace Pms.Common.ViewModels
 
         public PromptDialogButton PromptDialogButton { get; private set; }
         public string Message { get; private set; } = string.Empty;
+        public string MoreInfo { get; private set; } = string.Empty;
         public DelegateCommand<object?> PromptCommand { get; }
+        public bool HasMoreInfo { get; private set; }
 
         private void Prompt(object? parameter)
         {
@@ -52,9 +54,13 @@ namespace Pms.Common.ViewModels
             PromptDialogButton = parameters.GetValue<PromptDialogButton?>(DialogParameterNames.PromptDialogButton) ?? PromptDialogButton.Ok;
             Message = parameters.GetValue<string?>(DialogParameterNames.Message) ?? string.Empty;
             Title = parameters.GetValue<string?>(DialogParameterNames.Title) ?? string.Empty;
+            MoreInfo = parameters.GetValue<string?>(DialogParameterNames.MoreInfo) ?? string.Empty;
+            HasMoreInfo = !string.IsNullOrEmpty(MoreInfo);
             RaisePropertyChanged(nameof(PromptDialogButton));
             RaisePropertyChanged(nameof(Message));
             RaisePropertyChanged(nameof(Title));
+            RaisePropertyChanged(nameof(MoreInfo));
+            RaisePropertyChanged(nameof(HasMoreInfo));
         }
         #endregion
     }

@@ -1,4 +1,5 @@
 ﻿using FastExpressionCompiler.LightExpression;
+using Google.Protobuf.WellKnownTypes;
 using NPOI.HPSF;
 using Pms.Common;
 using Pms.Common.Enums;
@@ -9,12 +10,16 @@ using Prism.Regions;
 using Prism.Services.Dialogs;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Security.Policy;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Data;
 
 namespace Pms.Masterlists.Module.ViewModels
 {
@@ -23,7 +28,6 @@ namespace Pms.Masterlists.Module.ViewModels
         public DummyEmployeeListingViewMode(Employees employees, IMessageBoxService message, IDialogService dialog, IFileDialogService fileDialog)
             : base(employees, message, dialog, fileDialog)
         {
-            Employees = new Employee[] { new Employee() };
         }
     }
 
@@ -59,31 +63,71 @@ namespace Pms.Masterlists.Module.ViewModels
             OpenPayrollCodeViewCommand = new DelegateCommand(OpenPayrollCodeView);
         }
 
-        #region properties
-        private IEnumerable<Employee> _employees = Enumerable.Empty<Employee>();
-        private int _activeEECount;
-        //private string _companyId = string.Empty;
-        private bool _hideArchived;
-        private int _nonActiveEECount;
-        //private PayrollCode _payrollCode = new();
-        //private string _payrollCodeId = string.Empty;
-        private string _searchInput = string.Empty;
-        //private SiteChoices _site = SiteChoices.MANILA;
+        
 
-
+        public bool KeepAlive => true;
         public IMasterlistsMain? Main { get; set; }
+
+        #region properties
+        private int _activeEECount;
         public int ActiveEECount { get => _activeEECount; set => SetProperty(ref _activeEECount, value); }
 
-        //public string CompanyId { get => _companyId; set => SetProperty(ref _companyId, value); }
+        private ObservableCollection<Employee>? _employees;
+        public ObservableCollection<Employee>? Employees
+        {
+            get => _employees;
+            set
+            {
+                var oldValue = _employees;
+                var newValue = value;
 
-        public IEnumerable<Employee> Employees { get => _employees; set => SetProperty(ref _employees, value); }
+                if (oldValue != null)
+                {
+                    var oldSource = CollectionViewSource.GetDefaultView(oldValue);
+                    oldSource.CollectionChanged -= Employees_CollectionChanged;
+                }
 
-        public bool HideArchived { get => _hideArchived; set => SetProperty(ref _hideArchived, value); }
+                if (newValue != null)
+                {
+                    var newSource = CollectionViewSource.GetDefaultView(newValue);
+                    newSource.CollectionChanged += Employees_CollectionChanged;
+                    newSource.Filter = t => FilterEmployee(t);
+                }
 
+                SetProperty(ref _employees, value);
+            }
+        }
+
+        private bool _hideArchived;
+        public bool HideArchived
+        {
+            get => _hideArchived;
+            set
+            {
+                if (SetProperty(ref _hideArchived, value))
+                {
+                    var source = CollectionViewSource.GetDefaultView(Employees);
+                    source.Refresh();
+                }
+            }
+        }
+
+        private int _nonActiveEECount;
         public int NonActiveEECount { get => _nonActiveEECount; set => SetProperty(ref _nonActiveEECount, value); }
 
-        public string SearchInput { get => _searchInput; set => SetProperty(ref _searchInput, value); }
-        //public SiteChoices Site { get => _site; set => SetProperty(ref _site, value); }
+        private string _searchInput = string.Empty;
+        public string SearchInput
+        {
+            get => _searchInput;
+            set
+            {
+                if (SetProperty(ref _searchInput, value))
+                {
+                    var source = CollectionViewSource.GetDefaultView(Employees);
+                    source.Refresh();
+                }
+            }
+        }
         #endregion
 
         #region commands
@@ -97,13 +141,11 @@ namespace Pms.Masterlists.Module.ViewModels
         public DelegateCommand SyncAllCommand { get; }
         public DelegateCommand SyncNewlyHiredCommand { get; }
         public DelegateCommand SyncResignedCommand { get; }
-
-        public bool KeepAlive => true;
         #endregion
 
         public void SelectDate(Action<IDialogResult> selectDateCallback)
         {
-            s_Dialog.Show(ViewNames.SelectDateView, selectDateCallback);
+            s_Dialog.ShowDialog(ViewNames.SelectDateView, selectDateCallback);
         }
 
         #region sync newly hired
@@ -116,9 +158,9 @@ namespace Pms.Masterlists.Module.ViewModels
         {
             if (result.Result == ButtonResult.OK)
             {
-                var selectedDate = result.Parameters.GetValue<DateTime>(PmsConstants.SelectedDate);
+                var selectedDate = result.Parameters.GetValue<DateTime?>(PmsConstants.SelectedDate) ?? DateTime.Now;
                 var cts = GetCancellationTokenSource();
-                var dialogParameters = CreateDialogParameters("Loading", "Syncing data...", this, cts);
+                var dialogParameters = CreateDialogParameters(this, cts);
                 s_Dialog.Show(DialogNames.CancelDialog, dialogParameters, (_) => { });
                 _ = SyncNewlyHired(selectedDate, cts.Token);
             }
@@ -128,15 +170,22 @@ namespace Pms.Masterlists.Module.ViewModels
         {
             try
             {
-                if (Main == null) throw new Exception(ErrorMessages.MainIsNull);
-                if (Main.Site == null) throw new Exception(ErrorMessages.SiteIsEmpty);
-
+                var site = Main?.Site ?? SiteChoices.MANILA;
                 var exceptions = new List<Exception>();
-                var site = Main.Site.Value;
-                var employees = await m_Employees.SyncNewlyHired(selectedDate, site.ToString(), cancellationToken);
-                if (!employees.Any()) return;
-                OnProgressStart(employees.Count);
 
+                OnProgressStart();
+                OnMessageSent("Retrieving HRMS data...");
+                var employees = await m_Employees.SyncNewlyHired(selectedDate, site, cancellationToken);
+
+                if (!employees.Any())
+                {
+                    OnTaskCompleted();
+                    s_Message.ShowDialog("No employees synced.", "Sync");
+                    return;
+                }
+
+                OnMessageSent("Syncing...");
+                OnProgressStart(employees.Count);
                 foreach (var employee in employees)
                 {
                     try
@@ -149,29 +198,45 @@ namespace Pms.Masterlists.Module.ViewModels
                         }
                     }
                     catch (TaskCanceledException) { throw; }
-                    catch (InvalidFieldValuesException ex) { exceptions.Add(ex); OnErrorFound(); }
-                    catch (InvalidFieldValueException ex) { exceptions.Add(ex); OnErrorFound(); }
-                    catch (DuplicateBankInformationException ex) { exceptions.Add(ex); OnErrorFound(); }
-                    catch (Exception ex) { exceptions.Add(ex); OnErrorFound(); }
+                    catch (Exception ex)
+                    {
+                        exceptions.Add(new Exception($"Error found with employee id: {employee.EEId}", ex));
+                        OnErrorFound();
+                    }
                     finally { OnProgressIncrement(); }
                 }
 
-                m_Employees.ReportExceptions(exceptions, new PayrollCode(), $"{site}-NEWLYHIRED");
+                await Task.Run(() =>
+                {
+                    m_Employees.ReportExceptions(exceptions, new PayrollCode(), $"{site}-NEWLYHIRED");
+                }, cancellationToken);
+
+                var payrollCode = Main?.PayrollCode?.PayrollCodeId;
+                await LoadValues(payrollCode, cancellationToken);
+
+                if (exceptions.Any()) throw new AggregateException(exceptions);
+                else s_Message.ShowDialog("Operation completed without errors.", "Sync");
+
                 OnTaskCompleted();
             }
             catch (TaskCanceledException)
             {
                 OnTaskException();
             }
-            catch (HttpRequestException)
+            catch (AggregateException ex)
             {
                 OnTaskException();
-                s_Message.ShowError(ErrorMessages.HrmsHttpRequestError);
+                s_Message.ShowDialog(ex.Message, "Sync", ex.ToString());
+            }
+            catch (HttpRequestException ex)
+            {
+                OnTaskException();
+                s_Message.ShowDialog(ErrorMessages.HrmsHttpRequestError, "Sync", ex.ToString());
             }
             catch (Exception ex)
             {
                 OnTaskException();
-                s_Message.ShowError(ex.Message);
+                s_Message.ShowDialog(ex.Message, "Sync", ex.ToString());
             }
         }
         #endregion
@@ -186,9 +251,9 @@ namespace Pms.Masterlists.Module.ViewModels
         {
             if (result.Result == ButtonResult.OK)
             {
-                var selectedDate = result.Parameters.GetValue<DateTime>(PmsConstants.SelectedDate);
+                var selectedDate = result.Parameters.GetValue<DateTime?>(PmsConstants.SelectedDate) ?? DateTime.Now;
                 var cts = GetCancellationTokenSource();
-                var dialogParameters = CreateDialogParameters("Loading", "Syncing data...", this, cts);
+                var dialogParameters = CreateDialogParameters(this, cts);
                 s_Dialog.Show(DialogNames.CancelDialog, dialogParameters, (_) => { });
                 _ = SyncResigned(selectedDate, cts.Token);
             }
@@ -198,15 +263,22 @@ namespace Pms.Masterlists.Module.ViewModels
         {
             try
             {
-                if (Main == null) throw new Exception(ErrorMessages.MainIsNull);
-                if (Main.Site == null) throw new Exception(ErrorMessages.SiteIsEmpty);
-
-                var site = Main.Site.Value;
+                var site = Main?.Site ?? SiteChoices.MANILA;
                 var exceptions = new List<Exception>();
-                var employees = await m_Employees.SyncResigned(selectedDate, site.ToString(), cancellationToken);
-                if (!employees.Any()) return;
-                OnProgressStart(employees.Count);
 
+                OnProgressStart();
+                OnMessageSent("Retrieving HRMS data...");
+                var employees = await m_Employees.SyncResigned(selectedDate, site, cancellationToken);
+
+                if (!employees.Any())
+                {
+                    OnTaskCompleted();
+                    s_Message.ShowDialog("No employees synced.", "Sync");
+                    return;
+                }
+
+                OnMessageSent("Syncing...");
+                OnProgressStart(employees.Count);
                 foreach (var employee in employees)
                 {
                     try
@@ -217,157 +289,218 @@ namespace Pms.Masterlists.Module.ViewModels
                             await m_Employees.Save(employee, cancellationToken);
                         }
                     }
-                    catch (InvalidFieldValuesException ex) { exceptions.Add(ex); OnErrorFound(); }
-                    catch (InvalidFieldValueException ex) { exceptions.Add(ex); OnErrorFound(); }
-                    catch (DuplicateBankInformationException ex) { exceptions.Add(ex); OnErrorFound(); }
-                    catch (Exception ex) { exceptions.Add(ex); OnErrorFound(); }
+                    catch (TaskCanceledException) { throw; }
+                    catch (Exception ex)
+                    {
+                        exceptions.Add(new Exception($"Error found with employee id: {employee.EEId}", ex));
+                        OnErrorFound();
+                    }
                     finally { OnProgressIncrement(); }
                 }
 
-                m_Employees.ReportExceptions(exceptions, new PayrollCode(), $"{site}-RESIGNED");
+                await Task.Run(() =>
+                {
+                    m_Employees.ReportExceptions(exceptions, new PayrollCode(), $"{site}-RESIGNED");
+                }, cancellationToken);
+
+                var payrollCode = Main?.PayrollCode?.PayrollCodeId;
+                await LoadValues(payrollCode, cancellationToken);
+
+                if (exceptions.Any()) throw new AggregateException(exceptions);
+                else s_Message.ShowDialog("Operation completed without errors.", "Sync");
+
                 OnTaskCompleted();
             }
             catch (TaskCanceledException)
             {
                 OnTaskException();
             }
-            catch (HttpRequestException)
+            catch (AggregateException ex)
             {
                 OnTaskException();
-                s_Message.ShowError(ErrorMessages.HrmsHttpRequestError);
+                s_Message.ShowDialog(ex.Message, "Sync", ex.ToString());
+            }
+            catch (HttpRequestException ex)
+            {
+                OnTaskException();
+                s_Message.ShowDialog(ErrorMessages.HrmsHttpRequestError, "Sync", ex.ToString());
             }
             catch (Exception ex)
             {
                 OnTaskException();
-                s_Message.ShowError(ex.Message);
+                s_Message.ShowDialog(ex.Message, "Sync", ex.ToString());
             }
         }
         #endregion
 
         #region sync all
+        private readonly SemaphoreSlim _syncSs = new(3);
+
         private void SyncAll()
         {
             var cts = GetCancellationTokenSource();
-            var dialogParameters = CreateDialogParameters("Loading", "Syncing data...", this, cts);
+            var dialogParameters = CreateDialogParameters(this, cts);
             s_Dialog.Show(DialogNames.CancelDialog, dialogParameters, (_) => { });
-            _ = SyncAll(Employees.Select(t => t.EEId).ToArray(), cts.Token);
+            var source = CollectionViewSource.GetDefaultView(Employees);
+            var eeIds = source.OfType<Employee>().Select(t => t.EEId).ToArray();
+            _ = SyncAll(eeIds, cts.Token);
         }
+
+        
 
         private async Task SyncAll(string[] eeIds, CancellationToken cancellationToken = default)
         {
             try
             {
-                if (Main == null) throw new Exception(ErrorMessages.MainIsNull);
-                if (Main.Site == null) throw new Exception(ErrorMessages.SiteIsEmpty);
-                if (Main.PayrollCode == null) throw new Exception(ErrorMessages.PayrollCodeIsEmpty);
+                var payrollCode = Main?.PayrollCode;
+                var site = Main?.Site ?? SiteChoices.MANILA;
+                //var exceptions = new List<Exception>();
+                var tasks = new List<Task>();
 
-                var site = Main.Site.Value;
-                var exceptions = new List<Exception>();
+                if (payrollCode == null) throw new Exception(ErrorMessages.PayrollCodeIsEmpty);
+
+                OnMessageSent("Syncing...");
                 OnProgressStart(eeIds.Length);
-
                 foreach (var eeId in eeIds)
                 {
-                    try
-                    {
-                        var foundEmployee = await m_Employees.SyncOne(eeId, site.ToString(), cancellationToken);
-                        var foundEmployeeLocal = await m_Employees.FindEmployee(eeId, cancellationToken);
+                    //try
+                    //{
+                    //    var foundEmployee = await m_Employees.SyncOne(eeId, site.ToString(), cancellationToken);
+                    //    var foundEmployeeLocal = await m_Employees.FindEmployee(eeId, cancellationToken);
 
-                        if (foundEmployee == null && foundEmployeeLocal == null)
-                        {
-                            var employee = new Employee()
-                            {
-                                EEId = eeId,
-                                Active = false
-                            };
-                            await m_Employees.Save(employee, cancellationToken);
-                        }
-                        else if (foundEmployee == null && foundEmployeeLocal != null)
-                        {
-                            foundEmployeeLocal.Active = false;
-                            await m_Employees.Save(foundEmployeeLocal, cancellationToken);
-                        }
-                        else if (foundEmployee != null)
-                        {
-                            foundEmployee.Active = true;
-                            await m_Employees.Save(foundEmployee, cancellationToken);
-                        }
-                    }
-                    catch (InvalidFieldValuesException ex) { exceptions.Add(ex); OnErrorFound(); }
-                    catch (InvalidFieldValueException ex) { exceptions.Add(ex); OnErrorFound(); }
-                    catch (DuplicateBankInformationException ex) { exceptions.Add(ex); OnErrorFound(); }
-                    catch (Exception ex) { exceptions.Add(ex); OnErrorFound(); }
-                    finally { OnProgressIncrement(); }
+                    //    if (foundEmployee == null && foundEmployeeLocal == null)
+                    //    {
+                    //        var employee = new Employee()
+                    //        {
+                    //            EEId = eeId,
+                    //            Active = false
+                    //        };
+                    //        await m_Employees.Save(employee, cancellationToken);
+                    //    }
+                    //    else if (foundEmployee == null && foundEmployeeLocal != null)
+                    //    {
+                    //        foundEmployeeLocal.Active = false;
+                    //        await m_Employees.Save(foundEmployeeLocal, cancellationToken);
+                    //    }
+                    //    else if (foundEmployee != null)
+                    //    {
+                    //        foundEmployee.Active = true;
+                    //        await m_Employees.Save(foundEmployee, cancellationToken);
+                    //    }
+                    //}
+                    //catch (TaskCanceledException) { throw; }
+                    //catch (Exception ex)
+                    //{
+                    //    exceptions.Add(new Exception($"Error found with employee id: {eeId}", ex));
+                    //    OnErrorFound();
+                    //}
+                    //finally
+                    //{
+                    //    OnProgressIncrement();
+                    //}
+
+                    tasks.Add(SyncOne(eeId, site.ToString(), cancellationToken));
                 }
 
-                m_Employees.ReportExceptions(exceptions, Main.PayrollCode, $"{site}-REGULAR");
+                var task = Task.WhenAll(tasks);
+                await task;
+                var exception = task.Exception;
+                var exceptions = task.Exception?.InnerExceptions ?? Enumerable.Empty<Exception>();
+
+                if (task.IsFaulted && task.Exception != null)
+                {
+                    if (task.Exception.InnerExceptions.Any())
+                    {
+                        await Task.Run(() =>
+                        {
+                            m_Employees.ReportExceptions(exceptions, payrollCode, $"{site}-REGULAR");
+                        }, cancellationToken);
+                    }
+
+                    throw task.Exception;
+                }
+                else
+                {
+                    
+                }
+
                 OnTaskCompleted();
+
+                //await Task.Run(() =>
+                //{
+                //    m_Employees.ReportExceptions(task.Exception?.InnerExceptions, payrollCode, $"{site}-REGULAR");
+                //}, cancellationToken);
+
+                //if (exceptions.Any())
+                //{
+                //    var ex = new AggregateException(exceptions);
+                //    s_Message.ShowDialog(ex.Message, "Sync", ex.ToString());
+                //}
+
+                //await SyncNewlyHired(DateTime.Now.AddDays(-20), cancellationToken);
             }
             catch (TaskCanceledException)
             {
                 OnTaskException();
             }
-            catch (HttpRequestException)
+            catch (AggregateException ex)
             {
                 OnTaskException();
-                s_Message.ShowError(ErrorMessages.HrmsHttpRequestError);
+                s_Message.ShowDialog(ex.Message, "Sync", ex.ToString());
+            }
+            catch (HttpRequestException ex)
+            {
+                OnTaskException();
+                s_Message.ShowDialog(ErrorMessages.HrmsHttpRequestError, "Sync", ex.ToString());
             }
             catch (Exception ex)
             {
                 OnTaskException();
-                s_Message.ShowError(ex.Message);
+                s_Message.ShowDialog(ex.Message, "Sync", ex.ToString());
             }
         }
-        #endregion
 
-        #region cancel test
-        public void OpenCancelDialog()
-        {
-            var cts = GetCancellationTokenSource();
-            var dialogParameters = CreateDialogParameters("Running", "Testing CancelDialog...", this, cts);
-            s_Dialog.Show(DialogNames.CancelDialog, dialogParameters, (_) => { });
-            var operation = RunOperation(1000, cts.Token);
-        }
-
-        private async Task RunOperation(int lengthMilliseconds = 1000, CancellationToken cancellationToken = default)
+        private async Task SyncOne(string eeId, string site, CancellationToken cancellationToken = default)
         {
             try
             {
-                OnMessageSent("Testing CancelDialog...");
-                await Task.Delay(lengthMilliseconds, cancellationToken);
+                await _syncSs.WaitAsync(cancellationToken);
 
-                OnMessageSent("Indeterminate operation");
-                OnProgressStart();
-                await Task.Delay(5000, cancellationToken);
+                var foundEmployee = await m_Employees.SyncOne(eeId, site.ToString(), cancellationToken);
+                var foundEmployeeLocal = await m_Employees.FindEmployee(eeId, cancellationToken);
 
-                OnMessageSent("Determinate operation");
-                int count = 10;
-                OnProgressStart(count);
-                for (int i = 0; i < count; i++)
+                if (foundEmployee == null && foundEmployeeLocal == null)
                 {
-                    await Task.Delay(lengthMilliseconds, cancellationToken);
-                    OnProgressIncrement();
+                    var employee = new Employee()
+                    {
+                        EEId = eeId,
+                        Active = false
+                    };
+                    await m_Employees.Save(employee, cancellationToken);
                 }
-
-                OnErrorFound();
-
-                OnMessageSent("New operation");
-                count = 20;
-                OnProgressStart(count);
-                for (int i = 0; i < count; i++)
+                else if (foundEmployee == null && foundEmployeeLocal != null)
                 {
-                    await Task.Delay(lengthMilliseconds, cancellationToken);
-                    OnProgressIncrement();
+                    foundEmployeeLocal.Active = false;
+                    await m_Employees.Save(foundEmployeeLocal, cancellationToken);
                 }
-
-                OnTaskCompleted();
+                else if (foundEmployee != null)
+                {
+                    foundEmployee.Active = true;
+                    await m_Employees.Save(foundEmployee, cancellationToken);
+                }
             }
             catch
             {
-                OnTaskException();
+                OnErrorFound();
+                throw;
+            }
+            finally
+            {
+                _syncSs.Release();
+                OnProgressIncrement();
             }
         }
         #endregion
-
 
         #region INavigationAware
         public void OnNavigatedTo(NavigationContext navigationContext)
@@ -403,25 +536,17 @@ namespace Pms.Masterlists.Module.ViewModels
         private void LoadValues()
         {
             var cts = GetCancellationTokenSource();
-            var dialogParameters = CreateDialogParameters("Loading", "Retrieving data...", this, cts);
+            var dialogParameters = CreateDialogParameters(this, cts);
             s_Dialog.Show(DialogNames.CancelDialog, dialogParameters, (_) => { });
-            _ = LoadValues(cts.Token);
+            _ = StartLoadValues(cts.Token);
         }
 
-        private async Task LoadValues(CancellationToken cancellationToken = default)
+        private async Task StartLoadValues(CancellationToken cancellationToken = default)
         {
             try
             {
-                if (Main != null)
-                {
-                    //_payrollCode = _main.PayrollCode ?? new PayrollCode();
-                    //_payrollCodeId = _payrollCode.PayrollCodeId;
-                    //_site = _main.Site ?? SiteChoices.UNKNOWN;
-                    //_companyId = _main.Company?.CompanyId ?? new Company().CompanyId;
-
-                    await LoadEmployees(cancellationToken);
-                }
-
+                var payrollCode = Main?.PayrollCode?.PayrollCodeId;
+                await LoadValues(payrollCode, cancellationToken);
                 OnTaskCompleted();
             }
             catch (TaskCanceledException)
@@ -431,25 +556,18 @@ namespace Pms.Masterlists.Module.ViewModels
             catch (Exception ex)
             {
                 OnTaskException();
-                s_Message.ShowError(ex.Message);
+                s_Message.ShowDialog(ex.Message, "Load");
             }
         }
 
-        private async Task LoadEmployees(CancellationToken cancellationToken = default)
+        private async Task LoadValues(string? payrollCode, CancellationToken cancellationToken = default)
         {
             try
             {
-                if (Main == null) throw new Exception(ErrorMessages.MainIsNull);
-                if (Main.PayrollCode == null) throw new Exception(ErrorMessages.PayrollCodeIsEmpty);
-
-                var employees = (await m_Employees.GetEmployees(cancellationToken))
-                    .HideArchived(HideArchived)
-                    .FilterSearchInput(SearchInput)
-                    .FilterPayrollCode(Main.PayrollCode.PayrollCodeId);
-
-                Employees = employees;
-                ActiveEECount = employees.Count(t => t.Active);
-                NonActiveEECount = employees.Count(t => !t.Active);
+                OnProgressStart();
+                OnMessageSent("Loading employees...");
+                var employees = await m_Employees.GetEmployees(payrollCode, cancellationToken);
+                Employees = new ObservableCollection<Employee>(employees);
             }
             catch
             {
@@ -703,5 +821,32 @@ namespace Pms.Masterlists.Module.ViewModels
             s_Dialog.Show(ViewNames.PayrollCodeDetailView, dialogParams, (_) => { });
         }
         #endregion
+
+        private bool FilterEmployee(object? t)
+        {
+            if (t is Employee employee)
+            {
+                var isEmpty = string.IsNullOrEmpty(SearchInput);
+                var hideArchived = employee.Active || !HideArchived;
+                var idMatch = employee.EEId.Contains(SearchInput);
+                var nameMatch = employee.Fullname.Contains(SearchInput);
+                var cardMatch = employee.CardNumber.Contains(SearchInput);
+                var accountMatch = employee.AccountNumber.Contains(SearchInput);
+
+                return (isEmpty || idMatch || nameMatch || cardMatch || accountMatch) && hideArchived;
+            }
+
+            return false;
+        }
+
+        private void Employees_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        {
+            if (sender is ICollectionView source)
+            {
+                var employees = source.OfType<Employee>();
+                ActiveEECount = employees.Count(t => t.Active);
+                NonActiveEECount = employees.Count(t => !t.Active);
+            }
+        }
     }
 }

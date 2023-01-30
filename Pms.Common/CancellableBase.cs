@@ -67,7 +67,7 @@ namespace Pms.Common
         event EventHandler<EventArgs> TaskCancelled;
         event EventHandler<EventArgs> TaskException;
         event EventHandler<MessageSentEventArgs> MessageSent;
-        event EventHandler<EventArgs> ErrorFound;
+        event EventHandler<Exception> ErrorFound;
         event EventHandler<ProgressStartEventArgs> ProgressStart;
         event EventHandler<ProgressIncrementEventArgs> ProgressIncrement;
 
@@ -87,7 +87,7 @@ namespace Pms.Common
 
         public event EventHandler<EventArgs>? TaskException;
 
-        public event EventHandler<EventArgs>? ErrorFound;
+        public event EventHandler<Exception>? ErrorFound;
         public event EventHandler<ProgressStartEventArgs>? ProgressStart;
         public event EventHandler<ProgressIncrementEventArgs>? ProgressIncrement;
 
@@ -153,7 +153,12 @@ namespace Pms.Common
 
         protected void OnErrorFound()
         {
-            ErrorFound?.Invoke(this, EventArgs.Empty);
+            ErrorFound?.Invoke(this, new Exception());
+        }
+
+        protected void OnErrorFound(Exception ex)
+        {
+            ErrorFound?.Invoke(this, ex);
         }
 
         protected void OnProgressIncrement(int increment = 1)

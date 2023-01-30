@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Primitives;
 using Pms.Common;
+using Pms.Common.Enums;
 using Pms.Masterlists.Entities;
 using Pms.Masterlists.ServiceLayer.EfCore;
 using Pms.Masterlists.ServiceLayer.Files;
@@ -48,7 +49,7 @@ namespace Pms.Masterlists.Module
             return s_Provider.FindEmployee(eeId);
         }
 
-        public async Task<Employee?> FindEmployee(string eeId, CancellationToken cancellationToken = default)
+        public async Task<Employee?> FindEmployee(string? eeId, CancellationToken cancellationToken = default)
         {
             return await s_Provider.FindEmployee(eeId, cancellationToken);
         }
@@ -61,6 +62,11 @@ namespace Pms.Masterlists.Module
         public async Task<ICollection<Employee>> GetEmployees(CancellationToken cancellationToken = default)
         {
             return await s_Provider.GetEmployees(cancellationToken);
+        }
+
+        public async Task<ICollection<Employee>> GetEmployees(string? payrollCode, CancellationToken cancellationToken = default)
+        {
+            return await s_Provider.GetEmployees(payrollCode, cancellationToken);
         }
 
         public IEnumerable<IBankInformation> ImportBankInformation(string payRegisterPath)
@@ -174,9 +180,9 @@ namespace Pms.Masterlists.Module
             return Enumerable.Empty<Employee>();
         }
 
-        public async Task<ICollection<Employee>> SyncNewlyHired(DateTime fromDate, string site, CancellationToken cancellationToken = default)
+        public async Task<ICollection<Employee>> SyncNewlyHired(DateTime fromDate, SiteChoices site, CancellationToken cancellationToken = default)
         {
-            return await s_Hrms.GetNewlyHiredEmployees(fromDate, site, cancellationToken);
+            return await s_Hrms.GetNewlyHiredEmployees(fromDate, site.ToString(), cancellationToken);
         }
 
         public async Task<Employee> SyncOneAsync(string eeId, string site)
@@ -198,9 +204,9 @@ namespace Pms.Masterlists.Module
             return Enumerable.Empty<Employee>();
         }
 
-        public async Task<ICollection<Employee>> SyncResigned(DateTime fromDate, string site, CancellationToken cancellationToken = default)
+        public async Task<ICollection<Employee>> SyncResigned(DateTime fromDate, SiteChoices site, CancellationToken cancellationToken = default)
         {
-            return await s_Hrms.GetResignedEmployees(fromDate, site, cancellationToken);
+            return await s_Hrms.GetResignedEmployees(fromDate, site.ToString(), cancellationToken);
         }
     }
 }

@@ -16,6 +16,7 @@ namespace Pms.Common
         void ShowError(string message, string caption = "");
         void ShowPrompt(string message, string caption = "");
         void ShowDialog(string message, string title);
+        void ShowDialog(string message, string title, string moreInfo);
         void ShowDialog(string message, IDialogParameters parameters, Action<IDialogResult> callback,
             string title = "",
             PromptDialogButton button = PromptDialogButton.Ok);
@@ -54,6 +55,18 @@ namespace Pms.Common
             s_Dialog.ShowDialog(DialogNames.PromptDialog, dialogParameters, (_) => { });
         }
 
+        public void ShowDialog(string message, string title, string moreInfo)
+        {
+            var dialogParameters = new DialogParameters()
+            {
+                { DialogParameterNames.Message, message },
+                { DialogParameterNames.Title, title },
+                { DialogParameterNames.MoreInfo, moreInfo },
+                { DialogParameterNames.PromptDialogButton, PromptDialogButton.Ok }
+            };
+            s_Dialog.ShowDialog(DialogNames.PromptDialog, dialogParameters, (_) => { });
+        }
+
         public void ShowError(string message, string caption = "")
         {
             MessageBox.Show(message, caption, button: MessageBoxButton.OK, icon: MessageBoxImage.Error);
@@ -78,6 +91,11 @@ namespace Pms.Common
         }
 
         public void ShowDialog(string message, string title)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void ShowDialog(string message, string title, string moreInfo)
         {
             throw new NotImplementedException();
         }

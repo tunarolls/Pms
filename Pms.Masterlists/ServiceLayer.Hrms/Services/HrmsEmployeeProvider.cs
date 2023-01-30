@@ -33,10 +33,12 @@ namespace Pms.Masterlists.ServiceLayer.Hrms.Services
         public async Task<Employee?> GetEmployee(string eeId, string site, CancellationToken cancellationToken = default)
         {
             var employee = await _hrmsAdapter.GetEmployeeFromHRMS<Employee>(eeId, site, cancellationToken);
+
             if (employee != null)
             {
                 employee.PayrollCode = ParsePayrollCode(employee.PayrollCode, site);
             }
+
             return employee;
         }
 

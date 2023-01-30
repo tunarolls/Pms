@@ -12,12 +12,10 @@
     <prism:Dialog.WindowStyle>
         <Style TargetType="Window">
             <Setter Property="prism:Dialog.WindowStartupLocation" Value="CenterOwner" />
-            <!--<Setter Property="ResizeMode" Value="NoResize" />-->
+            <Setter Property="ResizeMode" Value="NoResize" />
             <Setter Property="Title" Value="{Binding Title}" />
             <Setter Property="SizeToContent" Value="WidthAndHeight" />
             <Setter Property="FontFamily" Value="Tahoma" />
-            <Setter Property="MinWidth" Value="500" />
-            <Setter Property="MinHeight" Value="300" />
         </Style>
     </prism:Dialog.WindowStyle>
     <Grid Margin="8">

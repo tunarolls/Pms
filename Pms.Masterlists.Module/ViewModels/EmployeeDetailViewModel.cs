@@ -49,7 +49,7 @@ namespace Pms.Masterlists.Module.ViewModels
 
         #region IDialogAware
         public event Action<IDialogResult>? RequestClose;
-        public string Title => "Employee Detail";
+        public string Title { get; set; } = string.Empty;
 
         public bool CanCloseDialog()
         {
@@ -63,7 +63,7 @@ namespace Pms.Masterlists.Module.ViewModels
         public void OnDialogOpened(IDialogParameters parameters)
         {
             LoadPayrollCodes();
-            Employee = parameters.GetValue<Employee?>(PmsConstants.Timesheet);
+            Employee = parameters.GetValue<Employee>(PmsConstants.Employee);
         }
         #endregion
 
@@ -71,7 +71,7 @@ namespace Pms.Masterlists.Module.ViewModels
         private void LoadPayrollCodes()
         {
             var cts = GetCancellationTokenSource();
-            var dialogParameters = CreateDialogParameters("Loading", "Retrieving payroll codes...", this, cts);
+            var dialogParameters = CreateDialogParameters(this, cts);
             s_Dialog.Show(DialogNames.CancelDialog, dialogParameters, (_) => { });
             _ = LoadPayrollCodes(cts.Token);
         }
@@ -80,7 +80,9 @@ namespace Pms.Masterlists.Module.ViewModels
         {
             try
             {
-                PayrollCodes = (await m_PayrollCodes.ListPayrollCodes(cancellationToken)).Select(t => t.PayrollCodeId);
+                OnMessageSent("Retrieving payroll codes...");
+                var payrollCodes = await m_PayrollCodes.ListPayrollCodes(cancellationToken);
+                PayrollCodes = payrollCodes.Select(t => t.PayrollCodeId);
                 OnTaskCompleted();
             }
             catch (TaskCanceledException)
@@ -91,7 +93,7 @@ namespace Pms.Masterlists.Module.ViewModels
             catch (Exception ex)
             {
                 OnTaskException();
-                s_Message.ShowError(ex.ToString());
+                s_Message.ShowDialog(ex.Message, "Unexpected error", ex.ToString());
                 RequestClose?.Invoke(new DialogResult(ButtonResult.None));
             }
         }
@@ -100,7 +102,7 @@ namespace Pms.Masterlists.Module.ViewModels
         private void Save()
         {
             var cts = GetCancellationTokenSource();
-            var dialogParameters = CreateDialogParameters("Loading", "Saving data...", this, cts);
+            var dialogParameters = CreateDialogParameters(this, cts);
             s_Dialog.Show(DialogNames.CancelDialog, dialogParameters, (_) => { });
             _ = Save(cts.Token);
         }
@@ -111,9 +113,11 @@ namespace Pms.Masterlists.Module.ViewModels
             {
                 if (l_Employee != null)
                 {
+                    OnMessageSent("Saving employee...");
                     await m_Employees.Save(l_Employee, cancellationToken);
                     OnTaskCompleted();
-                    s_Message.Show("Save success");
+
+                    s_Message.ShowDialog("Employee saved.", "Success");
                     RequestClose?.Invoke(new DialogResult());
                 }
                 else
@@ -125,23 +129,23 @@ namespace Pms.Masterlists.Module.ViewModels
             {
                 OnTaskException();
             }
-            catch (NullReferenceException nrex)
+            catch (NullReferenceException ex)
             {
                 OnTaskException();
-                s_Message.ShowError(nrex.ToString());
+                s_Message.ShowDialog(ex.Message, "Error", ex.ToString());
                 RequestClose?.Invoke(new DialogResult());
             }
             catch (Exception ex)
             {
                 OnTaskException();
-                s_Message.ShowError(ex.ToString());
+                s_Message.ShowDialog(ex.Message, "Unexpected error", ex.ToString());
             }
         }
 
         private void Sync()
         {
             var cts = GetCancellationTokenSource();
-            var dialogParameters = CreateDialogParameters("Loading", "Syncing data...", this, cts);
+            var dialogParameters = CreateDialogParameters(this, cts);
             s_Dialog.Show(DialogNames.CancelDialog, dialogParameters, (_) => { });
             _ = Sync(cts.Token);
         }
@@ -152,7 +156,10 @@ namespace Pms.Masterlists.Module.ViewModels
             {
                 if (l_Employee != null)
                 {
+                    OnMessageSent("Syncing data...");
                     var employeeFoundOnServer = await m_Employees.SyncOne(l_Employee.EEId, l_Employee.Site, cancellationToken);
+                    OnTaskCompleted();
+
                     if (employeeFoundOnServer != null)
                     {
                         l_Employee.LastName = employeeFoundOnServer.LastName;
@@ -163,7 +170,7 @@ namespace Pms.Masterlists.Module.ViewModels
 
                         RaisePropertyChanged(nameof(Employee));
 
-                        s_Message.Show("Sync success");
+                        s_Message.ShowDialog("Employee synced.", "Success");
                     }
                     else
                     {
@@ -174,33 +181,21 @@ namespace Pms.Masterlists.Module.ViewModels
                 {
                     throw new NullReferenceException("Employee not found.");
                 }
-
-                OnTaskCompleted();
             }
             catch (TaskCanceledException)
             {
                 OnTaskException();
             }
-            catch (NullReferenceException nrex)
+            catch (NullReferenceException ex)
             {
                 OnTaskException();
-                s_Message.ShowError(nrex.ToString());
+                s_Message.ShowDialog(ex.Message, "Error", ex.ToString());
                 RequestClose?.Invoke(new DialogResult());
-            }
-            catch (EmployeeNotFoundException enfex)
-            {
-                OnTaskException();
-                s_Message.ShowError(enfex.ToString());
-            }
-            catch (HttpRequestException hrex)
-            {
-                OnTaskException();
-                s_Message.ShowError(hrex.ToString());
             }
             catch (Exception ex)
             {
                 OnTaskException();
-                s_Message.ShowError(ex.ToString());
+                s_Message.ShowDialog(ex.Message, "Unexpected error", ex.ToString());
             }
         }
     }

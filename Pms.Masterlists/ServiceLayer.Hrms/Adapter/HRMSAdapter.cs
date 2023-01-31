@@ -79,9 +79,13 @@ namespace Pms.Masterlists.ServiceLayer.Hrms.Adapter
                 switch (response.StatusCode)
                 {
                     case (System.Net.HttpStatusCode)400:
-                        throw new InvalidRequestException($"Status: {response.StatusCode}\nReason: {response.ReasonPhrase}");
+                        //throw new InvalidRequestException($"Status: {response.StatusCode}\nReason: {response.ReasonPhrase}");
+                        break;
                     case (System.Net.HttpStatusCode)404:
-                        throw new EmployeeNotFoundException(eeId);
+                        //throw new EmployeeNotFoundException(eeId);
+                        break;
+                    default:
+                        throw new Exception($"Status: {response.StatusCode}\nReason: {response.ReasonPhrase}");
                 }
             }
 

@@ -36,11 +36,11 @@ namespace Pms.Masterlists.Module
             MasterlistExporter.StartExport(employees, payrollCode, remarks);
         }
 
-        public async Task ExportMasterlist(IEnumerable<Employee> employees, PayrollCode payrollCode, string remarks = "", CancellationToken cancellationToken = default)
+        public async Task<string> ExportMasterlist(IEnumerable<Employee> employees, PayrollCode payrollCode, string remarks = "", CancellationToken cancellationToken = default)
         {
-            await Task.Run(() =>
+            return await Task.Run(() =>
             {
-                MasterlistExporter.StartExport(employees, payrollCode, remarks);
+                return MasterlistExporter.StartExport(employees, payrollCode, remarks);
             }, cancellationToken);
         }
 

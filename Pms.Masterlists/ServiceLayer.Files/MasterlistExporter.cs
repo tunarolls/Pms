@@ -13,7 +13,7 @@ namespace Pms.Masterlists.ServiceLayer.Files
 {
     public class MasterlistExporter
     {
-        public static void StartExport(IEnumerable<Employee> employees, PayrollCode payrollCode, string remarks)
+        public static string StartExport(IEnumerable<Employee> employees, PayrollCode payrollCode, string remarks)
         {
             var nWorkbook = new HSSFWorkbook();
             var nSheet = nWorkbook.CreateSheet("Sheet1");
@@ -46,6 +46,8 @@ namespace Pms.Masterlists.ServiceLayer.Files
 
             using var nReportFile = new FileStream(fullname, FileMode.OpenOrCreate, FileAccess.Write);
             nWorkbook.Write(nReportFile, false);
+
+            return fullname;
         }
 
         private static int Append(ref int index)

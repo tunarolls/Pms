@@ -186,7 +186,7 @@ namespace Pms.Payrolls.App.ViewModels
         {
             try
             {
-                OnMessageSent("Initializing...");
+                //OnMessageSent("Initializing...");
                 OnProgressStart();
 
                 OnMessageSent("Retrieving cutoff ids...");

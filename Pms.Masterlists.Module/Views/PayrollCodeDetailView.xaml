@@ -13,7 +13,7 @@
         <Style TargetType="Window">
             <Setter Property="prism:Dialog.WindowStartupLocation" Value="CenterOwner" />
             <Setter Property="ResizeMode" Value="NoResize" />
-            <Setter Property="Title" Value="{Binding Title}" />
+            <!--<Setter Property="Title" Value="{Binding Title}" />-->
             <Setter Property="SizeToContent" Value="WidthAndHeight" />
             <Setter Property="FontFamily" Value="Tahoma" />
         </Style>
@@ -64,21 +64,22 @@
             <RowDefinition />
         </Grid.RowDefinitions>
         <TextBlock Grid.Row="0" Grid.ColumnSpan="4" Style="{StaticResource Header}" Text="Payroll Code Details"/>
-        <TextBlock Grid.Row="1" Grid.Column="0" Text="Id:"/>
-        <TextBlock Grid.Row="2" Grid.Column="0" Text="Name:"/>
-        <TextBlock Grid.Row="3" Grid.Column="0" Text="Company:"/>
-        <TextBlock Grid.Row="4" Grid.Column="0" Text="Site:"/>
-        <TextBlock Grid.Row="5" Grid.Column="0" Text="Process:"/>
-        <TextBox Grid.Row="1" Grid.Column="1"  Text="{Binding SelectedPayrollCode.PayrollCodeId}" IsReadOnly="True"/>
-        <TextBox Grid.Row="2" Grid.Column="1"  Text="{Binding SelectedPayrollCode.Name}"/>
-        <ComboBox Grid.Row="3" Grid.Column="1"  SelectedValue="{Binding SelectedPayrollCode.CompanyId}" ItemsSource="{Binding CompanyIds}"/>
-        <ComboBox Grid.Row="4" Grid.Column="1"  SelectedValue="{Binding SelectedPayrollCode.Site}" ItemsSource="{Binding Sites}" />
-        <ComboBox Grid.Row="5" Grid.Column="1"  SelectedValue="{Binding SelectedPayrollCode.Process}" ItemsSource="{Binding ProcessTypes}"/>
+        <TextBlock Grid.Row="1" Grid.Column="0" Text="Id:" />
+        <TextBlock Grid.Row="2" Grid.Column="0" Text="Name:" />
+        <TextBlock Grid.Row="3" Grid.Column="0" Text="Company:" />
+        <TextBlock Grid.Row="4" Grid.Column="0" Text="Site:" />
+        <TextBlock Grid.Row="5" Grid.Column="0" Text="Process:" />
+        <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding SelectedPayrollCode.PayrollCodeId}" IsReadOnly="True"/>
+        <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding SelectedPayrollCode.Name}"/>
+        <ComboBox Grid.Row="3" Grid.Column="1" SelectedValue="{Binding SelectedPayrollCode.CompanyId}" ItemsSource="{Binding CompanyIds}"/>
+        <ComboBox Grid.Row="4" Grid.Column="1" SelectedValue="{Binding SelectedPayrollCode.Site}" ItemsSource="{Binding Sites}" />
+        <ComboBox Grid.Row="5" Grid.Column="1" SelectedValue="{Binding SelectedPayrollCode.Process}" ItemsSource="{Binding ProcessTypes}"/>
         <Button Grid.Row="6" Grid.Column="1" Content="Save" Command="{Binding SaveCommand}"/>
-        <DataGrid Grid.Row="1" Grid.Column="2" Grid.RowSpan="8" Margin="4"
+        <DataGrid Grid.Row="1" Grid.Column="2" Grid.RowSpan="7" Margin="4"
                   AutoGenerateColumns="False"
                   SelectedItem="{Binding SelectedPayrollCode}"
-                  ItemsSource="{Binding PayrollCodes}">
+                  ItemsSource="{Binding PayrollCodes}"
+                  IsReadOnly="True">
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Id" Binding="{Binding PayrollCodeId}"/>
                 <DataGridTextColumn Header="Name" Binding="{Binding Name}"/>

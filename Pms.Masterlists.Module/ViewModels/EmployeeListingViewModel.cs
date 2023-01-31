@@ -334,7 +334,7 @@ namespace Pms.Masterlists.Module.ViewModels
         #endregion
 
         #region sync all
-        private readonly SemaphoreSlim _syncSs = new(3);
+        private readonly SemaphoreSlim _syncSs = new(5);
 
         private void SyncAll()
         {
@@ -346,15 +346,13 @@ namespace Pms.Masterlists.Module.ViewModels
             _ = SyncAll(eeIds, cts.Token);
         }
 
-        
-
         private async Task SyncAll(string[] eeIds, CancellationToken cancellationToken = default)
         {
             try
             {
                 var payrollCode = Main?.PayrollCode;
                 var site = Main?.Site ?? SiteChoices.MANILA;
-                //var exceptions = new List<Exception>();
+                var exceptions = new List<Exception>();
                 var tasks = new List<Task>();
 
                 if (payrollCode == null) throw new Exception(ErrorMessages.PayrollCodeIsEmpty);
@@ -363,81 +361,45 @@ namespace Pms.Masterlists.Module.ViewModels
                 OnProgressStart(eeIds.Length);
                 foreach (var eeId in eeIds)
                 {
-                    //try
-                    //{
-                    //    var foundEmployee = await m_Employees.SyncOne(eeId, site.ToString(), cancellationToken);
-                    //    var foundEmployeeLocal = await m_Employees.FindEmployee(eeId, cancellationToken);
-
-                    //    if (foundEmployee == null && foundEmployeeLocal == null)
-                    //    {
-                    //        var employee = new Employee()
-                    //        {
-                    //            EEId = eeId,
-                    //            Active = false
-                    //        };
-                    //        await m_Employees.Save(employee, cancellationToken);
-                    //    }
-                    //    else if (foundEmployee == null && foundEmployeeLocal != null)
-                    //    {
-                    //        foundEmployeeLocal.Active = false;
-                    //        await m_Employees.Save(foundEmployeeLocal, cancellationToken);
-                    //    }
-                    //    else if (foundEmployee != null)
-                    //    {
-                    //        foundEmployee.Active = true;
-                    //        await m_Employees.Save(foundEmployee, cancellationToken);
-                    //    }
-                    //}
-                    //catch (TaskCanceledException) { throw; }
-                    //catch (Exception ex)
-                    //{
-                    //    exceptions.Add(new Exception($"Error found with employee id: {eeId}", ex));
-                    //    OnErrorFound();
-                    //}
-                    //finally
-                    //{
-                    //    OnProgressIncrement();
-                    //}
-
                     tasks.Add(SyncOne(eeId, site.ToString(), cancellationToken));
                 }
 
-                var task = Task.WhenAll(tasks);
-                await task;
-                var exception = task.Exception;
-                var exceptions = task.Exception?.InnerExceptions ?? Enumerable.Empty<Exception>();
-
-                if (task.IsFaulted && task.Exception != null)
+                while (tasks.Any())
                 {
-                    if (task.Exception.InnerExceptions.Any())
+                    var completedTask = await Task.WhenAny(tasks);
+
+                    if (completedTask.Exception?.InnerException is Exception ex)
                     {
-                        await Task.Run(() =>
+                        switch (ex)
                         {
-                            m_Employees.ReportExceptions(exceptions, payrollCode, $"{site}-REGULAR");
-                        }, cancellationToken);
+                            case InvalidFieldValueException:
+                            case InvalidFieldValuesException:
+                            case DuplicateBankInformationException:
+                            default:
+                                exceptions.Add(ex);
+                                break;
+                        }
                     }
 
-                    throw task.Exception;
+                    tasks.Remove(completedTask);
+                }
+
+                if (exceptions.Any())
+                {
+                    await Task.Run(() =>
+                    {
+                        m_Employees.ReportExceptions(exceptions, payrollCode, $"{site}-REGULAR");
+                    }, cancellationToken);
+
+                    throw new AggregateException(exceptions);
                 }
                 else
                 {
-                    
+                    s_Message.ShowDialog("Operation ran without issues.", "Sync");
                 }
 
+                await LoadValues(payrollCode.ToString(), cancellationToken);
                 OnTaskCompleted();
-
-                //await Task.Run(() =>
-                //{
-                //    m_Employees.ReportExceptions(task.Exception?.InnerExceptions, payrollCode, $"{site}-REGULAR");
-                //}, cancellationToken);
-
-                //if (exceptions.Any())
-                //{
-                //    var ex = new AggregateException(exceptions);
-                //    s_Message.ShowDialog(ex.Message, "Sync", ex.ToString());
-                //}
-
-                //await SyncNewlyHired(DateTime.Now.AddDays(-20), cancellationToken);
             }
             catch (TaskCanceledException)
             {
@@ -556,7 +518,7 @@ namespace Pms.Masterlists.Module.ViewModels
             catch (Exception ex)
             {
                 OnTaskException();
-                s_Message.ShowDialog(ex.Message, "Load");
+                s_Message.ShowDialog(ex.Message, "Load", ex.ToString());
             }
         }
 
@@ -584,7 +546,7 @@ namespace Pms.Masterlists.Module.ViewModels
         private void BankImportCallback(IFileDialogResult result)
         {
             var cts = GetCancellationTokenSource();
-            var dialogParameters = CreateDialogParameters("Loading", "Importing files...", this, cts);
+            var dialogParameters = CreateDialogParameters(this, cts);
             s_Dialog.Show(DialogNames.CancelDialog, dialogParameters, (_) => { });
             _ = BankImport(result.FileNames, cts.Token);
         }
@@ -739,7 +701,7 @@ namespace Pms.Masterlists.Module.ViewModels
         private void MasterlistExport()
         {
             var cts = GetCancellationTokenSource();
-            var dialogParameters = CreateDialogParameters("Loading", "Exporting masterlist...", this, cts);
+            var dialogParameters = CreateDialogParameters(this, cts);
             s_Dialog.Show(DialogNames.CancelDialog, dialogParameters, (_) => { });
             _ = MasterlistExport(cts.Token);
         }
@@ -748,20 +710,23 @@ namespace Pms.Masterlists.Module.ViewModels
         {
             try
             {
-                if (Main == null) throw new Exception(ErrorMessages.MainIsNull);
-                if (Main.PayrollCode == null) throw new Exception(ErrorMessages.PayrollCodeIsEmpty);
+                var payrollCode = Main?.PayrollCode;
+                if (payrollCode == null) throw new Exception(ErrorMessages.PayrollCodeIsEmpty);
+                var source = CollectionViewSource.GetDefaultView(Employees);
+                var employees = source.OfType<Employee>().ToList();
 
-                var employees = Employees.ToList();
-                await m_Employees.ExportMasterlist(employees, Main.PayrollCode, cancellationToken: cancellationToken);
+                OnMessageSent("Exporting masterlist...");
+                var path = await m_Employees.ExportMasterlist(employees, payrollCode, cancellationToken: cancellationToken);
                 OnTaskCompleted();
+
+                s_Message.ShowDialog("Masterfile exported.", "Success", $"File saved to {path}");
             }
             catch (TaskCanceledException) { OnTaskException(); }
             catch (Exception ex)
             {
                 OnTaskException();
-                s_Message.ShowError(ex.Message, "Unexpected error");
+                s_Message.ShowDialog(ex.Message, "Unexpected error", ex.ToString());
             }
-            
         }
         #endregion
 
@@ -778,18 +743,23 @@ namespace Pms.Masterlists.Module.ViewModels
         {
             try
             {
-                if (Main == null) throw new Exception(ErrorMessages.MainIsNull);
-                if (Main.PayrollCode == null) throw new Exception(ErrorMessages.PayrollCodeIsEmpty);
+                var payrollCode = Main?.PayrollCode;
+                if (payrollCode == null) throw new Exception(ErrorMessages.PayrollCodeIsEmpty);
+                var source = CollectionViewSource.GetDefaultView(Employees);
+                var employees = source.OfType<Employee>().ToList();
+                var noTin = employees.Where(t => string.IsNullOrEmpty(t.TIN));
 
-                var noTin = Employees.Where(t => string.IsNullOrEmpty(t.TIN)).ToList();
-                await m_Employees.ExportMasterlist(noTin, Main.PayrollCode, cancellationToken: cancellationToken);
+                OnMessageSent("Exporting unknown TIN...");
+                var path = await m_Employees.ExportMasterlist(noTin, payrollCode, cancellationToken: cancellationToken);
                 OnTaskCompleted();
+
+                s_Message.ShowDialog("Unknown TIN exported.", "Success", $"File saved to {path}");
             }
             catch (TaskCanceledException) { OnTaskException(); }
             catch (Exception ex)
             {
                 OnTaskException();
-                s_Message.ShowError(ex.Message, "Unexpected error");
+                s_Message.ShowDialog(ex.Message, "Unexpected error", ex.ToString());
             }
         }
         #endregion
@@ -818,7 +788,11 @@ namespace Pms.Masterlists.Module.ViewModels
             {
             };
 
-            s_Dialog.Show(ViewNames.PayrollCodeDetailView, dialogParams, (_) => { });
+            s_Dialog.Show(ViewNames.PayrollCodeDetailView, dialogParams, OpenPayrollCodeViewCallback);
+        }
+
+        private void OpenPayrollCodeViewCallback(IDialogResult result)
+        {
         }
         #endregion
 

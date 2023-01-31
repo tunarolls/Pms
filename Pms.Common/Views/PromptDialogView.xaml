@@ -90,7 +90,7 @@
             <TextBlock Text="{Binding Message}" VerticalAlignment="Center" Margin="0,4" TextWrapping="Wrap" MaxWidth="500" MinHeight="48" />
         </Grid>
         <Expander Style="{DynamicResource MoreInfoBox}" Grid.Row="1" MaxHeight="250" MaxWidth="500" Margin="16,8" Header="More info">
-            <TextBox Text="{Binding MoreInfo, Mode=OneWay}" TextWrapping="Wrap" AcceptsReturn="True" VerticalScrollBarVisibility="Auto" IsReadOnly="True" />
+            <TextBox Text="{Binding MoreInfo, Mode=OneWay}" TextWrapping="Wrap" AcceptsReturn="True" VerticalScrollBarVisibility="Auto" IsReadOnly="True" Padding="4,2" />
         </Expander>
         <Separator Grid.Row="2" Height="2" />
         <StackPanel Orientation="Horizontal" Grid.Row="3" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="12">

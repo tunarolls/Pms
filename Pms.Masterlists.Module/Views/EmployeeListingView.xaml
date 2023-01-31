@@ -25,12 +25,11 @@
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="45"/>
-            <RowDefinition/>
-            <RowDefinition Height="40"/>
+            <RowDefinition />
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto" />
-            <ColumnDefinition/>
+            <ColumnDefinition />
         </Grid.ColumnDefinitions>
         <!--MENU-->
         <Menu VerticalAlignment="Center" Margin="8,3" Background="Transparent">

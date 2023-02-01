@@ -10,57 +10,38 @@
              mc:Ignorable="d" 
              d:DesignHeight="450" 
              d:DesignWidth="800">
+    <UserControl.Resources>
+        <Style TargetType="Button">
+            <Setter Property="Padding" Value="4,2" />
+        </Style>
+    </UserControl.Resources>
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="48"/>
-            <RowDefinition/>
-            <RowDefinition Height="45"/>
+            <RowDefinition Height="48" />
+            <RowDefinition />
         </Grid.RowDefinitions>
-
         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-            <TextBlock Text="Adjustment Name:" VerticalAlignment="Center" Margin="12,0,0,0"/>
-            <ComboBox x:Name="CbAdjustmentName" Margin="8" Width="125" ItemsSource="{Binding AdjustmentNames}" SelectedValue="{Binding AdjustmentName}"/>
-            <Button x:Name="btnExport" Command="{Binding ExportBillingsCommand}" VerticalAlignment="Center">Export</Button>
+            <TextBlock Text="Adjustment Name:" VerticalAlignment="Center" Margin="12,0,0,0" />
+            <ComboBox x:Name="CbAdjustmentName" Margin="8" Width="125" ItemsSource="{Binding AdjustmentNames}" SelectedValue="{Binding AdjustmentName}" IsEditable="True" />
+            <Button x:Name="btnExport" Command="{Binding ExportBillingsCommand}" VerticalAlignment="Center" Content="Export" />
         </StackPanel>
-
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
-            <Button Margin="8 0 0 0" Command="{Binding AddToAdjustmentCommand}" CommandParameter="{x:Static adjustments:AdjustmentOptions.ADJUST1}">Add to Adjust1</Button>
-            <Button Margin="8 0 0 0" Command="{Binding AddToAdjustmentCommand}" CommandParameter="{x:Static adjustments:AdjustmentOptions.ADJUST1}">Add to Adjust2</Button>
-            <Button Margin="24 0 8 0" Command="{Binding GenerateBillingsCommand}">Generate Billings</Button>
+            <Button Margin="8,0,0,0" Command="{Binding AddToAdjustmentCommand}" CommandParameter="{x:Static adjustments:AdjustmentOptions.ADJUST1}" Content="Add to Adjust1" />
+            <Button Margin="8,0,0,0" Command="{Binding AddToAdjustmentCommand}" CommandParameter="{x:Static adjustments:AdjustmentOptions.ADJUST2}" Content="Add to Adjust2" />
+            <Button Margin="24,0,8,0" Command="{Binding GenerateBillingsCommand}" Content="Generate Billings" />
         </StackPanel>
-
         <DataGrid x:Name="lstAdjustments" Grid.Row="1" AutoGenerateColumns="False" ItemsSource="{Binding Billings}" IsReadOnly="True" CanUserAddRows="False">
             <DataGrid.Columns>
-                <DataGridTextColumn Header="EE ID" Binding="{Binding EEId}"/>
-                <DataGridTextColumn Header="Adjustment Name" Binding="{Binding EE.Fullname}"/>
-                <DataGridTextColumn Header="Payroll Code" Binding="{Binding EE.PayrollCode}"/>
-                <DataGridTextColumn Header="Cutoff Id" Binding="{Binding CutoffId}"/>
-                <DataGridTextColumn Header="Type" Binding="{Binding AdjustmentOption}"/>
-                <DataGridTextColumn Header="Amount" Binding="{Binding Amount}"/>
-                <DataGridTextColumn Header="On" Binding="{Binding AdjustmentType}"/>
-                <DataGridTextColumn Header="Remarks" Binding="{Binding Remarks}"/>
-                <DataGridCheckBoxColumn Header="Applied" Binding="{Binding Applied}"/>
+                <DataGridTextColumn Header="EE ID" Binding="{Binding EEId}" />
+                <DataGridTextColumn Header="Name" Binding="{Binding EE.FullName}" />
+                <DataGridTextColumn Header="Payroll Code" Binding="{Binding EE.PayrollCode}" />
+                <DataGridTextColumn Header="Cutoff Id" Binding="{Binding CutoffId}" />
+                <DataGridTextColumn Header="Type" Binding="{Binding AdjustmentOption}" />
+                <DataGridTextColumn Header="Amount" Binding="{Binding Amount}" />
+                <DataGridTextColumn Header="On" Binding="{Binding AdjustmentType}" />
+                <DataGridTextColumn Header="Remarks" Binding="{Binding Remarks}" />
+                <DataGridCheckBoxColumn Header="Applied" Binding="{Binding Applied}" />
             </DataGrid.Columns>
         </DataGrid>
-
-        <!--<Grid Grid.Row="2">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition/>
-                <ColumnDefinition Width="50"/>
-                <ColumnDefinition Width="25"/>
-                <ColumnDefinition Width="50"/>
-            </Grid.ColumnDefinitions>
-            <Grid.RowDefinitions>
-                <RowDefinition/>
-                <RowDefinition Height="5"/>
-            </Grid.RowDefinitions>
-
-            <TextBlock Text="{Binding StatusMessage}" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="8,0"/>
-            <TextBlock Text="{Binding ProgressValue, StringFormat={}{0:N0}}" Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="8,0"/>
-            <TextBlock Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Center">of</TextBlock>
-            <TextBlock Grid.Column="3" Text="{Binding ProgressMaximum, StringFormat={}{0:N0}}" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="8,0"/>
-
-            <ProgressBar Grid.ColumnSpan="5" Grid.Row="1" Maximum="{Binding ProgressMaximum}" Value="{Binding ProgressValue}"/>
-        </Grid>-->
     </Grid>
 </UserControl>

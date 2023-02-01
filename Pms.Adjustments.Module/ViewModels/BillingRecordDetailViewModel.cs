@@ -105,7 +105,7 @@ namespace Pms.Adjustments.Module.ViewModels
             if (e.PropertyName == nameof(BillingRecord))
             {
                 EEId = BillingRecord?.EEId ?? string.Empty;
-                FullName = BillingRecord?.EE?.Fullname ?? string.Empty;
+                FullName = BillingRecord?.EE?.FullName ?? string.Empty;
             }
         }
 

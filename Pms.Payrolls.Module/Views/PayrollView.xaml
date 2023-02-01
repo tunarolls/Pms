@@ -15,8 +15,7 @@
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="auto"/>
-            <RowDefinition/>
-            <RowDefinition Height="45"/>
+            <RowDefinition />
             <!--<RowDefinition Height="25"/>-->
         </Grid.RowDefinitions>
 
@@ -92,36 +91,25 @@
             <TextBox Grid.Row="7" Grid.Column="1" Style="{StaticResource textBox}" Text="{Binding GrandCount}"/>
             <TextBox Grid.Row="7" Grid.Column="2" Style="{StaticResource textBox}" Text="{Binding GrandTotal, StringFormat='###,##0.00'}"/>
         </Grid>
- 
-
-        <Grid Grid.Row="1">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition />
-                <ColumnDefinition Width="auto" />
-            </Grid.ColumnDefinitions>
-            
-            <DataGrid ItemsSource="{Binding Payrolls}" Grid.Column="0" Grid.RowSpan="9" Margin="8" AutoGenerateColumns="False" SelectionMode="Single" IsReadOnly="True">
-                <DataGrid.Columns>
-                    <DataGridTextColumn Header="EE Id" Binding="{Binding EEId}" IsReadOnly="True"/>
-                    <DataGridTextColumn Header="Fullname" Binding="{Binding EE.Fullname}" Width="175" IsReadOnly="True"/>
-                    <DataGridTextColumn Header="Bank" Binding="{Binding EE.Bank}" IsReadOnly="True"/>
-                    <DataGridTextColumn Header="Company" Binding="{Binding CompanyId}" IsReadOnly="True"/>
-                    <DataGridTextColumn Header="Gross Pay" Binding="{Binding GrossPay, StringFormat={}{0:N2}}" IsReadOnly="True"/>
-                    <DataGridTextColumn Header="Regular Pay" Binding="{Binding RegularPay, StringFormat={}{0:N2}}" IsReadOnly="True"/>
-                    <DataGridTextColumn Header="Net Pay" Binding="{Binding NetPay, StringFormat={}{0:N2}}" IsReadOnly="True"/>
-                    <DataGridTextColumn Header="HDMF EE" Binding="{Binding EmployeePagibig, StringFormat={}{0:N2}}" IsReadOnly="True"/>
-                    <DataGridTextColumn Header="HDMF ER" Binding="{Binding EmployerPagibig, StringFormat={}{0:N2}}" IsReadOnly="True"/>
-                    <DataGridTextColumn Header="SSS EE" Binding="{Binding EmployeeSSS, StringFormat={}{0:N2}}" IsReadOnly="True"/>
-                    <DataGridTextColumn Header="SSS ER" Binding="{Binding EmployerSSS, StringFormat={}{0:N2}}" IsReadOnly="True"/>
-                    <DataGridTextColumn Header="PHIC EE" Binding="{Binding EmployeePhilHealth, StringFormat={}{0:N2}}" IsReadOnly="True"/>
-                    <DataGridTextColumn Header="PHIC ER" Binding="{Binding EmployerPhilHealth, StringFormat={}{0:N2}}" IsReadOnly="True"/>
-                </DataGrid.Columns>
-            </DataGrid>
 
 
-            <ListBox Grid.Row="2" Grid.Column="3" Grid.ColumnSpan="2" Grid.RowSpan="5" Visibility="Collapsed"/>
-
-        </Grid>
+        <DataGrid ItemsSource="{Binding Payrolls}" Grid.Column="0" Grid.RowSpan="9" AutoGenerateColumns="False" SelectionMode="Single" IsReadOnly="True" Grid.Row="1">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="EE Id" Binding="{Binding EEId}" IsReadOnly="True"/>
+                <DataGridTextColumn Header="Full Name" Binding="{Binding EE.FullName}" Width="175" IsReadOnly="True"/>
+                <DataGridTextColumn Header="Bank" Binding="{Binding EE.Bank}" IsReadOnly="True"/>
+                <DataGridTextColumn Header="Company" Binding="{Binding CompanyId}" IsReadOnly="True"/>
+                <DataGridTextColumn Header="Gross Pay" Binding="{Binding GrossPay, StringFormat={}{0:N2}}" IsReadOnly="True"/>
+                <DataGridTextColumn Header="Regular Pay" Binding="{Binding RegularPay, StringFormat={}{0:N2}}" IsReadOnly="True"/>
+                <DataGridTextColumn Header="Net Pay" Binding="{Binding NetPay, StringFormat={}{0:N2}}" IsReadOnly="True"/>
+                <DataGridTextColumn Header="HDMF EE" Binding="{Binding EmployeePagibig, StringFormat={}{0:N2}}" IsReadOnly="True"/>
+                <DataGridTextColumn Header="HDMF ER" Binding="{Binding EmployerPagibig, StringFormat={}{0:N2}}" IsReadOnly="True"/>
+                <DataGridTextColumn Header="SSS EE" Binding="{Binding EmployeeSSS, StringFormat={}{0:N2}}" IsReadOnly="True"/>
+                <DataGridTextColumn Header="SSS ER" Binding="{Binding EmployerSSS, StringFormat={}{0:N2}}" IsReadOnly="True"/>
+                <DataGridTextColumn Header="PHIC EE" Binding="{Binding EmployeePhilHealth, StringFormat={}{0:N2}}" IsReadOnly="True"/>
+                <DataGridTextColumn Header="PHIC ER" Binding="{Binding EmployerPhilHealth, StringFormat={}{0:N2}}" IsReadOnly="True"/>
+            </DataGrid.Columns>
+        </DataGrid>
 
 
 

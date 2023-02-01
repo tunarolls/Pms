@@ -40,7 +40,6 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition />
-            <RowDefinition Height="16" />
         </Grid.RowDefinitions>
         <Grid>
             <Grid.ColumnDefinitions>

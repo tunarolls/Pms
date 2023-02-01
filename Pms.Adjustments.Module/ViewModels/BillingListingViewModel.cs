@@ -13,6 +13,8 @@ using System.Threading;
 using Prism.Services.Dialogs;
 using Prism.Regions;
 using Pms.Masterlists.Entities;
+using System.Windows.Data;
+using System.Collections.Specialized;
 
 namespace Pms.Adjustments.Module.ViewModels
 {
@@ -20,7 +22,7 @@ namespace Pms.Adjustments.Module.ViewModels
     {
         public static IEnumerable<Billing> FilterPayrollCode(this IEnumerable<Billing> payrolls, string payrollCode)
         {
-            return !string.IsNullOrEmpty(payrollCode) ? payrolls.Where(t => t.EE.PayrollCode == payrollCode) : payrolls;
+            return !string.IsNullOrEmpty(payrollCode) ? payrolls.Where(t => t.EE != null && t.EE.PayrollCode == payrollCode) : payrolls;
         }
 
         public static IEnumerable<Billing> FilterPayrollCode(this ICollection<Billing> payrolls, string payrollCode)
@@ -42,8 +44,7 @@ namespace Pms.Adjustments.Module.ViewModels
     public class BillingListingViewModel : CancellableBase, INavigationAware
     {
 
-        private AdjustmentTypes _adjustmentName;
-        private IEnumerable<Billing> _billings = Enumerable.Empty<Billing>();
+        private AdjustmentTypes? _adjustmentName;
 
         private readonly Models.Timesheets m_Timesheets;
         private readonly Billings m_Billings;
@@ -61,12 +62,26 @@ namespace Pms.Adjustments.Module.ViewModels
             ExportBillingsCommand = new DelegateCommand(ExportBillings);
             GenerateBillingsCommand = new DelegateCommand(GenerateBillings);
             AdjustmentNames = Enum.GetValues<AdjustmentTypes>();
+
+            Billings = new();
+            var source = CollectionViewSource.GetDefaultView(Billings);
+            source.Filter = t => FilterBillings(t);
+            source.CollectionChanged += Billings_CollectionChanged;
         }
 
-        public AdjustmentTypes AdjustmentName { get => _adjustmentName; set => SetProperty(ref _adjustmentName, value); }
+        public AdjustmentTypes? AdjustmentName
+        {
+            get => _adjustmentName;
+            set
+            {
+                SetProperty(ref _adjustmentName, value);
+
+                var source = CollectionViewSource.GetDefaultView(Billings);
+                source.Refresh();
+            }
+        }
         public IEnumerable<AdjustmentTypes> AdjustmentNames { get; }
-        public IEnumerable<Billing> Billings { get => _billings; set => SetProperty(ref _billings, value); }
-        //public IMain? Main { get; set; }
+        public RangedObservableCollection<Billing> Billings { get; set; }
         public IAdjustmentMain? Main { get; set; }
 
         #region commands
@@ -88,19 +103,27 @@ namespace Pms.Adjustments.Module.ViewModels
         {
             try
             {
-                if (Main == null) throw new Exception(ErrorMessages.MainIsNull);
-                if (Main.PayrollCode == null) throw new Exception(ErrorMessages.PayrollCodeIsEmpty);
+                var cutoff = new Cutoff(Main?.CutoffId);
+                var payrollCode = Main?.PayrollCode?.PayrollCodeId;
+                var adjustment = AdjustmentName;
+                if (payrollCode == null) throw new Exception(ErrorMessages.PayrollCodeIsEmpty);
+                if (adjustment == null) throw new Exception(ErrorMessages.AdjustmentIsEmpty);
 
-                OnMessageSent("Exporting adjustments...");
+                var source = CollectionViewSource.GetDefaultView(Billings);
+                var billings = source.OfType<Billing>();
+
                 OnProgressStart();
-                await m_Billings.Export(Billings, Main.CutoffId, Main.PayrollCode.PayrollCodeId, AdjustmentName, cancellationToken);
+                OnMessageSent("Exporting adjustments...");
+                await Task.Run(() => m_Billings.Export(billings, cutoff.CutoffId, payrollCode, adjustment.Value), cancellationToken);
+
                 OnTaskCompleted();
+                s_Message.ShowDialog("Done.", "Export billings");
             }
             catch (TaskCanceledException) { OnTaskException(); }
             catch (Exception ex)
             {
                 OnTaskException();
-                s_Message.ShowError(ex.Message);
+                s_Message.ShowDialog(ex.Message, "Export billings", ex.ToString());
             }
         }
         #endregion
@@ -116,39 +139,38 @@ namespace Pms.Adjustments.Module.ViewModels
 
         private async Task StartGenerateBillings(CancellationToken cancellationToken = default)
         {
-            try
-            {
-                await GenerateBillings(cancellationToken);
-                await ListBillings(cancellationToken);
-            }
-            catch (Exception ex)
-            {
-                s_Message.ShowError(ex.Message);
-            }
+            await GenerateBillings(cancellationToken);
+            ListBillings();
         }
 
         private async Task GenerateBillings(CancellationToken cancellationToken = default)
         {
             try
             {
-                if (Main == null) throw new Exception("Main not initialized.");
-                if (Main.PayrollCode == null) throw new Exception("Empty payroll code.");
+                var cutoff = new Cutoff(Main?.CutoffId);
+                var payrollCode = Main?.PayrollCode;
+                if (payrollCode == null) throw new Exception(ErrorMessages.PayrollCodeIsEmpty);
+                var billingItems = new List<Billing>();
 
                 OnMessageSent("Retrieving billing records...");
                 OnProgressStart();
-                var billingItems = new List<Billing>();
-                var employeesWithPcv = await m_Billings.GetEmployeesWithPcv(Main.PayrollCode.PayrollCodeId, Main.CutoffId, cancellationToken);
-                var employeesWithBillingRecord = await m_Billings.GetEmployeesWithBillingRecord(Main.PayrollCode.PayrollCodeId, Main.CutoffId, cancellationToken);
-                var eeIds = employeesWithPcv.Union(employeesWithBillingRecord);
+                var employeesWithPcv = await m_Billings.GetEmployeesWithPcv(payrollCode.PayrollCodeId, cutoff.CutoffId, cancellationToken);
+                var employeesWithBillingRecord = await m_Billings.GetEmployeesWithBillingRecord(payrollCode.PayrollCodeId, cancellationToken);
+                var eeIds = employeesWithPcv.Union(employeesWithBillingRecord).Distinct();
 
                 OnMessageSent("Generating billing...");
                 OnProgressStart(eeIds.Count());
                 foreach (var eeId in eeIds)
                 {
-                    await m_Billings.ResetBillings(Main.CutoffId, eeId, cancellationToken);
-                    var billingFromBillingRecord = await m_Billings.GenerateBillingFromBillingRecord(Main.CutoffId, eeId, cancellationToken);
-                    var billingFromTimesheetView = await m_Billings.GenerateBillingFromTimesheetView(Main.CutoffId, eeId, cancellationToken);
-
+                    if (eeId != null)
+                    {
+                        await m_Billings.ResetBillings(cutoff.CutoffId, eeId, cancellationToken);
+                        var billingFromBillingRecord = await m_Billings.GenerateBillingFromBillingRecord(cutoff.CutoffId, eeId, cancellationToken);
+                        var billingFromTimesheetView = await m_Billings.GenerateBillingFromTimesheetView(cutoff.CutoffId, eeId, cancellationToken);
+                        billingItems.AddRange(billingFromBillingRecord);
+                        billingItems.AddRange(billingFromTimesheetView);
+                    }
+                    
                     OnProgressIncrement();
                 }
 
@@ -161,12 +183,13 @@ namespace Pms.Adjustments.Module.ViewModels
                 }
 
                 OnTaskCompleted();
+                s_Message.ShowDialog("Done.", "Generate billings");
             }
             catch (TaskCanceledException) { OnTaskException(); }
             catch (Exception ex)
             {
                 OnTaskException();
-                s_Message.ShowError(ex.Message);
+                s_Message.ShowDialog(ex.Message, "Generate billings", ex.ToString());
             }
         }
         #endregion
@@ -184,20 +207,21 @@ namespace Pms.Adjustments.Module.ViewModels
         {
             try
             {
-                if (Main == null) throw new Exception("Main not initialized.");
-                if (Main.PayrollCode == null) throw new Exception("Empty payroll code.");
+                var cutoff = new Cutoff(Main?.CutoffId);
+                var payrollCode = Main?.PayrollCode?.PayrollCodeId;
+
+                OnProgressStart();
 
                 OnMessageSent("Retrieving billing info...");
-                OnProgressStart();
-                var billingItems = await m_Billings.GetBillings(Main.CutoffId, cancellationToken);
-                Billings = billingItems.FilterPayrollCode(Main.PayrollCode.PayrollCodeId).FilterAdjustmentName(AdjustmentName);
+                var billings = await m_Billings.GetBillings(cutoff.CutoffId, payrollCode, cancellationToken);
+                Billings.ReplaceRange(billings);
                 OnTaskCompleted();
             }
             catch (TaskCanceledException) { OnTaskException(); }
             catch (Exception ex)
             {
                 OnTaskException();
-                s_Message.ShowError(ex.Message);
+                s_Message.ShowDialog(ex.Message, "List billings", ex.ToString());
             }
         }
         #endregion
@@ -218,15 +242,18 @@ namespace Pms.Adjustments.Module.ViewModels
         {
             try
             {
-                if (Main == null) throw new Exception("Main not initialized.");
+                var cutoff = new Cutoff(Main?.CutoffId);
 
-                OnMessageSent("Retrieving timesheets...");
                 OnProgressStart();
-                var timesheets = await m_Timesheets.GetTimesheets(Main.CutoffId, cancellationToken);
+                OnMessageSent("Retrieving timesheets...");
+                var timesheets = await m_Timesheets.GetTimesheets(cutoff.CutoffId, cancellationToken);
 
                 OnMessageSent("Exporting adjustments...");
-                OnProgressStart(Billings.Count());
-                foreach (var billing in Billings)
+                var source = CollectionViewSource.GetDefaultView(Billings);
+                var billings = source.OfType<Billing>();
+                OnProgressStart(billings.Count());
+
+                foreach (var billing in billings)
                 {
                     var timesheet = timesheets.SingleOrDefault(t => t.CutoffId == billing.CutoffId && t.EEId == billing.EEId);
 
@@ -269,12 +296,14 @@ namespace Pms.Adjustments.Module.ViewModels
                 }
 
                 OnTaskCompleted();
+
+                s_Message.ShowDialog("Done.", "Add to adjust");
             }
             catch (TaskCanceledException) { OnTaskException(); }
             catch (Exception ex)
             {
                 OnTaskException();
-                s_Message.ShowError(ex.Message);
+                s_Message.ShowDialog(ex.Message, "Add to adjust", ex.ToString());
             }
         }
         #endregion
@@ -310,5 +339,21 @@ namespace Pms.Adjustments.Module.ViewModels
             ListBillings();
         }
         #endregion
+
+        private bool FilterBillings(object t)
+        {
+            if (t is Billing billing)
+            {
+                var adjustmentMatch = AdjustmentName == null || billing.AdjustmentType == AdjustmentName;
+
+                return adjustmentMatch;
+            }
+
+            return false;
+        }
+
+        private void Billings_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        {
+        }
     }
 }

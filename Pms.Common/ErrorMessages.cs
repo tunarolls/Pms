@@ -17,5 +17,6 @@ namespace Pms.Common
         public const string SiteIsEmpty = "Site is empty.";
         public const string CutoffIsEmpty = "Cutoff is empty.";
         public const string CompanyIsEmpty = "Company is empty.";
+        public const string AdjustmentIsEmpty = "Adjustment is empty.";
     }
 }

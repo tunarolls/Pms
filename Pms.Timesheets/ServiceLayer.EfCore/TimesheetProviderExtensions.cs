@@ -13,9 +13,11 @@ namespace Pms.Timesheets.ServiceLayer.EfCore
             return timesheets.Where(ts => ts.CutoffId == cutoffId);
         }
 
-        public static IQueryable<Timesheet> FilterByCutoffId(this IQueryable<Timesheet> timesheets, string cutoffId)
+        public static IQueryable<Timesheet> FilterByCutoffId(this IQueryable<Timesheet> timesheets, string? cutoffId)
         {
-            return timesheets.Where(t => t.CutoffId == cutoffId);
+            return string.IsNullOrEmpty(cutoffId)
+                ? timesheets
+                : timesheets.Where(t => t.CutoffId == cutoffId);
         }
 
         public static IEnumerable<Timesheet> FilterByPayrollCode(this IEnumerable<Timesheet> timesheets, string payrollCode) =>

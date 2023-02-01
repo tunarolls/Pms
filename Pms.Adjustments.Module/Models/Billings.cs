@@ -37,27 +37,32 @@ namespace Pms.Adjustments.Module.Models
 
         public IEnumerable<Billing> GetBillings(string cutoffId, string payrollCodeId)
         {
-            return _billingProvider.GetBillings(cutoffId).Where(p => p.EE.PayrollCode == payrollCodeId);
+            return _billingProvider.GetBillings(cutoffId).Where(p => p.EE != null && p.EE.PayrollCode == payrollCodeId);
         }
 
-        public IEnumerable<string> GetEmployeesWithPcv(string payrollCodeId, string cutoffId)
+        public async Task<ICollection<Billing>> GetBillings(string? cutoffId, string? payrollCode, CancellationToken cancellationToken = default)
+        {
+            return await _billingProvider.GetBillings(cutoffId, payrollCode, cancellationToken);
+        }
+
+        public IEnumerable<string?> GetEmployeesWithPcv(string payrollCodeId, string cutoffId)
         {
             return _billingGenerator.CollectEEIdWithPcv(payrollCodeId, cutoffId);
         }
 
-        public async Task<ICollection<string>> GetEmployeesWithPcv(string payrollCodeId, string cutoffId, CancellationToken cancellationToken = default)
+        public async Task<ICollection<string?>> GetEmployeesWithPcv(string payrollCode, string cutoffId, CancellationToken cancellationToken = default)
         {
-            return await _billingGenerator.CollectEEIdWithPcv(payrollCodeId, cutoffId, cancellationToken);
+            return await _billingGenerator.CollectEEIdWithPcv(payrollCode, cutoffId, cancellationToken);
         }
 
-        public IEnumerable<string> GetEmployeesWithBillingRecord(string payrollCodeId, string cutoffId)
+        public IEnumerable<string?> GetEmployeesWithBillingRecord(string payrollCodeId, string cutoffId)
         {
             return _billingGenerator.CollectEEIdWithBillingRecord(payrollCodeId, cutoffId);
         }
 
-        public async Task<ICollection<string>> GetEmployeesWithBillingRecord(string payrollCodeId, string cutoffId, CancellationToken cancellationToken = default)
+        public async Task<ICollection<string?>> GetEmployeesWithBillingRecord(string payrollCode, CancellationToken cancellationToken = default)
         {
-            return await _billingGenerator.CollectEEIdWithBillingRecord(payrollCodeId, cutoffId, cancellationToken);
+            return await _billingGenerator.CollectEEIdWithBillingRecord(payrollCode, cancellationToken);
         }
 
         public double GetTotalAdvances(string eeId, string cutoffId)

@@ -72,6 +72,11 @@ namespace Pms.Payrolls.Module
             return await _provider.GetPayrolls(cutoffId, payrollCode, cancellationToken);
         }
 
+        public async Task<ICollection<Payroll>> Get(string? cutoffId, string? companyId, string? payrollCode, CancellationToken cancellationToken = default)
+        {
+            return await _provider.GetPayrolls(cutoffId, companyId, payrollCode, cancellationToken);
+        }
+
         public IEnumerable<Payroll> Get(int yearCovered, string companyId) =>
             _provider.GetPayrolls(yearCovered, companyId);
 
@@ -124,13 +129,11 @@ namespace Pms.Payrolls.Module
             return da4.ToList();
         }
 
-        public async Task<ICollection<Payroll>> GetYearlyPayrollsByEmployee(int yearCovered, string payrollCodeId, string companyId,
+        public async Task<ICollection<Payroll>> GetYearlyPayrollsByEmployee(int yearCovered, string payrollCode, string? companyId,
             CancellationToken cancellationToken = default)
         {
-            var payrolls = await _provider.GetYearlyPayrolls(yearCovered, cancellationToken);
+            var payrolls = await _provider.GetYearlyPayrolls(yearCovered, payrollCode, companyId, cancellationToken);
             return payrolls
-                .Where(t => t.PayrollCode == payrollCodeId)
-                .Where(t => t.CompanyId == companyId)
                 .GroupBy(t => t.EEId)
                 .Where(t => t.Any(u => u.Cutoff.CutoffDate.Month == 11))
                 .SelectMany(t => t)

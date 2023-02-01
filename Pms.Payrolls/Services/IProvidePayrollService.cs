@@ -19,6 +19,8 @@ namespace Pms.Payrolls.Services
 
         Task<ICollection<Payroll>> GetYearlyPayrolls(int year, CancellationToken cancellationToken = default);
 
+        Task<ICollection<Payroll>> GetYearlyPayrolls(int year, string? payrollCode, string? companyId, CancellationToken cancellationToken = default);
+
         /// <summary>
         /// Used for generating Government Computation.
         /// </summary>
@@ -38,6 +40,8 @@ namespace Pms.Payrolls.Services
         IEnumerable<Payroll> GetPayrolls(string cutoffId, string payrollCode);
 
         Task<ICollection<Payroll>> GetPayrolls(string cutoffId, string payrollCode, CancellationToken cancellationToken = default);
+
+        Task<ICollection<Payroll>> GetPayrolls(string? cutoffId, string? companyId, string? payrollCode, CancellationToken cancellationToken = default);
 
         IEnumerable<Payroll> GetPayrolls(int yearsCovered, string companyId);
 

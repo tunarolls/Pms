@@ -10,6 +10,7 @@ using Pms.Payrolls.ServiceLayer.Files.Import.Alphalist;
 using Pms.Masterlists.Entities;
 using Prism.Services.Dialogs;
 using System;
+using System.Collections.Generic;
 
 namespace Pms.Payrolls.Module.ViewModels
 {
@@ -58,32 +59,37 @@ namespace Pms.Payrolls.Module.ViewModels
         {
             try
             {
-                if (Main == null) throw new Exception(ErrorMessages.MainIsNull);
-                if (Main.Company == null) throw new Exception(ErrorMessages.CompanyIsEmpty);
-                if (Main.PayrollCode == null) throw new Exception(ErrorMessages.PayrollCodeIsEmpty);
+                var cutoff = new Cutoff(Main?.CutoffId);
+                var payrollCodeId = Main?.PayrollCode?.PayrollCodeId;
+                var company = Main?.Company;
+                if (company == null) throw new Exception(ErrorMessages.CompanyIsEmpty);
+                if (string.IsNullOrEmpty(payrollCodeId)) throw new Exception(ErrorMessages.PayrollCodeIsEmpty);
 
-                var cutoff = new Cutoff(Main.CutoffId);
-                var payrollCodeId = Main.PayrollCode.PayrollCodeId;
-                var company = Main.Company;
+                var importTasks = new List<Task>();
 
                 foreach (string payRegister in fileNames)
                 {
                     var companyView = new CompanyView(company.RegisteredName, company.TIN, company.BranchCode, company.Region);
                     var importer = new AlphalistImport();
 
-                    await Task.Run(() =>
+                    var importTask = Task.Run(() =>
                     {
                         importer.ImportToBIRProgram(payRegister, BirDbfDirectory, companyView, cutoff.YearCovered);
                     }, cancellationToken);
+                    importTasks.Add(importTask);
                 }
 
+                OnMessageSent("Importing...");
+                await Task.WhenAll(importTasks);
                 OnTaskCompleted();
+
+                s_Message.ShowDialog("Import done.", "Import alphalist");
             }
             catch (TaskCanceledException) { OnTaskException(); }
             catch (Exception ex)
             {
                 OnTaskException();
-                s_Message.ShowError(ex.Message);
+                s_Message.ShowDialog(ex.Message, "Import alphalist", ex.ToString());
             }
         }
         #endregion

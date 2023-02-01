@@ -41,5 +41,26 @@ namespace Pms.Payrolls.ServiceLayer.EfCore
                 .OrderByDescending(ts => ts.PayrollCode)
                 .Select(ts => ts.PayrollCode)
                 .ToList();
+
+        public static IQueryable<Payroll> FilterByPayrollCode(this IQueryable<Payroll> payrolls, string? payrollCode)
+        {
+            return !string.IsNullOrEmpty(payrollCode)
+                ? payrolls.Where(t => t.PayrollCode == payrollCode)
+                : payrolls;
+        }
+
+        public static IQueryable<Payroll> FilterByCompanyId(this IQueryable<Payroll> payrolls, string? companyId)
+        {
+            return !string.IsNullOrEmpty(companyId)
+                ? payrolls.Where(t => t.CompanyId == companyId)
+                : payrolls;
+        }
+
+        public static IQueryable<Payroll> FilterByCutoffId(this IQueryable<Payroll> payrolls, string? cutoffId)
+        {
+            return !string.IsNullOrEmpty(cutoffId)
+                ? payrolls.Where(t => t.CutoffId == cutoffId)
+                : payrolls;
+        }
     }
 }

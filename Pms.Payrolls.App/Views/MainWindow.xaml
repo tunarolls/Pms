@@ -66,8 +66,8 @@
                     </Style>
                 </StackPanel.Resources>
                 <Button Content="Timesheet" Command="{Binding TimesheetCommand}" />
-                <Button IsEnabled="True" Content="Billings" Command="{Binding BillingCommand}" />
-                <Button IsEnabled="True" Content="Records" Command="{Binding BillingRecordCommand}" />
+                <Button Content="Billings" Command="{Binding BillingCommand}" />
+                <Button Content="Records" Command="{Binding BillingRecordCommand}" />
                 <Button Content="Payroll" Command="{Binding PayrollCommand}" />
                 <Button Content="Alphalist" Command="{Binding AlphalistCommand}" />
                 <Button Content="Masterlist" Command="{Binding EmployeeCommand}" />

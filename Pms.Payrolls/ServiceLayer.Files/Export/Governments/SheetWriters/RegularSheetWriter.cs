@@ -13,12 +13,12 @@ namespace Pms.Payrolls.ServiceLayer.Files.Exports.Governments
         public RegularSheetWriter(IEnumerable<Payroll> payrolls, IRowWriter rowWriter)
         {
             RowWriter = rowWriter;
-            _payrolls = payrolls.OrderBy(p => p.EE.Fullname);
+            _payrolls = payrolls.OrderBy(p => p.EE.FullName);
         }
 
         public RegularSheetWriter(IEnumerable<Payroll> payrolls)
         {
-            _payrolls = payrolls.OrderBy(p => p.EE.Fullname);
+            _payrolls = payrolls.OrderBy(p => p.EE.FullName);
         }
 
         public IRowWriter? RowWriter { get; set; }

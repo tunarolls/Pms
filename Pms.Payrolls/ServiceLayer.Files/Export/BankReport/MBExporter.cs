@@ -31,7 +31,7 @@ namespace Pms.Payrolls.ServiceLayer.Files.Export.BankReport
             string filename = $@"{filePath}\{_payrollCode}_{_cutoff.CutoffDate:yyyyMMdd}-{_bankName}.xls";
             File.Copy(templatePath, filename, true);
 
-            payrolls = payrolls.OrderBy(p => p.EE.Fullname);
+            payrolls = payrolls.OrderBy(p => p.EE.FullName);
 
             GenerateXls(filename, payrolls.ToArray());
         }

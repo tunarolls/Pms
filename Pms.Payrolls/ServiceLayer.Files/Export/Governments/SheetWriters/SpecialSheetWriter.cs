@@ -45,7 +45,7 @@ namespace Pms.Payrolls.ServiceLayer.Files.Exports.Governments
                     .GroupBy(p => p.EE.JobCode)
                     .Select(pp =>
                         pp
-                        .OrderBy(p => p.EE.Fullname)
+                        .OrderBy(p => p.EE.FullName)
                         .ToList()
                     )
                     .OrderBy(p => p.First().EE.JobCode)

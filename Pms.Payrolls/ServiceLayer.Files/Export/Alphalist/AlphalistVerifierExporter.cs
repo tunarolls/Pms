@@ -61,7 +61,7 @@ namespace Pms.Payrolls.ServiceLayer.Files.Export.Alphalist
             row.CreateCell(Append(ref columnIndex)).SetCellValue(eeId);
             if (employee is not null)
             {
-                row.CreateCell(Append(ref columnIndex)).SetCellValue(employee.Fullname);
+                row.CreateCell(Append(ref columnIndex)).SetCellValue(employee.FullName);
                 row.CreateCell(Append(ref columnIndex)).SetCellValue(employee.TIN);
             }
         }

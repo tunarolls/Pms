@@ -37,7 +37,7 @@ namespace Pms.Payrolls.ServiceLayer.Files.Export.BankReport
             string templatePath = $@"{startupPath}\TEMPLATES\CHK-{_site}.xls";
             File.Copy(templatePath, filename, true);
 
-            payrolls = payrolls.OrderBy(p => p.EE.Fullname);
+            payrolls = payrolls.OrderBy(p => p.EE.FullName);
             GenerateXls(filename, payrolls.ToArray());
         }
 

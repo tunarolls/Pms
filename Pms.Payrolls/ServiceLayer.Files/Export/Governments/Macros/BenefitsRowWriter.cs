@@ -15,7 +15,7 @@ namespace Pms.Payrolls.ServiceLayer.Files.Exports.Governments.Macros
         {
             row.GetOrCreateCell(0).SetCellValue(sequence);
             row.GetOrCreateCell(1).SetCellValue(payroll.EEId);
-            row.GetOrCreateCell(2).SetCellValue(payroll.EE.Fullname);
+            row.GetOrCreateCell(2).SetCellValue(payroll.EE.FullName);
 
             row.GetOrCreateCell(3).SetCellValue(payroll.EmployeePhilHealth);
             row.GetOrCreateCell(4).SetCellValue(payroll.EmployeePhilHealth);// should be employer

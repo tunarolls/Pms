@@ -34,7 +34,7 @@ namespace Pms.Payrolls.ServiceLayer.Files.Export.BankReport
             string templatePath = $@"{startupPath}\TEMPLATES\CBC.xls";
             File.Copy(templatePath, filename, true);
 
-            payrolls = payrolls.OrderBy(p => p.EE.Fullname);
+            payrolls = payrolls.OrderBy(p => p.EE.FullName);
 
             GenerateXls(filename, payrolls.ToArray());
             GenerateTxt(filename, payrolls.ToArray());

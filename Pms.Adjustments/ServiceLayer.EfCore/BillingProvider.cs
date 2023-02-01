@@ -55,6 +55,16 @@ namespace Pms.Adjustments.ServiceLayer.EfCore
             return await context.Billings.Include(t => t.EE).Where(t => t.CutoffId == cutoffId).ToListAsync(cancellationToken);
         }
 
+        public async Task<ICollection<Billing>> GetBillings(string? cutoffId, string? payrollCode, CancellationToken cancellationToken = default)
+        {
+            using var context = _factory.CreateDbContext();
+            return await context.Billings
+                .Include(t => t.EE)
+                .FilterByCutoffId(cutoffId)
+                .FilterByPayrollCode(payrollCode)
+                .ToListAsync(cancellationToken);
+        }
+
         //public IEnumerable<Billing> GetBillings(string cutoffId, string adjustmentName)
         //{
         //    var context = _factory.CreateDbContext();

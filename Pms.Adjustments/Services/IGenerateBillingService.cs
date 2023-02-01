@@ -14,9 +14,9 @@ namespace Pms.Adjustments.Services
         Task<ICollection<Billing>> GenerateBillingFromTimesheetView(string eeId, string cutoffId, CancellationToken cancellationToken = default);
         IEnumerable<Billing> GenerateBillingFromRecords(string eeId, string cutoffId);
         Task<ICollection<Billing>> GenerateBillingFromRecords(string eeId, string cutoffId, CancellationToken cancellationToken = default);
-        IEnumerable<string> CollectEEIdWithPcv(string payrollCodeId, string cutoffId);
-        Task<ICollection<string>> CollectEEIdWithPcv(string payrollCodeId, string cutoffId, CancellationToken cancellationToken = default);
-        IEnumerable<string> CollectEEIdWithBillingRecord(string payrollCodeId, string cutoffId);
-        Task<ICollection<string>> CollectEEIdWithBillingRecord(string payrolCodeId, string cutoffId, CancellationToken cancellationToken = default);
+        IEnumerable<string?> CollectEEIdWithPcv(string payrollCodeId, string cutoffId);
+        Task<ICollection<string?>> CollectEEIdWithPcv(string payrollCode, string cutoffId, CancellationToken cancellationToken = default);
+        IEnumerable<string?> CollectEEIdWithBillingRecord(string payrollCodeId, string cutoffId);
+        Task<ICollection<string?>> CollectEEIdWithBillingRecord(string payrollCode, CancellationToken cancellationToken = default);
     }
 }

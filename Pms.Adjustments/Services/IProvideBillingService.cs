@@ -14,6 +14,7 @@ namespace Pms.Adjustments.Services
         //IEnumerable<Billing> GetBillings(string eeId, string cutoffId);
         IEnumerable<Billing> GetBillings(string cutoffId);
         Task<ICollection<Billing>> GetBillings(string cutoffId, CancellationToken cancellationToken = default);
+        Task<ICollection<Billing>> GetBillings(string? cutoffId, string? payrollCode, CancellationToken cancellationToken = default);
         //IEnumerable<Billing> GetBillings(string cutoffId, string adjustmentName);
         //IEnumerable<string> GetAdjustmentNames(string cutoffId, string payrollCode);
     }

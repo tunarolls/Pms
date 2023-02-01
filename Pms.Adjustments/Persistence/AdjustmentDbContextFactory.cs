@@ -17,14 +17,14 @@ namespace Pms.Adjustments.Persistence
             _connectionString = connectionString;
 
         public AdjustmentDbContextFactory() =>
-            _connectionString = "server=192.168.56.101;database=payroll3Test_efdb;user=tim;password=tim@123;";
+            _connectionString = "server=192.168.56.101;database=payroll3_efdb;user=tim;password=tim@123;";
 
         public AdjustmentDbContext CreateDbContext()
         {
             DbContextOptions dbContextOptions = new DbContextOptionsBuilder()
                 .UseMySQL(
                     _connectionString,
-                    options => options.MigrationsHistoryTable("AdjustmentsMigrationHistory")
+                    options => options.MigrationsHistoryTable("adjustmentsmigrationhistory")
                 )
                 .Options;
 

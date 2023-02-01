@@ -8,45 +8,66 @@ namespace Pms.Adjustments.Models
 {
     public class Cutoff
     {
-        public string CutoffId { get; private set; } = string.Empty;
+        public string CutoffId { get; private set; }
         public DateTime CutoffDate { get; private set; }
         public DeductionOptions DeductionOption => CutoffDate.Day == 15 ? DeductionOptions.ONLY15TH : DeductionOptions.ONLY30TH;
 
         public Cutoff()
         {
+            var cutoffDate = GetCutoffDate();
+            CutoffDate = cutoffDate;
+            CutoffId = GetCutoffId(cutoffDate);
+        }
+
+        public Cutoff(string? cutoffId)
+        {
+            if (string.IsNullOrEmpty(cutoffId))
+            {
+                var cutoffDate = GetCutoffDate();
+                CutoffDate = cutoffDate;
+                CutoffId = GetCutoffId(cutoffDate);
+            }
+            else
+            {
+                CutoffId = cutoffId;
+                CutoffDate = GetCutoffDate(cutoffId);
+            }
+        }
+
+        private DateTime GetCutoffDate()
+        {
             int year = DateTime.Now.Year;
             int month = DateTime.Now.Month;
 
-            if (DateTime.Now.Day < 15)
-                CutoffDate = new DateTime(year, month, 15);
-            else CutoffDate = new DateTime(year, month, DateTime.DaysInMonth(year, month));
-
-            GetCutoffId();
+            return DateTime.Now.Day < 15
+                ? new DateTime(year, month, 15)
+                : new DateTime(year, month, DateTime.DaysInMonth(year, month));
         }
 
-        public Cutoff(string cutoffId)
+        private DateTime GetCutoffDate(string cutoffId)
         {
-            CutoffId = cutoffId;
-            GetCutoffDate();
-        }
-
-        private void GetCutoffDate()
-        {
-            int year = int.Parse(CutoffId.Substring(0, 2));
-            int month = int.Parse(CutoffId.Substring(2, 2));
-            int dayIdx = int.Parse(CutoffId.Substring(5, 1));
+            int year = int.Parse(cutoffId.Substring(0, 2));
+            int month = int.Parse(cutoffId.Substring(2, 2));
+            int dayIdx = int.Parse(cutoffId.Substring(5, 1));
             int day = 15;
-            if (dayIdx == 2)
-                day = DateTime.DaysInMonth(year, month);
 
-            CutoffDate = new DateTime(year + 2000, month, day); // update year to 3000 at the end of the millennium
+            if (dayIdx == 2)
+            {
+                day = DateTime.DaysInMonth(year, month);
+            }
+
+            return new DateTime(year + 2000, month, day);
         }
 
-        private void GetCutoffId()
+        private string GetCutoffId(DateTime cutoffDate)
         {
-            if (CutoffDate.Day <= 15)
-                CutoffId = $"{CutoffDate:yyMM}-1";
-            else CutoffId = $"{CutoffDate:yyMM}-2";
+            switch (cutoffDate.Day)
+            {
+                case <= 15:
+                    return $"{cutoffDate:yyMM}-1";
+                default:
+                    return $"{cutoffDate:yyMM}-2";
+            }
         }
 
         public override string ToString() => CutoffId;

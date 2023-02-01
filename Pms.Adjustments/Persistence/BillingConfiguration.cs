@@ -18,10 +18,10 @@ namespace Pms.Adjustments.Persistence
             //    .HasOne(pcv => pcv.Record)
             //    .WithMany(rec => rec.Billings);
 
-            builder.Property(cc => cc.EEId).HasColumnType("VARCHAR(8)").IsRequired();
+            builder.Property(cc => cc.EEId).HasColumnType("VARCHAR(8)");
             builder.Property(cc => cc.BillingId).HasColumnType("VARCHAR(45)").IsRequired();
             builder.Property(cc => cc.CutoffId).HasColumnType("VARCHAR(6)").IsRequired();
-            builder.Property(cc => cc.RecordId).HasColumnType("VARCHAR(45)").IsRequired(false);
+            builder.Property(cc => cc.RecordId).HasColumnType("VARCHAR(45)");
             builder.Property(cc => cc.AdjustmentType).HasColumnType("TINYINT").IsRequired();
             builder.Property(cc => cc.AdjustmentOption).HasColumnType("TINYINT").IsRequired();
             builder.Property(cc => cc.Applied).HasColumnType("TINYINT").IsRequired();

@@ -10,9 +10,9 @@ namespace Pms.Adjustments.ServiceLayer.Files
 {
     static class Evaluator
     {
-        public static string GetValue(this ICell cell, HSSFFormulaEvaluator formulator = null)
+        public static string GetValue(this ICell? cell, HSSFFormulaEvaluator? formulator = null)
         {
-            if (cell is null) return string.Empty;
+            if (cell == null) return string.Empty;
 
             switch (cell.CellType)
             {
@@ -40,7 +40,7 @@ namespace Pms.Adjustments.ServiceLayer.Files
                         return cell.NumericCellValue.ToString();
                     }
                 case CellType.Formula:
-                    return GetValue(formulator.EvaluateInCell(cell));
+                    return GetValue(formulator?.EvaluateInCell(cell));
                 default:
                     return cell.StringCellValue;
             }

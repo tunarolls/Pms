@@ -19,10 +19,10 @@ namespace Pms.Adjustments.ServiceLayer.EfCore
             _factory = factory;
         }
 
-        public IEnumerable<string> CollectEEIdWithBillingRecord(string payrollCodeId, string cutoffId)
+        public IEnumerable<string?> CollectEEIdWithBillingRecord(string payrollCodeId, string cutoffId)
         {
             using AdjustmentDbContext context = _factory.CreateDbContext();
-            IEnumerable<string> eeIds = context.BillingRecords
+            IEnumerable<string?> eeIds = context.BillingRecords
                 .Include(b => b.EE)
                 .Where(b => b.EE != null && b.EE.PayrollCode == payrollCodeId)
                 .Select(b => b.EEId)
@@ -32,20 +32,20 @@ namespace Pms.Adjustments.ServiceLayer.EfCore
             return eeIds;
         }
 
-        public async Task<ICollection<string>> CollectEEIdWithBillingRecord(string payrollCodeId, string cutoffId, CancellationToken cancellationToken = default)
+        public async Task<ICollection<string?>> CollectEEIdWithBillingRecord(string payrollCode, CancellationToken cancellationToken = default)
         {
             using var context = _factory.CreateDbContext();
             return await context.BillingRecords
-                .Where(t => t.EE.PayrollCode == payrollCodeId)
+                .FilterByPayrollCode(payrollCode)
                 .Select(t => t.EEId)
                 .Distinct()
                 .ToListAsync(cancellationToken);
         }
 
-        public IEnumerable<string> CollectEEIdWithPcv(string payrollCodeId, string cutoffId)
+        public IEnumerable<string?> CollectEEIdWithPcv(string payrollCodeId, string cutoffId)
         {
             using AdjustmentDbContext context = _factory.CreateDbContext();
-            IEnumerable<string> eeIds = context.Timesheets
+            IEnumerable<string?> eeIds = context.Timesheets
                 .Include(ts => ts.EE)
                 .Where(ts => ts.EE != null && ts.EE.PayrollCode == payrollCodeId)
                 .Where(ts => ts.CutoffId == cutoffId)
@@ -57,11 +57,12 @@ namespace Pms.Adjustments.ServiceLayer.EfCore
             return eeIds;
         }
 
-        public async Task<ICollection<string>> CollectEEIdWithPcv(string payrollCodeId, string cutoffId, CancellationToken cancellationToken = default)
+        public async Task<ICollection<string?>> CollectEEIdWithPcv(string payrollCode, string cutoffId, CancellationToken cancellationToken = default)
         {
             using var context = _factory.CreateDbContext();
             return await context.Timesheets
-                .Where(t => t.EE.PayrollCode == payrollCodeId && t.CutoffId == cutoffId)
+                .FilterByPayrollCode(payrollCode)
+                .FilterByCutoffId(cutoffId)
                 .Where(t => !string.IsNullOrEmpty(t.RawPCV) || t.Allowance > 0)
                 .Select(t => t.EEId)
                 .Distinct()

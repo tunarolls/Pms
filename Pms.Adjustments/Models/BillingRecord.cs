@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -16,10 +17,10 @@ namespace Pms.Adjustments.Models
         public DateTime DateCreated { get; set; } = DateTime.Now;
         public DeductionOptions DeductionOption { get; set; }
         public EmployeeView? EE { get; set; }
-        public string EEId { get; set; } = string.Empty;
+        public string? EEId { get; set; }
         public DateTime EffectivityDate { get; set; }
         public string RecordId { get; set; } = string.Empty;
-        public string Remarks { get; set; } = string.Empty; 
+        public string? Remarks { get; set; }
         public BillingRecordStatus Status { get; set; }
         public static string GenerateId(BillingRecord rec) => $"{rec.EEId}_{rec.AdjustmentType}_{rec.EffectivityDate:MMyy}";
 

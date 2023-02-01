@@ -9,15 +9,15 @@ using Pms.Adjustments.Persistence;
 namespace Pms.Adjustments.Migrations
 {
     [DbContext(typeof(AdjustmentDbContext))]
-    [Migration("20230112063719_init")]
-    partial class init
+    [Migration("20220927035103_addedAdjustmentType")]
+    partial class addedAdjustmentType
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("Relational:MaxIdentifierLength", 64)
-                .HasAnnotation("ProductVersion", "5.0.13");
+                .HasAnnotation("ProductVersion", "5.0.17");
 
             modelBuilder.Entity("Pms.Adjustments.Models.Billing", b =>
                 {
@@ -52,7 +52,6 @@ namespace Pms.Adjustments.Migrations
                         .HasColumnType("VARCHAR(45)");
 
                     b.Property<string>("Remarks")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.HasKey("BillingId");
@@ -64,10 +63,38 @@ namespace Pms.Adjustments.Migrations
                     b.ToTable("adjustment_billing");
                 });
 
+            modelBuilder.Entity("Pms.Adjustments.Models.EmployeeView", b =>
+                {
+                    b.Property<string>("EEId")
+                        .HasColumnType("varchar(767)");
+
+                    b.Property<string>("FirstName")
+                        .HasColumnType("text");
+
+                    b.Property<string>("LastName")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Location")
+                        .HasColumnType("text");
+
+                    b.Property<string>("MiddleName")
+                        .HasColumnType("text");
+
+                    b.Property<string>("PayrollCode")
+                        .HasColumnType("text");
+
+                    b.HasKey("EEId");
+
+                    b.ToView("masterlist");
+                });
+
             modelBuilder.Entity("Pms.Adjustments.Models.BillingRecord", b =>
                 {
                     b.Property<string>("RecordId")
                         .HasColumnType("VARCHAR(45)");
+
+                    b.Property<int>("AdjustmentOption")
+                        .HasColumnType("int");
 
                     b.Property<byte>("AdjustmentType")
                         .HasColumnType("TINYINT");
@@ -95,6 +122,9 @@ namespace Pms.Adjustments.Migrations
                     b.Property<DateTime>("EffectivityDate")
                         .HasColumnType("DATE");
 
+                    b.Property<string>("Remarks")
+                        .HasColumnType("text");
+
                     b.Property<byte>("Status")
                         .HasColumnType("TINYINT");
 
@@ -103,36 +133,6 @@ namespace Pms.Adjustments.Migrations
                     b.HasIndex("EEId");
 
                     b.ToTable("BillingRecords");
-                });
-
-            modelBuilder.Entity("Pms.Adjustments.Models.EmployeeView", b =>
-                {
-                    b.Property<string>("EEId")
-                        .HasColumnType("varchar(767)");
-
-                    b.Property<string>("FirstName")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("LastName")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Location")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("MiddleName")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("PayrollCode")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("EEId");
-
-                    b.ToView("masterlist");
                 });
 
             modelBuilder.Entity("Pms.Adjustments.Models.TimesheetView", b =>
@@ -145,19 +145,18 @@ namespace Pms.Adjustments.Migrations
                         .HasColumnType("double");
 
                     b.Property<string>("CutoffId")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("EEId")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("Fullname")
-                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("PayrollCode")
                         .HasColumnType("text");
 
                     b.Property<string>("RawPCV")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.HasKey("TimesheetId");

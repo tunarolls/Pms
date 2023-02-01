@@ -41,7 +41,7 @@ namespace Pms.Adjustments.ServiceLayer.EfCore
             using var context = _factory.CreateDbContext();
             return await context.BillingRecords
                 .Include(t => t.EE)
-                .Where(t => t.EE.PayrollCode == payrollCode)
+                .Where(t => t.EE != null && t.EE.PayrollCode == payrollCode)
                 .ToListAsync(cancellationToken);
         }
     }

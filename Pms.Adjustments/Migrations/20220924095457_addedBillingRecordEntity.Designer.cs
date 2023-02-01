@@ -2,20 +2,22 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Pms.Adjustments.Persistence;
 
 namespace Pms.Adjustments.Migrations
 {
     [DbContext(typeof(AdjustmentDbContext))]
-    partial class AdjustmentDbContextModelSnapshot : ModelSnapshot
+    [Migration("20220924095457_addedBillingRecordEntity")]
+    partial class addedBillingRecordEntity
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("Relational:MaxIdentifierLength", 64)
-                .HasAnnotation("ProductVersion", "5.0.13");
+                .HasAnnotation("ProductVersion", "5.0.17");
 
             modelBuilder.Entity("Pms.Adjustments.Models.Billing", b =>
                 {
@@ -31,9 +33,6 @@ namespace Pms.Adjustments.Migrations
                     b.Property<double>("Amount")
                         .HasColumnType("DOUBLE(8,2)");
 
-                    b.Property<byte>("Applied")
-                        .HasColumnType("TINYINT");
-
                     b.Property<string>("CutoffId")
                         .IsRequired()
                         .HasColumnType("VARCHAR(6)");
@@ -42,7 +41,11 @@ namespace Pms.Adjustments.Migrations
                         .HasColumnType("TIMESTAMP")
                         .HasDefaultValueSql("CURRENT_TIMESTAMP");
 
+                    b.Property<byte>("Deducted")
+                        .HasColumnType("TINYINT");
+
                     b.Property<string>("EEId")
+                        .IsRequired()
                         .HasColumnType("VARCHAR(8)");
 
                     b.Property<string>("RecordId")
@@ -60,13 +63,35 @@ namespace Pms.Adjustments.Migrations
                     b.ToTable("adjustment_billing");
                 });
 
+            modelBuilder.Entity("Pms.Adjustments.Models.EmployeeView", b =>
+                {
+                    b.Property<string>("EEId")
+                        .HasColumnType("varchar(767)");
+
+                    b.Property<string>("FirstName")
+                        .HasColumnType("text");
+
+                    b.Property<string>("LastName")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Location")
+                        .HasColumnType("text");
+
+                    b.Property<string>("MiddleName")
+                        .HasColumnType("text");
+
+                    b.Property<string>("PayrollCode")
+                        .HasColumnType("text");
+
+                    b.HasKey("EEId");
+
+                    b.ToView("masterlist");
+                });
+
             modelBuilder.Entity("Pms.Adjustments.Models.BillingRecord", b =>
                 {
                     b.Property<string>("RecordId")
                         .HasColumnType("VARCHAR(45)");
-
-                    b.Property<int>("AdjustmentOption")
-                        .HasColumnType("int");
 
                     b.Property<byte>("AdjustmentType")
                         .HasColumnType("TINYINT");
@@ -88,13 +113,11 @@ namespace Pms.Adjustments.Migrations
                         .HasColumnType("TINYINT");
 
                     b.Property<string>("EEId")
+                        .IsRequired()
                         .HasColumnType("VARCHAR(8)");
 
                     b.Property<DateTime>("EffectivityDate")
                         .HasColumnType("DATE");
-
-                    b.Property<string>("Remarks")
-                        .HasColumnType("text");
 
                     b.Property<byte>("Status")
                         .HasColumnType("TINYINT");
@@ -103,37 +126,7 @@ namespace Pms.Adjustments.Migrations
 
                     b.HasIndex("EEId");
 
-                    b.ToTable("billingrecords");
-                });
-
-            modelBuilder.Entity("Pms.Adjustments.Models.EmployeeView", b =>
-                {
-                    b.Property<string>("EEId")
-                        .HasColumnType("varchar(767)");
-
-                    b.Property<string>("FirstName")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("LastName")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Location")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("MiddleName")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("PayrollCode")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("EEId");
-
-                    b.ToView("masterlist");
+                    b.ToTable("BillingRecord");
                 });
 
             modelBuilder.Entity("Pms.Adjustments.Models.TimesheetView", b =>
@@ -146,19 +139,18 @@ namespace Pms.Adjustments.Migrations
                         .HasColumnType("double");
 
                     b.Property<string>("CutoffId")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("EEId")
-                        .HasColumnType("varchar(767)");
+                        .HasColumnType("text");
+
+                    b.Property<string>("Fullname")
+                        .HasColumnType("text");
 
                     b.Property<string>("RawPCV")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.HasKey("TimesheetId");
-
-                    b.HasIndex("EEId");
 
                     b.ToView("timesheet");
                 });
@@ -167,7 +159,9 @@ namespace Pms.Adjustments.Migrations
                 {
                     b.HasOne("Pms.Adjustments.Models.EmployeeView", "EE")
                         .WithMany()
-                        .HasForeignKey("EEId");
+                        .HasForeignKey("EEId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("Pms.Adjustments.Models.BillingRecord", "Record")
                         .WithMany()
@@ -182,16 +176,9 @@ namespace Pms.Adjustments.Migrations
                 {
                     b.HasOne("Pms.Adjustments.Models.EmployeeView", "EE")
                         .WithMany()
-                        .HasForeignKey("EEId");
-
-                    b.Navigation("EE");
-                });
-
-            modelBuilder.Entity("Pms.Adjustments.Models.TimesheetView", b =>
-                {
-                    b.HasOne("Pms.Adjustments.Models.EmployeeView", "EE")
-                        .WithMany()
-                        .HasForeignKey("EEId");
+                        .HasForeignKey("EEId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("EE");
                 });

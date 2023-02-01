@@ -21,6 +21,7 @@ using Pms.Timesheets.ServiceLayer.EfCore;
 using Pms.Timesheets.ServiceLayer.TimeSystem;
 using Pms.Timesheets.ServiceLayer.TimeSystem.Adapter;
 using Pms.Timesheets.ServiceLayer.TimeSystem.Services;
+using Prism.DryIoc;
 using Prism.Ioc;
 using Prism.Modularity;
 using System;
@@ -37,7 +38,7 @@ namespace Pms.Payrolls.App
     /// <summary>
     /// Interaction logic for App.xaml
     /// </summary>
-    public partial class App
+    public partial class App : PrismApplication
     {
         protected override Window CreateShell()
         {

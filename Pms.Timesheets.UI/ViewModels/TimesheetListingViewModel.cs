@@ -61,7 +61,7 @@ namespace Pms.Timesheets.Module.ViewModels
             }
         }
 
-        public ObservableCollection<Timesheet>? Timesheets { get; set; }
+        public RangedObservableCollection<Timesheet> Timesheets { get; set; }
 
         public int TotalTimesheets { get => _totalTimesheets; set => SetProperty(ref _totalTimesheets, value); }
         #endregion
@@ -84,6 +84,24 @@ namespace Pms.Timesheets.Module.ViewModels
             ExportCommand = new DelegateCommand(Export);
             DownloadCommand = new DelegateCommand<object?>(Download);
             DetailTimesheetCommand = new DelegateCommand<object?>(ShowDetail);
+
+            Timesheets = new RangedObservableCollection<Timesheet>();
+            var source = CollectionViewSource.GetDefaultView(Timesheets);
+            source.Filter = t => FilterTimesheets(t);
+            source.CollectionChanged += Timesheets_CollectionChanged;
+        }
+
+        private void Timesheets_CollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            if (sender is ICollectionView source)
+            {
+                var filtered = source.OfType<Timesheet>();
+                Confirmed = filtered.Count(t => t.TotalHours > 0 && t.IsConfirmed);
+                ConfirmedWithoutAttendance = filtered.Count(t => t.TotalHours == 0 && t.IsConfirmed);
+                NotConfirmed = filtered.Count(t => !t.IsConfirmed);
+                NotConfirmedWithAttendance = filtered.Count(t => t.TotalHours > 0 && !t.IsConfirmed);
+                TotalTimesheets = filtered.Count();
+            }
         }
 
         public Cutoff Cutoff { get => _cutoff; set => SetProperty(ref _cutoff, value); }
@@ -141,12 +159,12 @@ namespace Pms.Timesheets.Module.ViewModels
             catch (System.Net.Http.HttpRequestException ex)
             {
                 OnTaskException();
-                s_Message.ShowDialog(ex.GetBaseException().Message, "Download");
+                s_Message.ShowDialog(ex.Message, "Download", ex.ToString());
             }
             catch (Exception ex)
             {
                 OnTaskException();
-                s_Message.ShowDialog(ex.GetBaseException().ToString(), "Download");
+                s_Message.ShowDialog(ex.Message, "Download", ex.ToString());
             }
         }
 
@@ -245,7 +263,7 @@ namespace Pms.Timesheets.Module.ViewModels
             catch (Exception ex)
             {
                 OnTaskException();
-                s_Message.ShowDialog(ex.Message, "Export");
+                s_Message.ShowDialog(ex.Message, "Export", ex.ToString());
             }
         }
 
@@ -290,7 +308,7 @@ namespace Pms.Timesheets.Module.ViewModels
             catch (Exception ex)
             {
                 OnTaskException();
-                s_Message.ShowDialog(ex.Message, "Export");
+                s_Message.ShowDialog(ex.Message, "Export", ex.ToString());
             }
         }
 
@@ -455,15 +473,16 @@ namespace Pms.Timesheets.Module.ViewModels
 
                 var summary = await m_Timesheets.DownloadContentSummary(cutoff, payrollCode.Name, cancellationToken);
                 var timesheets = await m_Timesheets.MapEmployeeView(summary?.UnconfirmedTimesheet, cancellationToken);
-                Timesheets = new ObservableCollection<Timesheet>(timesheets);
+                Timesheets.ReplaceRange(timesheets);
 
-                RaisePropertyChanged(nameof(Timesheets));
-                var source = CollectionViewSource.GetDefaultView(Timesheets);
-                source.Filter = t => FilterTimesheets(t);
+                //Timesheets = new ObservableCollection<Timesheet>(timesheets);
+                //RaisePropertyChanged(nameof(Timesheets));
+                //var source = CollectionViewSource.GetDefaultView(Timesheets);
+                //source.Filter = t => FilterTimesheets(t);
 
-                NotConfirmed = Timesheets.Count;
-                Confirmed = int.TryParse(summary?.TotalConfirmed, out int confirmed) ? confirmed : 0;
-                TotalTimesheets = int.TryParse(summary?.TotalCount, out int total) ? total : 0;
+                //NotConfirmed = Timesheets.Count;
+                //Confirmed = int.TryParse(summary?.TotalConfirmed, out int confirmed) ? confirmed : 0;
+                //TotalTimesheets = int.TryParse(summary?.TotalCount, out int total) ? total : 0;
 
                 OnTaskCompleted();
             }
@@ -471,7 +490,7 @@ namespace Pms.Timesheets.Module.ViewModels
             catch (Exception ex)
             {
                 OnTaskException();
-                s_Message.ShowDialog(ex.Message, "Load summary");
+                s_Message.ShowDialog(ex.Message, "Load summary", ex.ToString());
             }
         }
 
@@ -496,16 +515,7 @@ namespace Pms.Timesheets.Module.ViewModels
 
                 OnMessageSent("Retrieving timesheets...");
                 var timesheets = await m_Timesheets.GetTimesheets(cutoff.CutoffId, payrollCode?.PayrollCodeId, cancellationToken);
-                Timesheets = new ObservableCollection<Timesheet>(timesheets);
-                RaisePropertyChanged(nameof(Timesheets));
-                var source = CollectionViewSource.GetDefaultView(Timesheets);
-                source.Filter = t => FilterTimesheets(t);
-
-                Confirmed = Timesheets.Count(t => t.TotalHours > 0 && t.IsConfirmed);
-                ConfirmedWithoutAttendance = Timesheets.Count(t => t.TotalHours == 0 && t.IsConfirmed);
-                NotConfirmed = Timesheets.Count(t => !t.IsConfirmed);
-                NotConfirmedWithAttendance = Timesheets.Count(t => t.TotalHours > 0 && !t.IsConfirmed);
-                TotalTimesheets = Timesheets.Count;
+                Timesheets.ReplaceRange(timesheets);
 
                 OnTaskCompleted();
             }
@@ -513,7 +523,7 @@ namespace Pms.Timesheets.Module.ViewModels
             catch (Exception ex)
             {
                 OnTaskException();
-                s_Message.ShowDialog(ex.Message, "Load timesheets");
+                s_Message.ShowDialog(ex.Message, "Load timesheets", ex.ToString());
             }
         }
         #endregion

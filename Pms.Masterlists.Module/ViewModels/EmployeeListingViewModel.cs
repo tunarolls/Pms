@@ -61,6 +61,11 @@ namespace Pms.Masterlists.Module.ViewModels
 
             CheckDetailCommand = new DelegateCommand<object?>(CheckDetail);
             OpenPayrollCodeViewCommand = new DelegateCommand(OpenPayrollCodeView);
+
+            Employees = new RangedObservableCollection<Employee>();
+            var source = CollectionViewSource.GetDefaultView(Employees);
+            source.Filter = t => FilterEmployee(t);
+            source.CollectionChanged += Employees_CollectionChanged;
         }
 
         
@@ -72,31 +77,7 @@ namespace Pms.Masterlists.Module.ViewModels
         private int _activeEECount;
         public int ActiveEECount { get => _activeEECount; set => SetProperty(ref _activeEECount, value); }
 
-        private ObservableCollection<Employee>? _employees;
-        public ObservableCollection<Employee>? Employees
-        {
-            get => _employees;
-            set
-            {
-                var oldValue = _employees;
-                var newValue = value;
-
-                if (oldValue != null)
-                {
-                    var oldSource = CollectionViewSource.GetDefaultView(oldValue);
-                    oldSource.CollectionChanged -= Employees_CollectionChanged;
-                }
-
-                if (newValue != null)
-                {
-                    var newSource = CollectionViewSource.GetDefaultView(newValue);
-                    newSource.CollectionChanged += Employees_CollectionChanged;
-                    newSource.Filter = t => FilterEmployee(t);
-                }
-
-                SetProperty(ref _employees, value);
-            }
-        }
+        public RangedObservableCollection<Employee> Employees { get; set; }
 
         private bool _hideArchived;
         public bool HideArchived
@@ -529,7 +510,7 @@ namespace Pms.Masterlists.Module.ViewModels
                 OnProgressStart();
                 OnMessageSent("Loading employees...");
                 var employees = await m_Employees.GetEmployees(payrollCode, cancellationToken);
-                Employees = new ObservableCollection<Employee>(employees);
+                Employees.ReplaceRange(employees);
             }
             catch
             {

@@ -80,6 +80,7 @@ namespace Pms.Adjustments.Module.ViewModels
                 source.Refresh();
             }
         }
+
         public IEnumerable<AdjustmentTypes> AdjustmentNames { get; }
         public RangedObservableCollection<Billing> Billings { get; set; }
         public IAdjustmentMain? Main { get; set; }

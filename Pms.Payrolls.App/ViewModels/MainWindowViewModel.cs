@@ -139,7 +139,12 @@ namespace Pms.Payrolls.App.ViewModels
 
         private void BillingRecord()
         {
-            throw new NotImplementedException();
+            var navParams = new NavigationParameters()
+            {
+                { PmsConstants.Main, this }
+            };
+
+            _regionManager.RequestNavigate(RegionNames.PayrollsContentRegion, ViewNames.BillingRecordListingView, navParams);
         }
 
         private void Employee()

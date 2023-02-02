@@ -7,6 +7,14 @@ using System.Threading.Tasks;
 
 namespace Pms.Adjustments.Models
 {
+    public static class BillingRecordExtensions
+    {
+        public static string GenerateId(this BillingRecord record)
+        {
+            return $"{record.EEId}_{record.AdjustmentType}_{record.EffectivityDate:MMyy}";
+        }
+    }
+
     public class BillingRecord : IBillingRecord
     {
         public AdjustmentOptions AdjustmentOption { get; set; }

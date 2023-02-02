@@ -30,7 +30,7 @@ namespace Pms.Adjustments.Module.Models
             return _provider.GetBillingRecordsByPayrollCode(payrollCode);
         }
 
-        public async Task<ICollection<BillingRecord>> GetByPayrollCode(string payrollCode, CancellationToken cancellationToken = default)
+        public async Task<ICollection<BillingRecord>> GetByPayrollCode(string? payrollCode, CancellationToken cancellationToken = default)
         {
             return await _provider.GetBillingRecordsByPayrollCode(payrollCode, cancellationToken);
         }

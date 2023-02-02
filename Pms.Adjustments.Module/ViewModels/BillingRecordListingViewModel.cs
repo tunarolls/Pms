@@ -1,11 +1,15 @@
-﻿using Pms.Adjustments.Models;
+﻿using MySqlX.XDevAPI.Common;
+using Pms.Adjustments.Models;
 using Pms.Adjustments.Module.Models;
 using Pms.Common;
+using Pms.Masterlists.Entities;
 using Prism.Commands;
 using Prism.Regions;
 using Prism.Services.Dialogs;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -18,7 +22,6 @@ namespace Pms.Adjustments.Module.ViewModels
     {
 
         private AdjustmentTypes _adjustmentName;
-        private IEnumerable<BillingRecord> _billingRecords = Enumerable.Empty<BillingRecord>();
         private readonly IMessageBoxService s_Message;
         private readonly IDialogService s_Dialog;
         private readonly BillingRecords m_BillingRecords;
@@ -35,34 +38,30 @@ namespace Pms.Adjustments.Module.ViewModels
             m_Employees = employees;
 
             ImportCommand = new DelegateCommand(Import);
+            DetailCommand = new DelegateCommand<object?>(Detail);
 
-            //payrollCodeId = WeakReferenceMessenger.Default.Send<CurrentPayrollCodeRequestMessage>().Response.PayrollCodeId;
-            //string cutoffId = WeakReferenceMessenger.Default.Send<CurrentCutoffIdRequestMessage>();
-            //if (!string.IsNullOrEmpty(cutoffId))
-            //    cutoff = new Cutoff(cutoffId);
-
-            //IsActive = true;
-
-
-            //Detail = new Detail(billingRecords, employees);
-            //Import = new Import(this, billingRecords);
-
-            //ListBillings = new Listing(this, billingRecords);
-            //ListBillings.Execute(null);
+            BillingRecords = new();
         }
 
         public IAdjustmentMain? Main { get; set; }
         public AdjustmentTypes AdjustmentName { get => _adjustmentName; set => SetProperty(ref _adjustmentName, value); }
-        public IEnumerable<BillingRecord> BillingRecords { get => _billingRecords; set => SetProperty(ref _billingRecords, value); }
+        public RangedObservableCollection<BillingRecord> BillingRecords { get; set; }
 
         #region commands
-        public DelegateCommand DetailCommand { get; }
+        public DelegateCommand<object?> DetailCommand { get; }
         public DelegateCommand ImportCommand { get; }
-        public DelegateCommand ListBillingsCommand { get; }
         #endregion
 
         #region Detail
+        private void Detail(object? parameter)
+        {
+            var dialogParams = new DialogParameters
+            {
+                { PmsConstants.BillingRecord, parameter }
+            };
 
+            s_Dialog.Show(ViewNames.BillingRecordDetailView, dialogParams, (_) => { });
+        }
         #endregion
 
         #region Import
@@ -83,17 +82,14 @@ namespace Pms.Adjustments.Module.ViewModels
         {
             try
             {
-                OnMessageSent("Importing...");
-                OnProgressStart();
-
                 foreach (var fileName in fileNames)
                 {
-                    OnMessageSent($"Importing from {fileName}");
                     OnProgressStart();
 
+                    OnMessageSent($"Importing from {fileName}");
                     var records = await m_BillingRecords.Import(fileName, cancellationToken);
-                    OnProgressStart(records.Count);
 
+                    OnProgressStart(records.Count);
                     foreach (var record in records)
                     {
                         await m_BillingRecords.SaveRecord(record, cancellationToken);
@@ -102,12 +98,13 @@ namespace Pms.Adjustments.Module.ViewModels
                 }
 
                 OnTaskCompleted();
+                s_Message.ShowDialog("Done.", "Import");
             }
             catch (TaskCanceledException) { OnTaskException(); }
             catch (Exception ex)
             {
                 OnTaskException();
-                s_Message.ShowError(ex.Message);
+                s_Message.ShowDialog(ex.Message, "Import", ex.ToString());
             }
         }
         #endregion
@@ -115,18 +112,22 @@ namespace Pms.Adjustments.Module.ViewModels
         #region ListBillings
         private void ListBillings()
         {
-
+            var cts = GetCancellationTokenSource();
+            var dialogParameters = CreateDialogParameters(this, cts);
+            s_Dialog.Show(DialogNames.CancelDialog, dialogParameters, (_) => { });
+            _ = ListBillings(cts.Token);
         }
 
         private async Task ListBillings(CancellationToken cancellationToken = default)
         {
             try
             {
-                if (Main == null) throw new Exception(ErrorMessages.MainIsNull);
-                if (Main.PayrollCode == null) throw new Exception(ErrorMessages.PayrollCodeIsEmpty);
+                OnProgressStart();
 
-                var billingRecordItems = await m_BillingRecords.GetByPayrollCode(Main.PayrollCode.PayrollCodeId, cancellationToken);
-                BillingRecords = billingRecordItems;
+                OnMessageSent("Retrieving billing info...");
+                var payrollCode = Main?.PayrollCode?.PayrollCodeId;
+                var billingRecords = await m_BillingRecords.GetByPayrollCode(payrollCode, cancellationToken);
+                BillingRecords.ReplaceRange(billingRecords);
 
                 OnTaskCompleted();
             }
@@ -142,6 +143,14 @@ namespace Pms.Adjustments.Module.ViewModels
         #region INavigationAware
         public void OnNavigatedTo(NavigationContext navigationContext)
         {
+            Main = navigationContext.Parameters.GetValue<IAdjustmentMain?>(PmsConstants.Main);
+
+            if (Main != null)
+            {
+                Main.PropertyChanged += Main_PropertyChanged;
+            }
+
+            ListBillings();
         }
 
         public bool IsNavigationTarget(NavigationContext navigationContext)
@@ -151,21 +160,16 @@ namespace Pms.Adjustments.Module.ViewModels
 
         public void OnNavigatedFrom(NavigationContext navigationContext)
         {
+            if (Main != null)
+            {
+                Main.PropertyChanged -= Main_PropertyChanged;
+            }
         }
         #endregion
 
-        //protected override void OnPropertyChanged(System.ComponentModel.PropertyChangedEventArgs e)
-        //{
-        //    if ((new string[] { nameof(PayrollCodeId), nameof(Cutoff) }).Any(p => p == e.PropertyName))
-        //        ListBillings.Execute(null);
-
-        //    base.OnPropertyChanged(e);
-        //}
-
-        //protected override void OnActivated()
-        //{
-        //    Messenger.Register<BillingRecordListingViewModel, SelectedPayrollCodeChangedMessage>(this, (r, m) => r.PayrollCodeId = m.Value.PayrollCodeId);
-        //    Messenger.Register<BillingRecordListingViewModel, SelectedCutoffIdChangedMessage>(this, (r, m) => r.Cutoff = new Cutoff(m.Value));
-        //}
+        private void Main_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            ListBillings();
+        }
     }
 }

@@ -7,52 +7,32 @@
              xmlns:prism="http://prismlibrary.com/"
              prism:ViewModelLocator.AutoWireViewModel="True"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800"             
->
+             d:DesignHeight="450" d:DesignWidth="800">
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition/>
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition />
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
-            <RowDefinition Height="96"/>
-            <RowDefinition/>
-            <RowDefinition Height="45"/>
-            <!--<RowDefinition Height="25"/>-->
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-
-        <Menu/>
-        <StackPanel Orientation="Vertical" Grid.Row="1">
-            <!--<StackPanel Orientation="Horizontal" VerticalAlignment="Top" Margin="8">
+        <TextBlock VerticalAlignment="Center" Margin="4" Text="BIR Program DBF Directory:" />
+        <TextBox Text="{Binding BirDbfDirectory, UpdateSourceTrigger=PropertyChanged}" Width="425" Padding="4" Margin="4" VerticalAlignment="Center" HorizontalAlignment="Left" Grid.Column="1" />
+        <Button Width="150" HorizontalAlignment="Left" Command="{Binding ImportToBirCommand}" Content="Save to BIR Program" Grid.Row="1" Grid.Column="1" Margin="4" Padding="4" />
+        
+        <!--<Menu/>-->
+        <!--<StackPanel Orientation="Vertical" Grid.Row="1">
+            --><!--<StackPanel Orientation="Horizontal" VerticalAlignment="Top" Margin="8">
                 <TextBlock  VerticalAlignment="Center" Margin="6">Company:</TextBlock>
                 <ComboBox Text="{Binding CompanyId, UpdateSourceTrigger=PropertyChanged}" 
                               ItemsSource="{Binding CompanyIds}" 
                               Width="125" VerticalAlignment="Center" IsEditable="True"/>
-            </StackPanel>-->
+            </StackPanel>--><!--
             <StackPanel Orientation="Horizontal" VerticalAlignment="Top" Margin="8">
-                <TextBlock  VerticalAlignment="Center" Margin="6">Bir Program DBF Directory:</TextBlock>
-                <TextBox Text="{Binding BirDbfDirectory, UpdateSourceTrigger=PropertyChanged}" Width="425" VerticalAlignment="Center"/>
+                
             </StackPanel>
-            <Button Width="150" HorizontalAlignment="Left" Command="{Binding ImportToBirCommand}" >Save to BIR Program</Button>
-        </StackPanel>
-
-        <!--<Grid Grid.Row="2">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition/>
-                <ColumnDefinition Width="50"/>
-                <ColumnDefinition Width="25"/>
-                <ColumnDefinition Width="50"/>
-            </Grid.ColumnDefinitions>
-            <Grid.RowDefinitions>
-                <RowDefinition/>
-                <RowDefinition Height="5"/>
-            </Grid.RowDefinitions>
-
-            <TextBlock Text="{Binding StatusMessage}" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="8,0"/>
-            <TextBlock Text="{Binding ProgressValue, StringFormat={}{0:N0}}" Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="8,0"/>
-            <TextBlock Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Center">of</TextBlock>
-            <TextBlock Grid.Column="3" Text="{Binding ProgressMaximum, StringFormat={}{0:N0}}" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="8,0"/>
-
-            <ProgressBar Grid.ColumnSpan="5" Grid.Row="1" Maximum="{Binding ProgressMaximum}" Value="{Binding ProgressValue}"/>
-        </Grid>-->
+            
+        </StackPanel>-->
     </Grid>
 </UserControl>

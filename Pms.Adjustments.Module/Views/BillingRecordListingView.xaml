@@ -8,12 +8,16 @@
              prism:ViewModelLocator.AutoWireViewModel="True"
              mc:Ignorable="d"
              d:DesignHeight="450" d:DesignWidth="800">
+    <UserControl.Resources>
+        <Style TargetType="Button">
+            <Setter Property="Padding" Value="4,2" />
+        </Style>
+    </UserControl.Resources>
     <Grid>
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="48"/>
-                <RowDefinition/>
-                <RowDefinition Height="45"/>
+                <RowDefinition />
             </Grid.RowDefinitions>
             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                 <Button Command="{Binding DetailCommand}" Content="Add" />
@@ -42,26 +46,6 @@
                     <DataGridTextColumn Header="Effectivity Date" Binding="{Binding EffectivityDate, StringFormat={}{0:yyyy-MM-dd}}" />
                 </DataGrid.Columns>
             </DataGrid>
-
-            <!--<Grid Grid.Row="3">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition/>
-                    <ColumnDefinition Width="50"/>
-                    <ColumnDefinition Width="25"/>
-                    <ColumnDefinition Width="50"/>
-                </Grid.ColumnDefinitions>
-                <Grid.RowDefinitions>
-                    <RowDefinition/>
-                    <RowDefinition Height="5"/>
-                </Grid.RowDefinitions>
-
-                <TextBlock Text="{Binding StatusMessage}" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="8,0"/>
-                <TextBlock Text="{Binding ProgressValue, StringFormat={}{0:N0}}" Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="8,0"/>
-                <TextBlock Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Center">of</TextBlock>
-                <TextBlock Grid.Column="3" Text="{Binding ProgressMaximum, StringFormat={}{0:N0}}" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="8,0"/>
-
-                <ProgressBar Grid.ColumnSpan="5" Grid.Row="1" Maximum="{Binding ProgressMaximum}" Value="{Binding ProgressValue}"/>
-            </Grid>-->
         </Grid>
     </Grid>
 </UserControl>

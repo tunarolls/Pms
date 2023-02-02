@@ -1,4 +1,6 @@
-﻿using Pms.Adjustments.Models;
+﻿using MySqlX.XDevAPI.Common;
+using NPOI.HPSF;
+using Pms.Adjustments.Models;
 using Pms.Adjustments.Module.Models;
 using Pms.Common;
 using Prism.Commands;
@@ -16,27 +18,42 @@ namespace Pms.Adjustments.Module.ViewModels
 {
     public class BillingRecordDetailViewModel : CancellableBase, IDialogAware
     {
+        private readonly IDialogService s_Dialog;
+        private readonly IMessageBoxService s_Message;
         private readonly BillingRecords m_BillingRecords;
         private readonly Employees m_Employees;
-        private string _fullName = string.Empty;
-        private BillingRecord? _billingRecord;
-        private string _eeId = string.Empty;
-
-        public BillingRecordDetailViewModel(BillingRecords billingRecords, Employees employees)
+        
+        public BillingRecordDetailViewModel(IDialogService dialog, IMessageBoxService message, BillingRecords billingRecords, Employees employees)
         {
+            s_Dialog = dialog;
+            s_Message = message;
             m_BillingRecords = billingRecords;
             m_Employees = employees;
 
             SaveCommand = new DelegateCommand(Save);
 
-            PropertyChanged += BillingRecordDetailViewModel_PropertyChanged;
+            //PropertyChanged += BillingRecordDetailViewModel_PropertyChanged;
         }
 
         public IEnumerable<AdjustmentTypes> AdjustmentTypes { get; } = Enum.GetValues<AdjustmentTypes>();
         public IEnumerable<BillingRecordStatus> BillingRecordStatus { get; } = Enum.GetValues<BillingRecordStatus>();
         public IEnumerable<DeductionOptions> DeductionOptions { get; } = Enum.GetValues<DeductionOptions>();
-        public BillingRecord? BillingRecord { get => _billingRecord; set => SetProperty(ref _billingRecord, value); }
-        public string EEId { get => _eeId; set => SetProperty(ref _eeId, value); }
+
+        private BillingRecord? _billingRecord;
+        public BillingRecord? BillingRecord
+        {
+            get => _billingRecord;
+            set
+            {
+                SetProperty(ref _billingRecord, value);
+
+                EEId = _billingRecord?.EEId;
+                FullName = _billingRecord?.EE?.FullName;
+            }
+        }
+
+        private string? _eeId;
+        public string? EEId { get => _eeId; set => SetProperty(ref _eeId, value); }
 
         //public string EEId
         //{
@@ -55,14 +72,18 @@ namespace Pms.Adjustments.Module.ViewModels
         //    }
         //}
 
-        public string FullName { get => _fullName; set => SetProperty(ref _fullName, value); }
+        private string? _fullName;
+        public string? FullName { get => _fullName; set => SetProperty(ref _fullName, value); }
 
         #region save
         public DelegateCommand SaveCommand { get; }
 
         public void Save()
         {
-
+            var cts = GetCancellationTokenSource();
+            var dialogParameters = CreateDialogParameters(this, cts);
+            s_Dialog.Show(DialogNames.CancelDialog, dialogParameters, (_) => { });
+            _ = Save(cts.Token);
         }
 
         private async Task Save(CancellationToken cancellationToken = default)
@@ -71,14 +92,21 @@ namespace Pms.Adjustments.Module.ViewModels
             {
                 if (BillingRecord != null)
                 {
-                    var recordId = BillingRecord.GenerateId(BillingRecord);
-                    await m_BillingRecords.SaveRecord(BillingRecord, cancellationToken);
-                }
-            }
-            catch (TaskCanceledException) { }
-            catch (Exception)
-            {
+                    BillingRecord.RecordId = BillingRecord.GenerateId();
 
+                    OnMessageSent($"Saving...");
+                    await m_BillingRecords.SaveRecord(BillingRecord, cancellationToken);
+
+                    s_Message.ShowDialog("Billing record saved.", "Success");
+                }
+
+                OnTaskCompleted();
+            }
+            catch (TaskCanceledException) { OnTaskCancelled(); }
+            catch (Exception ex)
+            {
+                OnTaskException();
+                s_Message.ShowDialog(ex.Message, "Save", ex.ToString());
             }
         }
         #endregion
@@ -100,14 +128,14 @@ namespace Pms.Adjustments.Module.ViewModels
         }
         #endregion
 
-        private void BillingRecordDetailViewModel_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
-        {
-            if (e.PropertyName == nameof(BillingRecord))
-            {
-                EEId = BillingRecord?.EEId ?? string.Empty;
-                FullName = BillingRecord?.EE?.FullName ?? string.Empty;
-            }
-        }
+        //private void BillingRecordDetailViewModel_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+        //{
+        //    if (e.PropertyName == nameof(BillingRecord))
+        //    {
+        //        EEId = BillingRecord?.EEId ?? string.Empty;
+        //        FullName = BillingRecord?.EE?.FullName ?? string.Empty;
+        //    }
+        //}
 
         #region IDialogAware
         public string Title { get; set; } = string.Empty;
@@ -125,7 +153,7 @@ namespace Pms.Adjustments.Module.ViewModels
 
         public void OnDialogOpened(IDialogParameters parameters)
         {
-            BillingRecord = parameters.GetValue<BillingRecord?>(PmsConstants.BillingRecord);
+            BillingRecord = parameters.GetValue<BillingRecord>(PmsConstants.BillingRecord);
         }
         #endregion
     }

@@ -36,12 +36,12 @@ namespace Pms.Adjustments.ServiceLayer.EfCore
                 .ToList();
         }
 
-        public async Task<ICollection<BillingRecord>> GetBillingRecordsByPayrollCode(string payrollCode, CancellationToken cancellationToken = default)
+        public async Task<ICollection<BillingRecord>> GetBillingRecordsByPayrollCode(string? payrollCode, CancellationToken cancellationToken = default)
         {
             using var context = _factory.CreateDbContext();
             return await context.BillingRecords
                 .Include(t => t.EE)
-                .Where(t => t.EE != null && t.EE.PayrollCode == payrollCode)
+                .FilterByPayrollCode(payrollCode)
                 .ToListAsync(cancellationToken);
         }
     }

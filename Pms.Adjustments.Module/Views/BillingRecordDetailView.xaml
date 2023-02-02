@@ -20,58 +20,58 @@
     <Grid>
         <Grid.Resources>
             <Style TargetType="Button">
-                <Setter Property="HorizontalAlignment" Value="Right"/>
-                <Setter Property="Padding" Value="10 0"/>
-                <Setter Property="Margin" Value="6"/>
+                <Setter Property="HorizontalAlignment" Value="Right" />
+                <Setter Property="Padding" Value="10 0" />
+                <Setter Property="Margin" Value="6" />
             </Style>
         </Grid.Resources>
         <Grid.RowDefinitions>
-            <RowDefinition Height="48"/>
+            <RowDefinition Height="48" />
             <RowDefinition/>
-            <RowDefinition Height="45"/>
+            <RowDefinition Height="45" />
         </Grid.RowDefinitions>
         <TextBlock Grid.Row="0" VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="18" FontWeight="Bold">BILLING RECORD DETAIL</TextBlock>
         <Grid Grid.Row="1">
             <Grid.Resources>
                 <Style TargetType="TextBlock">
-                    <Setter Property="HorizontalAlignment" Value="Right"/>
-                    <Setter Property="VerticalAlignment" Value="Center"/>
-                    <Setter Property="FontSize" Value="12"/>
-                    <Setter Property="FontWeight" Value="DemiBold"/>
-                    <Setter Property="Margin" Value="8"/>
+                    <Setter Property="HorizontalAlignment" Value="Right" />
+                    <Setter Property="VerticalAlignment" Value="Center" />
+                    <Setter Property="FontSize" Value="12" />
+                    <Setter Property="FontWeight" Value="DemiBold" />
+                    <Setter Property="Margin" Value="8" />
                 </Style>
                 <Style TargetType="TextBox">
-                    <Setter Property="Margin" Value="3"/>
-                    <Setter Property="MinWidth" Value="50"/>
+                    <Setter Property="Margin" Value="3" />
+                    <Setter Property="MinWidth" Value="50" />
                 </Style>
                 <Style TargetType="ComboBox">
-                    <Setter Property="Margin" Value="3"/>
-                    <Setter Property="MinWidth" Value="125"/>
+                    <Setter Property="Margin" Value="3" />
+                    <Setter Property="MinWidth" Value="125" />
                 </Style>
                 <Style TargetType="DatePicker">
-                    <Setter Property="Margin" Value="3"/>
-                    <Setter Property="MinWidth" Value="75"/>
+                    <Setter Property="Margin" Value="3" />
+                    <Setter Property="MinWidth" Value="75" />
                 </Style>
             </Grid.Resources>
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
                 <ColumnDefinition/>
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
-                <RowDefinition Height="auto"/>
-                <RowDefinition Height="auto"/>
-                <RowDefinition Height="auto"/>
-                <RowDefinition Height="auto"/>
-                <RowDefinition Height="auto"/>
-                <RowDefinition Height="auto"/>
-                <RowDefinition Height="auto"/>
-                <RowDefinition Height="auto"/>
-                <RowDefinition Height="auto"/>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
                 <RowDefinition/>
             </Grid.RowDefinitions>
 
@@ -80,11 +80,11 @@
             <TextBox Grid.Row="0" Grid.Column="2" Grid.ColumnSpan="2" Text="{Binding FullName}" IsReadOnly="True" />
 
             <TextBlock Text="Adjustment Type:" Grid.Row="1" />
-            <ComboBox Grid.Row="1" Grid.Column="1" SelectedValue="{Binding BillingRecord.AdjustmentType}" ItemsSource="{Binding AdjustmentTypes}"/>
+            <ComboBox Grid.Row="1" Grid.Column="1" SelectedValue="{Binding BillingRecord.AdjustmentType}" ItemsSource="{Binding AdjustmentTypes}" />
             <TextBlock Text="Deduct On:" Grid.Row="1" Grid.Column="2" />
-            <ComboBox Grid.Row="1" Grid.Column="3" SelectedValue="{Binding BillingRecord.DeductionOption}" ItemsSource="{Binding DeductionOptions}"/>
+            <ComboBox Grid.Row="1" Grid.Column="3" SelectedValue="{Binding BillingRecord.DeductionOption}" ItemsSource="{Binding DeductionOptions}" />
             <TextBlock Text="Date Started:" Grid.Row="1" Grid.Column="4" />
-            <DatePicker Grid.Row="1" Grid.Column="5" SelectedDate="{Binding BillingRecord.EffectivityDate}"/>
+            <DatePicker Grid.Row="1" Grid.Column="5" SelectedDate="{Binding BillingRecord.EffectivityDate}" />
 
             <TextBlock Text="Advances:" Grid.Row="2" />
             <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding BillingRecord.Advances}" />
@@ -96,8 +96,8 @@
             <TextBlock Text="Remarks:" Grid.Row="3" />
             <TextBox Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="5" Text="{Binding Record.Remarks}" />
             <TextBlock Text="Status:" Grid.Row="4" />
-            <ComboBox Grid.Row="4" Grid.Column="1" SelectedValue="{Binding BillingRecord.Status}" ItemsSource="{Binding BillingRecordStatus}"/>
+            <ComboBox Grid.Row="4" Grid.Column="1" SelectedValue="{Binding BillingRecord.Status}" ItemsSource="{Binding BillingRecordStatus}" />
         </Grid>
-        <Button Grid.Row="2" Content="Save" HorizontalAlignment="Right" Command="{Binding SaveCommand}"/>
+        <Button Grid.Row="2" Content="Save" HorizontalAlignment="Right" Command="{Binding SaveCommand}" />
     </Grid>
 </UserControl>

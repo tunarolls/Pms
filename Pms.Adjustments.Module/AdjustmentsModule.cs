@@ -37,6 +37,9 @@ namespace Pms.Adjustments.Module
             containerRegistry.Register<TimesheetManager>();
 
             containerRegistry.RegisterForNavigation<BillingListingView>(ViewNames.BillingListingView);
+            containerRegistry.RegisterForNavigation<BillingRecordListingView>(ViewNames.BillingRecordListingView);
+
+            containerRegistry.RegisterDialog<BillingRecordDetailView>(ViewNames.BillingRecordDetailView);
         }
     }
 }

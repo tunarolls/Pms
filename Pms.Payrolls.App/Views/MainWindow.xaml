@@ -6,14 +6,77 @@
         xmlns:local="clr-namespace:Pms.Payrolls.App.Views"
         xmlns:prism="http://prismlibrary.com/"
         xmlns:common="clr-namespace:Pms.Common;assembly=Pms.Common"
+        xmlns:timesheet="clr-namespace:Pms.Timesheets.Module.Views;assembly=Pms.Timesheets.Module"
+        xmlns:adjustment="clr-namespace:Pms.Adjustments.Module.Views;assembly=Pms.Adjustments.Module"
+        xmlns:masterlist="clr-namespace:Pms.Masterlists.Module.Views;assembly=Pms.Masterlists.Module"
+        xmlns:payroll="clr-namespace:Pms.Payrolls.Module.Views;assembly=Pms.Payrolls.Module"
+        xmlns:ext="clr-namespace:MyWpfTools.Extensions;assembly=MyWpfTools"
+        xmlns:converters="clr-namespace:MyWpfTools.Converters;assembly=MyWpfTools"
         mc:Ignorable="d"
         WindowStartupLocation="CenterScreen"
-        Title="MainWindow" MinWidth="800" MinHeight="600" Width="800" Height="600">
+        Title="Payroll Manager" MinWidth="800" MinHeight="600" Width="800" Height="600">
     <Window.Style>
         <Style TargetType="Window">
             <Setter Property="FontFamily" Value="Tahoma" />
         </Style>
     </Window.Style>
+    <Window.Resources>
+        <converters:DataTypeConverter x:Key="DataTypeConverter" />
+        <Style x:Key="IndicatorRadioButton" TargetType="RadioButton" BasedOn="{StaticResource TabLikeRadioButtonV2}">
+            <Setter Property="ext:Indicator.IndicatorForeground" Value="#EE7674" />
+            <Setter Property="ext:Indicator.IndicatorOrientation" Value="Bottom" />
+            <Setter Property="ext:Indicator.IndicatorPressed" Value="#A75351" />
+            <Setter Property="Margin" Value="8 8 8 0" />
+            <Setter Property="Padding" Value="8" />
+            <Setter Property="Foreground" Value="Black" />
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="ext:Ext.CollapseWhenDisabled" Value="True" />
+        </Style>
+        <Style x:Key="TimesheetButton" TargetType="RadioButton" BasedOn="{StaticResource IndicatorRadioButton}">
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding Content, ElementName=MainContent, Converter={StaticResource DataTypeConverter}}" Value="{x:Type timesheet:TimesheetListingView}">
+                    <Setter Property="IsChecked" Value="True" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+        <Style x:Key="BillingsButton" TargetType="RadioButton" BasedOn="{StaticResource IndicatorRadioButton}">
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding Content, ElementName=MainContent, Converter={StaticResource DataTypeConverter}}" Value="{x:Type adjustment:BillingListingView}">
+                    <Setter Property="IsChecked" Value="True" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+        <Style x:Key="RecordsButton" TargetType="RadioButton" BasedOn="{StaticResource IndicatorRadioButton}">
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding Content, ElementName=MainContent, Converter={StaticResource DataTypeConverter}}" Value="{x:Type adjustment:BillingRecordListingView}">
+                    <Setter Property="IsChecked" Value="True" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+        <Style x:Key="PayrollButton" TargetType="RadioButton" BasedOn="{StaticResource IndicatorRadioButton}">
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding Content, ElementName=MainContent, Converter={StaticResource DataTypeConverter}}" Value="{x:Type payroll:PayrollView}">
+                    <Setter Property="IsChecked" Value="True" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+        <Style x:Key="AlphalistButton" TargetType="RadioButton" BasedOn="{StaticResource IndicatorRadioButton}">
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding Content, ElementName=MainContent, Converter={StaticResource DataTypeConverter}}" Value="{x:Type payroll:AlphalistView}">
+                    <Setter Property="IsChecked" Value="True" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+        <Style x:Key="MasterlistButton" TargetType="RadioButton" BasedOn="{StaticResource IndicatorRadioButton}">
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding Content, ElementName=MainContent, Converter={StaticResource DataTypeConverter}}" Value="{x:Type masterlist:EmployeeListingView}">
+                    <Setter Property="IsChecked" Value="True" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+    </Window.Resources>
     <Border>
         <Grid>
             <Grid.ColumnDefinitions>
@@ -58,21 +121,16 @@
                 </Menu>
             </DockPanel>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-                <StackPanel.Resources>
-                    <Style TargetType="Button">
-                        <Setter Property="Margin" Value="12 4" />
-                        <Setter Property="Padding" Value="8" />
-                        <Setter Property="Width" Value="100" />
-                    </Style>
-                </StackPanel.Resources>
-                <Button Content="Timesheet" Command="{Binding TimesheetCommand}" />
-                <Button Content="Billings" Command="{Binding BillingCommand}" />
-                <Button Content="Records" Command="{Binding BillingRecordCommand}" />
-                <Button Content="Payroll" Command="{Binding PayrollCommand}" />
-                <Button Content="Alphalist" Command="{Binding AlphalistCommand}" />
-                <Button Content="Masterlist" Command="{Binding EmployeeCommand}" />
+                <RadioButton Style="{DynamicResource TimesheetButton}" Content="Timesheet" Command="{Binding TimesheetCommand}" />
+                <RadioButton Style="{DynamicResource BillingsButton}" Content="Billings" Command="{Binding BillingCommand}" />
+                <RadioButton Style="{DynamicResource RecordsButton}" Content="Records" Command="{Binding BillingRecordCommand}" />
+                <RadioButton Style="{DynamicResource PayrollButton}" Content="Payroll" Command="{Binding PayrollCommand}" />
+                <RadioButton Style="{DynamicResource AlphalistButton}" Content="Alphalist" Command="{Binding AlphalistCommand}" />
+                <RadioButton Style="{DynamicResource MasterlistButton}" Content="Masterlist" Command="{Binding EmployeeCommand}" />
             </StackPanel>
-            <ContentControl prism:RegionManager.RegionName="{x:Static common:RegionNames.PayrollsContentRegion}" Grid.Row="2" Grid.Column="2" BorderBrush="#FF786F6F" BorderThickness="0.3" Margin="8,0,8,8" />
+            <Border Grid.Row="2" Grid.Column="2" BorderBrush="#FF786F6F" BorderThickness="0.3" Margin="8,8,8,16" Padding="8" CornerRadius="8">
+                <ContentControl x:Name="MainContent" prism:RegionManager.RegionName="{x:Static common:RegionNames.PayrollsContentRegion}" />
+            </Border>
 
 
             <!--<ContentControl Content="{Binding CurrentViewModel}" 

@@ -7,96 +7,97 @@
              xmlns:prism="http://prismlibrary.com/"
              prism:ViewModelLocator.AutoWireViewModel="True"
              mc:Ignorable="d"
-             d:DesignHeight="350" d:DesignWidth="500">
+             d:DesignHeight="350" d:DesignWidth="700">
     <prism:Dialog.WindowStyle>
         <Style TargetType="Window">
             <Setter Property="prism:Dialog.WindowStartupLocation" Value="CenterOwner" />
             <Setter Property="ResizeMode" Value="NoResize" />
             <Setter Property="SizeToContent" Value="WidthAndHeight" />
             <Setter Property="Title" Value="{Binding Title}" />
+            <Setter Property="FontFamily" Value="Tahoma" />
         </Style>
     </prism:Dialog.WindowStyle>
     <UserControl.Resources>
         <Style TargetType="Button">
-            <!--<Setter Property="HorizontalAlignment" Value="Center"/>-->
-            <Setter Property="VerticalAlignment" Value="Center"/>
-            <Setter Property="Padding" Value="16,4"/>
-            <Setter Property="Margin" Value="4"/>
+            <!--<Setter Property="HorizontalAlignment" Value="Center" />-->
+            <!--<Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="Padding" Value="16,4" />
+            <Setter Property="Margin" Value="4" />-->
         </Style>
         <Style x:Key="Header" TargetType="TextBlock">
-            <Setter Property="HorizontalAlignment" Value="Center"/>
-            <Setter Property="VerticalAlignment" Value="Center"/>
-            <Setter Property="Margin" Value="8"/>
-            <Setter Property="FontSize" Value="16"/>
-            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="HorizontalAlignment" Value="Center" />
+            <Setter Property="VerticalAlignment" Value="Top" />
+            <Setter Property="Margin" Value="4" />
+            <Setter Property="FontSize" Value="16" />
+            <Setter Property="FontWeight" Value="Medium" />
         </Style>
         <Style TargetType="TextBlock">
-            <Setter Property="HorizontalAlignment" Value="Right"/>
-            <Setter Property="VerticalAlignment" Value="Center"/>
-            <Setter Property="Margin" Value="8"/>
+            <Setter Property="HorizontalAlignment" Value="Right" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="Margin" Value="4" />
         </Style>
         <Style TargetType="TextBox">
-            <Setter Property="Width" Value="75"/>
-            <Setter Property="Margin" Value="3"/>
+            <Setter Property="Margin" Value="4" />
+            <Setter Property="Padding" Value="4,0" />
+            <Setter Property="VerticalAlignment" Value="Stretch" />
             <Setter Property="VerticalContentAlignment" Value="Center" />
         </Style>
         <Style TargetType="ComboBox">
-            <Setter Property="Margin" Value="3"/>
+            <Setter Property="Margin" Value="4" />
+            <Setter Property="Padding" Value="4,0" />
+            <Setter Property="VerticalAlignment" Value="Stretch" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
         </Style>
     </UserControl.Resources>
     <Grid>
         <Grid.RowDefinitions>
+            <RowDefinition Height="48" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
-        <Grid Margin="16,8">
+        <TextBlock Style="{StaticResource Header}" Text="Timesheet Detail" />
+        <Grid Grid.Row="1" Margin="8" HorizontalAlignment="Center">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="128" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="128" />
+                <ColumnDefinition Width="128" />
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="32" />
+                <RowDefinition Height="32" />
+                <RowDefinition Height="32" />
+                <RowDefinition Height="32" />
+                <RowDefinition Height="32" />
+                <RowDefinition Height="32" />
             </Grid.RowDefinitions>
-            <TextBlock Grid.Row="0" Grid.ColumnSpan="5" Style="{StaticResource Header}">TIMESHEET DETAIL</TextBlock>
+            <TextBlock Grid.Row="0" Grid.Column="0" Text="EE Id" />
+            <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Timesheet.EEId}" IsReadOnly="{Binding IsForEditing}" />
+            <TextBlock Grid.Row="0" Grid.Column="2" Text="Cutoff Id" />
+            <TextBox Grid.Row="0" Grid.Column="3" Text="{Binding Timesheet.CutoffId}" IsReadOnly="True" />
+            <CheckBox Grid.Row="0" Grid.Column="4" Content="Is Confirmed" IsChecked="{Binding Timesheet.IsConfirmed}" VerticalAlignment="Center" />
 
-            <TextBlock Grid.Row="1" Grid.Column="0">EE Id:</TextBlock>
-            <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Timesheet.EEId}" IsReadOnly="{Binding IsForEditing}"/>
-            <TextBlock Grid.Row="1" Grid.Column="2">Cutoff Id:</TextBlock>
-            <TextBox Grid.Row="1" Grid.Column="3" Text="{Binding Timesheet.CutoffId}" IsReadOnly="True"/>
-            <CheckBox Grid.Row="1" Grid.Column="4" Content="Is Confirmed" IsChecked="{Binding Timesheet.IsConfirmed}" VerticalAlignment="Center" />
+            <TextBlock Grid.Row="1" Grid.Column="0" Text="Regular Hours" />
+            <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Timesheet.TotalHours}" />
 
-            <TextBlock Grid.Row="2" Grid.Column="0">Regular Hours:</TextBlock>
-            <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Timesheet.TotalHours}"/>
+            <TextBlock Grid.Row="2" Grid.Column="0" Text="Overtime" />
+            <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Timesheet.TotalOT}" />
+            <TextBlock Grid.Row="3" Grid.Column="0" Text="Restday Overtime" />
+            <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding Timesheet.TotalRDOT}" />
+            <TextBlock Grid.Row="4" Grid.Column="0" Text="Holiday Overtime" />
+            <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding Timesheet.TotalHOT}" />
 
-            <TextBlock Grid.Row="3" Grid.Column="0">Overtime:</TextBlock>
-            <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding Timesheet.TotalOT}"/>
-            <TextBlock Grid.Row="4" Grid.Column="0">Restday Overtime:</TextBlock>
-            <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding Timesheet.TotalRDOT}"/>
-            <TextBlock Grid.Row="5" Grid.Column="0">Holiday Overtime:</TextBlock>
-            <TextBox Grid.Row="5" Grid.Column="1" Text="{Binding Timesheet.TotalHOT}"/>
-
-            <TextBlock Grid.Row="6" Grid.Column="0">Night Differential:</TextBlock>
-            <TextBox Grid.Row="6" Grid.Column="1" Text="{Binding Timesheet.TotalND}"/>
-            <TextBlock Grid.Row="6" Grid.Column="2">Absent/Tardy:</TextBlock>
-            <TextBox Grid.Row="6" Grid.Column="3" Text="{Binding Timesheet.TotalTardy}"/>
+            <TextBlock Grid.Row="5" Grid.Column="0" Text="Night Differential" />
+            <TextBox Grid.Row="5" Grid.Column="1" Text="{Binding Timesheet.TotalND}" />
+            <TextBlock Grid.Row="5" Grid.Column="2" Text="Absent Tardy" />
+            <TextBox Grid.Row="5" Grid.Column="3" Text="{Binding Timesheet.TotalTardy}" />
 
             <!--<TextBlock Grid.Row="7" Grid.Column="0">Bank:</TextBlock>
-            <TextBox Grid.Row="7" Grid.Column="1" Text="{Binding Timesheet.Bank}" IsReadOnly="True"/>-->
+            <TextBox Grid.Row="7" Grid.Column="1" Text="{Binding Timesheet.Bank}" IsReadOnly="True" />-->
         </Grid>
-        <Separator Grid.Row="1" />
-        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top" Grid.Row="2" Margin="12">
-            <Button Command="{Binding SaveCommand}" Content="Save Changes"/>
-            <Button Command="{Binding CloseCommand}" Content="Close" />
-        </StackPanel>
+        <Separator Grid.Row="2" />
+        <Button HorizontalAlignment="Center" VerticalAlignment="Center" Grid.Row="3" Margin="12" Padding="6" Command="{Binding SaveCommand}" Content="Save Changes" />
     </Grid>
 </UserControl>

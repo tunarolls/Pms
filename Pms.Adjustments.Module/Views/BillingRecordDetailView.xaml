@@ -7,7 +7,7 @@
              xmlns:prism="http://prismlibrary.com/"
              prism:ViewModelLocator.AutoWireViewModel="True"
              mc:Ignorable="d"
-             Height="325" Width="700">
+             d:DesignHeight="325" d:DesignWidth="700">
     <prism:Dialog.WindowStyle>
         <Style TargetType="Window">
             <Setter Property="prism:Dialog.WindowStartupLocation" Value="CenterOwner" />
@@ -27,77 +27,77 @@
         </Grid.Resources>
         <Grid.RowDefinitions>
             <RowDefinition Height="48" />
-            <RowDefinition/>
-            <RowDefinition Height="45" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
-        <TextBlock Grid.Row="0" VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="18" FontWeight="Bold">BILLING RECORD DETAIL</TextBlock>
-        <Grid Grid.Row="1">
+        <TextBlock Grid.Row="0" VerticalAlignment="Top" HorizontalAlignment="Center" FontSize="16" FontWeight="Medium" Text="Billing Record Detail" Margin="4" />
+        <Grid Grid.Row="1" Margin="8" HorizontalAlignment="Center">
             <Grid.Resources>
                 <Style TargetType="TextBlock">
                     <Setter Property="HorizontalAlignment" Value="Right" />
                     <Setter Property="VerticalAlignment" Value="Center" />
                     <Setter Property="FontSize" Value="12" />
-                    <Setter Property="FontWeight" Value="DemiBold" />
-                    <Setter Property="Margin" Value="8" />
+                    <Setter Property="Margin" Value="4" />
                 </Style>
                 <Style TargetType="TextBox">
-                    <Setter Property="Margin" Value="3" />
-                    <Setter Property="MinWidth" Value="50" />
+                    <Setter Property="Margin" Value="4" />
+                    <Setter Property="Padding" Value="4,0" />
+                    <Setter Property="VerticalAlignment" Value="Stretch" />
+                    <Setter Property="VerticalContentAlignment" Value="Center" />
                 </Style>
                 <Style TargetType="ComboBox">
-                    <Setter Property="Margin" Value="3" />
-                    <Setter Property="MinWidth" Value="125" />
+                    <Setter Property="Margin" Value="4" />
+                    <Setter Property="Padding" Value="4,0" />
+                    <Setter Property="VerticalAlignment" Value="Stretch" />
+                    <Setter Property="VerticalContentAlignment" Value="Center" />
                 </Style>
                 <Style TargetType="DatePicker">
-                    <Setter Property="Margin" Value="3" />
-                    <Setter Property="MinWidth" Value="75" />
+                    <Setter Property="Margin" Value="4" />
+                    <Setter Property="VerticalAlignment" Value="Stretch" />
+                    <Setter Property="VerticalContentAlignment" Value="Center" />
                 </Style>
             </Grid.Resources>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="128" />
                 <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="128" />
                 <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition/>
+                <ColumnDefinition Width="128" />
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition/>
+                <RowDefinition Height="32" />
+                <RowDefinition Height="32" />
+                <RowDefinition Height="32" />
+                <RowDefinition Height="32" />
+                <RowDefinition Height="32" />
             </Grid.RowDefinitions>
-
-            <TextBlock Text="EE Id:" Grid.Row="0" />
+            <TextBlock Text="EE Id" Grid.Row="0" />
             <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding EEId, UpdateSourceTrigger=PropertyChanged, Delay=150}" CharacterCasing="Upper" />
             <TextBox Grid.Row="0" Grid.Column="2" Grid.ColumnSpan="2" Text="{Binding FullName}" IsReadOnly="True" />
 
-            <TextBlock Text="Adjustment Type:" Grid.Row="1" />
+            <TextBlock Text="Adjustment Type" Grid.Row="1" />
             <ComboBox Grid.Row="1" Grid.Column="1" SelectedValue="{Binding BillingRecord.AdjustmentType}" ItemsSource="{Binding AdjustmentTypes}" />
-            <TextBlock Text="Deduct On:" Grid.Row="1" Grid.Column="2" />
+            <TextBlock Text="Deduct On" Grid.Row="1" Grid.Column="2" />
             <ComboBox Grid.Row="1" Grid.Column="3" SelectedValue="{Binding BillingRecord.DeductionOption}" ItemsSource="{Binding DeductionOptions}" />
-            <TextBlock Text="Date Started:" Grid.Row="1" Grid.Column="4" />
+            <TextBlock Text="Date Started" Grid.Row="1" Grid.Column="4" />
             <DatePicker Grid.Row="1" Grid.Column="5" SelectedDate="{Binding BillingRecord.EffectivityDate}" />
 
-            <TextBlock Text="Advances:" Grid.Row="2" />
+            <TextBlock Text="Advances" Grid.Row="2" />
             <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding BillingRecord.Advances}" />
-            <TextBlock Text="Amortization:" Grid.Row="2" Grid.Column="2" />
+            <TextBlock Text="Amortization" Grid.Row="2" Grid.Column="2" />
             <TextBox Grid.Row="2" Grid.Column="3" Text="{Binding BillingRecord.Amortization}" />
-            <TextBlock Text="Balance:" Grid.Row="2" Grid.Column="4" />
+            <TextBlock Text="Balance" Grid.Row="2" Grid.Column="4" />
             <TextBox Grid.Row="2" Grid.Column="5" Text="{Binding BillingRecord.Balance}" />
 
-            <TextBlock Text="Remarks:" Grid.Row="3" />
-            <TextBox Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="5" Text="{Binding Record.Remarks}" />
-            <TextBlock Text="Status:" Grid.Row="4" />
+            <TextBlock Text="Remarks" Grid.Row="3" />
+            <TextBox Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="5" Text="{Binding BillingRecord.Remarks}" />
+            <TextBlock Text="Status" Grid.Row="4" />
             <ComboBox Grid.Row="4" Grid.Column="1" SelectedValue="{Binding BillingRecord.Status}" ItemsSource="{Binding BillingRecordStatus}" />
         </Grid>
-        <Button Grid.Row="2" Content="Save" HorizontalAlignment="Right" Command="{Binding SaveCommand}" />
+        <!--<Button Grid.Row="2" Content="Save" HorizontalAlignment="Right" Command="{Binding SaveCommand}" />-->
+        <Separator Grid.Row="2" />
+        <Button Content="Save Changes" Grid.Row="3" Margin="12" Padding="6" Command="{Binding SaveCommand}" HorizontalAlignment="Center" />
     </Grid>
 </UserControl>

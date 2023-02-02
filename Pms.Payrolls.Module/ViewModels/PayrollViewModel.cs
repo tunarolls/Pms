@@ -290,7 +290,7 @@ namespace Pms.Payrolls.Module.ViewModels
             catch (PayrollRegisterHeaderNotFoundException ex)
             {
                 OnTaskException();
-                s_Message.ShowError($"{ex.Header} not found in {ex.PayrollRegisterFilePath}.");
+                s_Message.ShowDialog($"{ex.Header} not found in {ex.PayrollRegisterFilePath}.", "Import payroll", ex.ToString());
             }
             catch (Exception ex)
             {
@@ -333,7 +333,7 @@ namespace Pms.Payrolls.Module.ViewModels
             catch (Exception ex)
             {
                 OnTaskException();
-                s_Message.ShowError(ex.Message);
+                s_Message.ShowDialog(ex.Message, "Export macro", ex.ToString());
             }
         }
         #endregion

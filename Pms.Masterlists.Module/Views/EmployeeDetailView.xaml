@@ -7,7 +7,7 @@
              xmlns:prism="http://prismlibrary.com/"
              prism:ViewModelLocator.AutoWireViewModel="True"
              mc:Ignorable="d"
-             d:DesignHeight="250" d:DesignWidth="800"
+             d:DesignHeight="250" d:DesignWidth="900"
              IsEnabled="{Binding IsEnabled}">
     <prism:Dialog.WindowStyle>
         <Style TargetType="Window">
@@ -20,92 +20,88 @@
     </prism:Dialog.WindowStyle>
     <UserControl.Resources>
         <Style TargetType="Button">
-            <Setter Property="HorizontalAlignment" Value="Right"/>
-            <Setter Property="VerticalAlignment" Value="Top"/>
-            <Setter Property="Padding" Value="3"/>
-            <Setter Property="Margin" Value="3"/>
+            <Setter Property="HorizontalAlignment" Value="Right" />
+            <Setter Property="VerticalAlignment" Value="Stretch" />
+            <Setter Property="Padding" Value="4,0" />
+            <Setter Property="Margin" Value="4" />
         </Style>
         <Style TargetType="TextBlock">
-            <Setter Property="HorizontalAlignment" Value="Right"/>
-            <Setter Property="VerticalAlignment" Value="Center"/>
-            <Setter Property="Margin" Value="8"/>
+            <Setter Property="HorizontalAlignment" Value="Right" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="Margin" Value="4" />
         </Style>
         <Style TargetType="TextBox">
-            <Setter Property="Margin" Value="3" />
-            <Setter Property="Padding" Value="3" />
-            <Setter Property="MinWidth" Value="100"/>
-            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Margin" Value="4" />
+            <Setter Property="Padding" Value="4,0" />
+            <Setter Property="MinWidth" Value="100" />
+            <Setter Property="VerticalAlignment" Value="Stretch" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
         </Style>
         <Style TargetType="ComboBox">
-            <Setter Property="VerticalAlignment" Value="Center" />
-            <Setter Property="Margin" Value="3" />
-            <Setter Property="Padding" Value="3" />
+            <Setter Property="VerticalAlignment" Value="Stretch" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="Margin" Value="4" />
+            <Setter Property="Padding" Value="4,0" />
         </Style>
     </UserControl.Resources>
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="auto"/>
-            <RowDefinition Height="auto"/>
-            <RowDefinition Height="auto"/>
+            <RowDefinition Height="48" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
-        <Grid Margin="12" HorizontalAlignment="Center">
+        <TextBlock VerticalAlignment="Top" HorizontalAlignment="Center" FontSize="16" FontWeight="Medium" Text="Employee Detail" />
+        <Grid Grid.Row="1" HorizontalAlignment="Center" Margin="8">
             <Grid.RowDefinitions>
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
+                <RowDefinition Height="32" />
+                <RowDefinition Height="32" />
+                <RowDefinition Height="32" />
+                <RowDefinition Height="32" />
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="128" />
                 <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="128" />
+                <ColumnDefinition Width="96" />
+                <ColumnDefinition Width="128" />
                 <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="128" />
             </Grid.ColumnDefinitions>
-            <TextBlock Grid.ColumnSpan="8" VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="18" FontWeight="Bold">EMPLOYEE DETAIL</TextBlock>
-            <TextBlock Grid.Row="1" Grid.Column="0"> EE Id:
-            </TextBlock>
-            <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Employee.EEId}" />
+            
+            <TextBlock Grid.Row="0" Grid.Column="0" Text="EE Id" />
+            <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Employee.EEId}" />
             <!--<CheckBox Grid.Row="1" Grid.Column="2" IsChecked="{Binding Employee.Active}" Content="Active" />-->
-            <ComboBox Grid.Row="1" Grid.Column="4" SelectedValue="{Binding Employee.Site}" ItemsSource="{Binding Sites}"/>
-            <Button Grid.Row="1" Grid.Column="5" Command="{Binding SyncCommand}">Sync to HRMS</Button>
-            <TextBlock Grid.Row="2" Grid.Column="0">Last Name:</TextBlock>
-            <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Employee.LastName}" />
-            <TextBlock Grid.Row="2" Grid.Column="2">First Name:</TextBlock>
-            <TextBox Grid.Row="2" Grid.Column="3" Text="{Binding Employee.FirstName}"/>
-            <TextBlock Grid.Row="2" Grid.Column="4">Middle Name:</TextBlock>
-            <TextBox Grid.Row="2" Grid.Column="5" Text="{Binding Employee.MiddleName}" />
-            <TextBlock Grid.Row="2" Grid.Column="6">Ext:</TextBlock>
-            <TextBox Grid.Row="2" Grid.Column="7" Text="{Binding Employee.NameExtension}" />
-            <TextBlock Grid.Row="5" Grid.Column="0">Payroll Code:</TextBlock>
-            <ComboBox Grid.Row="5" Grid.Column="1" SelectedValue="{Binding Employee.PayrollCode}" ItemsSource="{Binding PayrollCodes}" />
-            <TextBlock Grid.Row="5" Grid.Column="2">Account Number:</TextBlock>
-            <TextBox Grid.Row="5" Grid.Column="3" Text="{Binding Employee.AccountNumber}" />
-            <TextBlock Grid.Row="5" Grid.Column="4">Card Number:</TextBlock>
-            <TextBox Grid.Row="5" Grid.Column="5" Text="{Binding Employee.CardNumber}" />
-            <TextBlock Grid.Row="5" Grid.Column="6">Bank:</TextBlock>
-            <ComboBox Grid.Row="5" Grid.Column="7" SelectedValue="{Binding Employee.Bank, UpdateSourceTrigger=PropertyChanged}" ItemsSource="{Binding BankTypes}"/>
-            <TextBlock Grid.Row="8" Grid.Column="0">TIN:</TextBlock>
-            <TextBox Grid.Row="8" Grid.Column="1" Text="{Binding Employee.TIN}" />
-            <TextBlock Grid.Row="8" Grid.Column="2">HDMF:</TextBlock>
-            <TextBox Grid.Row="8" Grid.Column="3" Text="{Binding Employee.Pagibig}" />
-            <TextBlock Grid.Row="8" Grid.Column="4">PhilHealth:</TextBlock>
-            <TextBox Grid.Row="8" Grid.Column="5" Text="{Binding Employee.PhilHealth}" />
-            <TextBlock Grid.Row="8" Grid.Column="6">SSS:</TextBlock>
-            <TextBox Grid.Row="8" Grid.Column="7" Text="{Binding Employee.SSS}" />
+            <ComboBox Grid.Row="0" Grid.Column="4" SelectedValue="{Binding Employee.Site}" ItemsSource="{Binding Sites}" />
+            <Button Grid.Row="0" Grid.Column="5" Command="{Binding SyncCommand}" Content="Sync To HRMS" />
+            <TextBlock Grid.Row="1" Grid.Column="0" Text="Last Name" />
+            <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Employee.LastName}" />
+            <TextBlock Grid.Row="1" Grid.Column="2" Text="First Name" />
+            <TextBox Grid.Row="1" Grid.Column="3" Text="{Binding Employee.FirstName}" />
+            <TextBlock Grid.Row="1" Grid.Column="4" Text="Middle Name" />
+            <TextBox Grid.Row="1" Grid.Column="5" Text="{Binding Employee.MiddleName}" />
+            <TextBlock Grid.Row="1" Grid.Column="6" Text="Ext" />
+            <TextBox Grid.Row="1" Grid.Column="7" Text="{Binding Employee.NameExtension}" />
+            <TextBlock Grid.Row="2" Grid.Column="0" Text="Payroll Code" />
+            <ComboBox Grid.Row="2" Grid.Column="1" SelectedValue="{Binding Employee.PayrollCode}" ItemsSource="{Binding PayrollCodes}" />
+            <TextBlock Grid.Row="2" Grid.Column="2" Text="Account Number" />
+            <TextBox Grid.Row="2" Grid.Column="3" Text="{Binding Employee.AccountNumber}" />
+            <TextBlock Grid.Row="2" Grid.Column="4" Text="Card Number" />
+            <TextBox Grid.Row="2" Grid.Column="5" Text="{Binding Employee.CardNumber}" />
+            <TextBlock Grid.Row="2" Grid.Column="6" Text="Bank" />
+            <ComboBox Grid.Row="2" Grid.Column="7" SelectedValue="{Binding Employee.Bank, UpdateSourceTrigger=PropertyChanged}" ItemsSource="{Binding BankTypes}" />
+            <TextBlock Grid.Row="3" Grid.Column="0" Text="TIN" />
+            <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding Employee.TIN}" />
+            <TextBlock Grid.Row="3" Grid.Column="2" Text="HDMF" />
+            <TextBox Grid.Row="3" Grid.Column="3" Text="{Binding Employee.Pagibig}" />
+            <TextBlock Grid.Row="3" Grid.Column="4" Text="PhilHealth" />
+            <TextBox Grid.Row="3" Grid.Column="5" Text="{Binding Employee.PhilHealth}" />
+            <TextBlock Grid.Row="3" Grid.Column="6" Text="SSS" />
+            <TextBox Grid.Row="3" Grid.Column="7" Text="{Binding Employee.SSS}" />
         </Grid>
-        <Separator Grid.Row="1" Grid.ColumnSpan="8" />
-        <Button Content="Save Changes" Grid.Row="2" Margin="12" Padding="6" Command="{Binding SaveCommand}" HorizontalAlignment="Right" />
+        <Separator Grid.Row="2" Grid.ColumnSpan="8" />
+        <Button Content="Save Changes" Grid.Row="3" Margin="12" Padding="6" Command="{Binding SaveCommand}" HorizontalAlignment="Center" />
         <!--<GroupBox Header="Government" Grid.Column="1" Grid.RowSpan="3" Margin="4" Visibility="Collapsed">
                 <StackPanel>
                     <WrapPanel>

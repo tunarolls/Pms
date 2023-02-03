@@ -6,19 +6,19 @@ namespace Pms.Timesheets.Migrations
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            //migrationBuilder.AddColumn<byte>(
-            //    name: "Bank",
-            //    table: "timesheet",
-            //    type: "TINYINT",
-            //    nullable: false,
-            //    defaultValue: (byte)0);
+            migrationBuilder.AddColumn<byte>(
+                name: "Bank",
+                table: "timesheet",
+                type: "TINYINT",
+                nullable: false,
+                defaultValue: (byte)0);
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            //migrationBuilder.DropColumn(
-            //    name: "Bank",
-            //    table: "timesheet");
+            migrationBuilder.DropColumn(
+                name: "Bank",
+                table: "timesheet");
         }
     }
 }

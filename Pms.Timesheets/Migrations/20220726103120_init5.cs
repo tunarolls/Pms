@@ -6,18 +6,18 @@ namespace Pms.Timesheets.Migrations
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            //migrationBuilder.AddColumn<string>(
-            //    name: "Location",
-            //    table: "timesheet",
-            //    type: "VARCHAR(50)",
-            //    nullable: true);
+            migrationBuilder.AddColumn<string>(
+                name: "Location",
+                table: "timesheet",
+                type: "VARCHAR(50)",
+                nullable: true);
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            //migrationBuilder.DropColumn(
-            //    name: "Location",
-            //    table: "timesheet");
+            migrationBuilder.DropColumn(
+                name: "Location",
+                table: "timesheet");
         }
     }
 }

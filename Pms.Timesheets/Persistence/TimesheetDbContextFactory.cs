@@ -29,7 +29,7 @@ namespace Pms.Timesheets.Persistence
                 .UseLazyLoadingProxies(_lazyLoad)
                 .UseMySQL(
                     _connectionString,
-                    options => options.MigrationsHistoryTable("TimesheetsMigrationHistoryName")
+                    options => options.MigrationsHistoryTable("timesheetsmigrationhistoryname")
                 )
                 .Options;
             return new TimesheetDbContext(dbContextOptions);

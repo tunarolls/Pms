@@ -9,8 +9,8 @@ using Pms.Timesheets.Persistence;
 namespace Pms.Timesheets.Migrations
 {
     [DbContext(typeof(TimesheetDbContext))]
-    [Migration("20230125114533_test")]
-    partial class test
+    [Migration("20230203095851_non_null_rawpcv")]
+    partial class non_null_rawpcv
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -81,7 +81,6 @@ namespace Pms.Timesheets.Migrations
                         .HasDefaultValueSql("CURRENT_TIMESTAMP");
 
                     b.Property<string>("EEId")
-                        .IsRequired()
                         .HasColumnType("VARCHAR(8)");
 
                     b.Property<byte>("IsConfirmed")
@@ -124,9 +123,7 @@ namespace Pms.Timesheets.Migrations
                 {
                     b.HasOne("Pms.Timesheets.EmployeeView", "EE")
                         .WithMany()
-                        .HasForeignKey("EEId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("EEId");
 
                     b.Navigation("EE");
                 });

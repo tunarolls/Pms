@@ -14,11 +14,11 @@
         <Style x:Key="GenericTextBlock" TargetType="TextBlock">
             <Setter Property="VerticalAlignment" Value="Center"/>
             <Setter Property="HorizontalAlignment" Value="Right"/>
-            <Setter Property="Margin" Value="8,4"/>
+            <Setter Property="Margin" Value="4"/>
         </Style>
         <Style TargetType="TextBox">
             <Setter Property="VerticalAlignment" Value="Center"/>
-            <Setter Property="Margin" Value="8,2"/>
+            <Setter Property="Margin" Value="4"/>
             <Setter Property="MinWidth" Value="64"/>
             <Setter Property="Padding" Value="2" />
         </Style>
@@ -56,22 +56,22 @@
                 <RowDefinition />
             </Grid.RowDefinitions>
             <StackPanel Grid.RowSpan="5" Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Top" HorizontalAlignment="Right">
-                <Button Content="Load Summary" Command="{Binding LoadSummaryCommand}" Style="{DynamicResource CommandButton}" Margin="4"/>
-                <Button Content="Download" Command="{Binding DownloadCommand}" Style="{DynamicResource CommandButton}" Margin="4"/>
-                <Button Content="Export" Command="{Binding ExportCommand}" Style="{DynamicResource CommandButton}" Margin="4" />
+                <Button Content="Load Summary" Command="{Binding LoadSummaryCommand}" Style="{DynamicResource CommandButton}" Margin="4,0"/>
+                <Button Content="Download" Command="{Binding DownloadCommand}" Style="{DynamicResource CommandButton}" Margin="4,0"/>
+                <Button Content="Export" Command="{Binding ExportCommand}" Style="{DynamicResource CommandButton}" Margin="4,0,0,0" />
             </StackPanel>
-            <TextBlock Grid.Row="0" Style="{DynamicResource GenericTextBlock}">CONFIRMED</TextBlock>
+            <TextBlock Grid.Row="0" Style="{DynamicResource GenericTextBlock}" Text="Confirmed" />
             <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Confirmed}" IsReadOnly="True" TextAlignment="Center" />
-            <TextBlock Grid.Row="1" Style="{DynamicResource GenericTextBlock}">(Without Attendance)</TextBlock>
+            <TextBlock Grid.Row="1" Style="{DynamicResource GenericTextBlock}" Text="(Without Attendance)" />
             <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding ConfirmedWithoutAttendance}" IsReadOnly="True" TextAlignment="Center" />
-            <TextBlock Grid.Row="2" Style="{DynamicResource GenericTextBlock}">NOT CONFIRMED</TextBlock>
+            <TextBlock Grid.Row="2" Style="{DynamicResource GenericTextBlock}" Text="Not Confirmed" />
             <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding NotConfirmed}" IsReadOnly="True" TextAlignment="Center" />
-            <TextBlock Grid.Row="3" Style="{DynamicResource GenericTextBlock}">(With Attendance)</TextBlock>
+            <TextBlock Grid.Row="3" Style="{DynamicResource GenericTextBlock}" Text="(With Attendance)" />
             <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding NotConfirmedWithAttendance}" IsReadOnly="True" TextAlignment="Center" />
-            <TextBlock Grid.Row="4" Style="{DynamicResource GenericTextBlock}">TOTAL TIMESHEET</TextBlock>
+            <TextBlock Grid.Row="4" Style="{DynamicResource GenericTextBlock}" Text="Total Timesheet" />
             <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding TotalTimesheets}" IsReadOnly="True" TextAlignment="Center" />
 
-            <Grid Grid.Column="3" Grid.RowSpan="5" Margin="4" HorizontalAlignment="Right" VerticalAlignment="Bottom">
+            <Grid Grid.Column="3" Grid.RowSpan="5" HorizontalAlignment="Right" VerticalAlignment="Bottom">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="55"/>
                     <ColumnDefinition Width="45"/>
@@ -79,8 +79,8 @@
                     <ColumnDefinition/>
                 </Grid.ColumnDefinitions>
                 <!--<Button Grid.Column="0" Content="Add" Command="{Binding DetailTimesheet}" Margin="4"/>-->
-                <TextBlock Grid.Column="1" Text="Search:" VerticalAlignment="Center" HorizontalAlignment="Right"/>
-                <TextBox Grid.Column="2" Margin="8,3" Text="{Binding SearchInput, UpdateSourceTrigger=PropertyChanged, Delay=100}" CharacterCasing="Upper" VerticalAlignment="Center"/>
+                <TextBlock Grid.Column="1" Text="Search" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="4" />
+                <TextBox Grid.Column="2" Margin="0,4" Text="{Binding SearchInput, UpdateSourceTrigger=PropertyChanged}" CharacterCasing="Upper" VerticalAlignment="Center"/>
             </Grid>
         </Grid>
         <Grid Grid.Row="1">
@@ -93,24 +93,24 @@
                     <DataGridTemplateColumn Header="">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
-                                <Button Margin="3,1" Content="Detail" CommandParameter="{Binding}" Command="{Binding DataContext.DetailTimesheetCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" />
+                                <Button Margin="0" Padding="0" Content="Detail" CommandParameter="{Binding}" Command="{Binding DataContext.DetailTimesheetCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" />
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
                     <DataGridTemplateColumn Header="Page">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
-                                <Button Margin="3,1" Width="50" Content="{Binding Page}" CommandParameter="{Binding Page}" Command="{Binding DataContext.DownloadCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" />
+                                <Button Margin="0" Padding="0" Width="50" Content="{Binding Page}" CommandParameter="{Binding Page}" Command="{Binding DataContext.DownloadCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" />
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
                     <DataGridCheckBoxColumn Header="OK" Binding="{Binding IsConfirmed}">
-                        <DataGridCheckBoxColumn.ElementStyle>
+                        <!--<DataGridCheckBoxColumn.ElementStyle>
                             <Style TargetType="CheckBox">
                                 <Setter Property="VerticalAlignment" Value="Center" />
                                 <Setter Property="HorizontalAlignment" Value="Center" />
                             </Style>
-                        </DataGridCheckBoxColumn.ElementStyle>
+                        </DataGridCheckBoxColumn.ElementStyle>-->
                     </DataGridCheckBoxColumn>
                     <DataGridTextColumn Header="EE Id" Binding="{Binding EEId}" />
                     <DataGridTextColumn Header="Full Name" Binding="{Binding EE.FullName}"/>

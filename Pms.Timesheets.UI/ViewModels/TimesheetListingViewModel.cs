@@ -26,7 +26,8 @@ namespace Pms.Timesheets.Module.ViewModels
 {
     public class DummyListingViewModel : TimesheetListingViewModel
     {
-        public DummyListingViewModel(IDialogService dialog, IMessageBoxService message, Timesheets timesheets) : base(dialog, message, timesheets)
+        public DummyListingViewModel(IDialogService dialog, IMessageBoxService message, Timesheets timesheets)
+            : base(dialog, message, timesheets)
         {
         }
     }
@@ -69,9 +70,6 @@ namespace Pms.Timesheets.Module.ViewModels
         private readonly IDialogService s_Dialog;
         private readonly IMessageBoxService s_Message;
         private readonly Timesheets m_Timesheets;
-        private Cutoff _cutoff = new();
-        private PayrollCode _payrollCode = new PayrollCode();
-        private SiteChoices _site = SiteChoices.MANILA;
 
         public TimesheetListingViewModel(IDialogService dialog, IMessageBoxService message, Timesheets timesheets)
         {
@@ -104,9 +102,6 @@ namespace Pms.Timesheets.Module.ViewModels
             }
         }
 
-        public Cutoff Cutoff { get => _cutoff; set => SetProperty(ref _cutoff, value); }
-        public PayrollCode PayrollCode { get => _payrollCode; set => SetProperty(ref _payrollCode, value); }
-        public SiteChoices Site { get => _site; set => SetProperty(ref _site, value); }
         public ITimesheetsMain? Main { get; set; }
 
         #region commands
@@ -283,9 +278,9 @@ namespace Pms.Timesheets.Module.ViewModels
         {
             if (result.Result == ButtonResult.Yes)
             {
-                var timesheets = result.Parameters.GetValue<IEnumerable<Timesheet>?>(PmsConstants.Timesheets);
-                var cutoff = result.Parameters.GetValue<Cutoff?>(PmsConstants.Cutoff);
-                var payrollCode = result.Parameters.GetValue<string?>(PmsConstants.PayrollCode);
+                var timesheets = result.Parameters.GetValue<IEnumerable<Timesheet>>(PmsConstants.Timesheets);
+                var cutoff = result.Parameters.GetValue<Cutoff>(PmsConstants.Cutoff);
+                var payrollCode = result.Parameters.GetValue<string>(PmsConstants.PayrollCode);
 
                 if (timesheets != null && cutoff != null && payrollCode != null)
                 {
@@ -303,6 +298,8 @@ namespace Pms.Timesheets.Module.ViewModels
             {
                 await Export(timesheets, cutoff, payrollCode, cancellationToken);
                 OnTaskCompleted();
+
+                s_Message.ShowDialog("Export done.", "Success");
             }
             catch (TaskCanceledException) { OnTaskException(); }
             catch (Exception ex)
@@ -362,35 +359,33 @@ namespace Pms.Timesheets.Module.ViewModels
             }
         }
 
+        public static string GetTimesheetExportDirectory(string cutoffId, string payrollCode)
+        {
+            return Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "EXPORT", cutoffId, payrollCode);
+        }
+
+        public static string GetTimesheetExportFilename(string cutoffId, string payrollCode, TimesheetBankChoices bank, string fileExtension = "")
+        {
+            return $"{payrollCode}_{bank}_{cutoffId}{(string.IsNullOrEmpty(fileExtension) ? "" : $".{fileExtension.Replace(".", "")}")}";
+        }
+
         private void ExportDbf(Cutoff cutoff, string payrollCode, TimesheetBankChoices bank, IEnumerable<Timesheet> exportable)
         {
-            try
-            {
-                string dbfdir = $@"{AppDomain.CurrentDomain.BaseDirectory}\EXPORT\{cutoff.CutoffId}\{payrollCode}";
-                string dbfpath = $@"{dbfdir}\{payrollCode}_{bank}_{cutoff.CutoffId}.DBF";
-                Directory.CreateDirectory(dbfdir);
-                TimesheetDbfExporter.ExportDbf(dbfpath, cutoff.CutoffDate, exportable);
-            }
-            catch
-            {
-                throw;
-            }
+            var dir = GetTimesheetExportDirectory(cutoff.CutoffId, payrollCode);
+            var filename = GetTimesheetExportFilename(cutoff.CutoffId, payrollCode, bank, "dbf");
+            var path = Path.Combine(dir, filename);
+            Directory.CreateDirectory(dir);
+            TimesheetDbfExporter.ExportDbf(path, cutoff.CutoffDate, exportable);
         }
 
         private void ExportEFile(Cutoff cutoff, string payrollCode, TimesheetBankChoices bank, IEnumerable<Timesheet[]> exportable)
         {
-            try
-            {
-                var exporter = new TimesheetEFileExporter(cutoff, payrollCode, bank, exportable);
-                string efiledir = $@"{AppDomain.CurrentDomain.BaseDirectory}\EXPORT\{cutoff.CutoffId}\{payrollCode}";
-                string efilepath = $@"{efiledir}\{payrollCode}_{bank}_{cutoff.CutoffId}.XLS";
-                Directory.CreateDirectory(efiledir);
-                exporter.ExportEFile(efilepath);
-            }
-            catch
-            {
-                throw;
-            }
+            var exporter = new TimesheetEFileExporter(cutoff, payrollCode, bank, exportable);
+            var dir = GetTimesheetExportDirectory(cutoff.CutoffId, payrollCode);
+            var filename = GetTimesheetExportFilename(cutoff.CutoffId, payrollCode, bank, "dbf");
+            var path = Path.Combine(dir, filename);
+            Directory.CreateDirectory(dir);
+            exporter.ExportEFile(path);
         }
 
         private void ExportFeedback(Cutoff cutoff, string payrollCode, TimesheetBankChoices bank,
@@ -399,22 +394,16 @@ namespace Pms.Timesheets.Module.ViewModels
             IEnumerable<Timesheet> unconfirmedTimesheetWithoutAttendance)
         {
 
-            try
-            {
-                var service =  new TimesheetFeedbackExporter(cutoff, payrollCode, bank,
+            var service = new TimesheetFeedbackExporter(cutoff, payrollCode, bank,
                     exportable,
                     unconfirmedTimesheetWithAttendance,
                     unconfirmedTimesheetWithoutAttendance);
 
-                string efiledir = $@"{AppDomain.CurrentDomain.BaseDirectory}\EXPORT\{cutoff.CutoffId}\{payrollCode}";
-                string efilepath = $@"{efiledir}\{payrollCode}_{bank}_{cutoff.CutoffId}-FEEDBACK.XLS";
-                Directory.CreateDirectory(efiledir);
-                service.StartExport(efilepath);
-            }
-            catch
-            {
-                throw;
-            }
+            var dir = GetTimesheetExportDirectory(cutoff.CutoffId, payrollCode);
+            var filename = $"{payrollCode}_{bank}_{cutoff.CutoffId}-FEEDBACK.XLS";
+            var path = Path.Combine(dir, filename);
+            Directory.CreateDirectory(dir);
+            service.StartExport(path);
         }
         #endregion
 
@@ -475,15 +464,6 @@ namespace Pms.Timesheets.Module.ViewModels
                 var timesheets = await m_Timesheets.MapEmployeeView(summary?.UnconfirmedTimesheet, cancellationToken);
                 Timesheets.ReplaceRange(timesheets);
 
-                //Timesheets = new ObservableCollection<Timesheet>(timesheets);
-                //RaisePropertyChanged(nameof(Timesheets));
-                //var source = CollectionViewSource.GetDefaultView(Timesheets);
-                //source.Filter = t => FilterTimesheets(t);
-
-                //NotConfirmed = Timesheets.Count;
-                //Confirmed = int.TryParse(summary?.TotalConfirmed, out int confirmed) ? confirmed : 0;
-                //TotalTimesheets = int.TryParse(summary?.TotalCount, out int total) ? total : 0;
-
                 OnTaskCompleted();
             }
             catch (TaskCanceledException) { OnTaskException(); }
@@ -533,7 +513,7 @@ namespace Pms.Timesheets.Module.ViewModels
         #region INavigationAware
         public void OnNavigatedTo(NavigationContext navigationContext)
         {
-            Main = navigationContext.Parameters.GetValue<ITimesheetsMain?>(PmsConstants.Main);
+            Main = navigationContext.Parameters.GetValue<ITimesheetsMain>(PmsConstants.Main);
 
             if (Main != null)
             {

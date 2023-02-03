@@ -9,5 +9,6 @@ namespace Pms.Common
     public class JobRemarks
     {
         public const string Transferred = "TRANSFERRED";
+        public const string Backout = "BACKOUT";
     }
 }

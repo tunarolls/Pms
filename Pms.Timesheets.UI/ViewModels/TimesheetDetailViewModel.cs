@@ -32,7 +32,7 @@ namespace Pms.Timesheets.Module.ViewModels
         #region dialog
         public event Action<IDialogResult>? RequestClose;
 
-        public string Title { get; set; } = "Timesheet Detail";
+        public string Title { get; set; } = string.Empty;
 
         public bool CanCloseDialog()
         {
@@ -45,7 +45,7 @@ namespace Pms.Timesheets.Module.ViewModels
 
         public void OnDialogOpened(IDialogParameters parameters)
         {
-            Timesheet = parameters.GetValue<Timesheet?>(Common.PmsConstants.Timesheet);
+            Timesheet = parameters.GetValue<Timesheet?>(PmsConstants.Timesheet);
             RaisePropertyChanged(nameof(Timesheet));
             RaisePropertyChanged(nameof(IsForEditing));
         }

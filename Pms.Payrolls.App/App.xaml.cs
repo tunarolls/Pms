@@ -73,8 +73,6 @@ namespace Pms.Payrolls.App
             containerRegistry.Register<IMessageBoxService, MessageBoxService>();
             containerRegistry.Register<IFileDialogService, FileDialogService>();
             containerRegistry.RegisterDialog<CancelDialogView>(DialogNames.CancelDialog);
-
-            //containerRegistry.Register<MainWindowViewModel, DummyMainViewModel>();
         }
 
         protected override void ConfigureModuleCatalog(IModuleCatalog moduleCatalog)

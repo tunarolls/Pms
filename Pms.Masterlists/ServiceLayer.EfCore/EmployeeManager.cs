@@ -267,9 +267,19 @@ namespace Pms.Masterlists.ServiceLayer.EfCore
         private async Task ValidateDuplicate(Employee employee, CancellationToken cancellationToken = default)
         {
             using var context = _factory.CreateDbContext();
-            var duplicateAccountNumber = await context.Employees.Where(t => !string.IsNullOrEmpty(t.AccountNumber) && t.EEId != employee.EEId && t.AccountNumber == employee.AccountNumber).ToListAsync(cancellationToken);
-            var duplicateCardNumber = await context.Employees.Where(t => !string.IsNullOrEmpty(t.CardNumber) && t.EEId != employee.EEId && t.CardNumber == employee.CardNumber).ToListAsync(cancellationToken);
-            var hasDuplicateAccountNumber = employee.Bank == BankChoices.LBP || employee.Bank != BankChoices.CHK && duplicateAccountNumber.Any();
+            var duplicateAccountNumber = await context.Employees
+                .Where(t => !string.IsNullOrEmpty(t.AccountNumber))
+                .Where(t => t.EEId != employee.EEId)
+                .Where(t => t.AccountNumber == employee.AccountNumber)
+                .Where(t => t.Bank == employee.Bank)
+                .ToListAsync(cancellationToken);
+            var duplicateCardNumber = await context.Employees
+                .Where(t => !string.IsNullOrEmpty(t.CardNumber))
+                .Where(t => t.EEId != employee.EEId)
+                .Where(t => t.CardNumber == employee.CardNumber)
+                .ToListAsync(cancellationToken);
+            
+            var hasDuplicateAccountNumber = (employee.Bank == BankChoices.LBP || employee.Bank != BankChoices.CHK) && duplicateAccountNumber.Any();
             var hasDuplicateCardNumber = employee.Bank == BankChoices.LBP && duplicateCardNumber.Any();
 
             if (hasDuplicateAccountNumber)
@@ -283,24 +293,29 @@ namespace Pms.Masterlists.ServiceLayer.EfCore
             }
         }
 
-        private void ValidatePayrollCode(Employee employee, EmployeeDbContext Context)
+        public void ValidatePayrollCode(Employee employee, EmployeeDbContext Context)
         {
-            if (Context.PayrollCodes.Where(pc => pc.PayrollCodeId == employee.PayrollCode).FirstOrDefault() is PayrollCode payrollCode)
+            if (employee.JobRemarks != JobRemarks.Backout)
             {
-                employee.CompanyId = payrollCode.CompanyId;
-                employee.Site = payrollCode.Site;
+                if (Context.PayrollCodes.Where(pc => pc.PayrollCodeId == employee.PayrollCode).FirstOrDefault() is PayrollCode payrollCode)
+                {
+                    employee.CompanyId = payrollCode.CompanyId;
+                    employee.Site = payrollCode.Site;
+                }
+                else
+                    throw new InvalidFieldValueException("Payroll Code", employee.PayrollCode, employee.EEId, "Unknown Payroll code.");
             }
-            else
-                throw new InvalidFieldValueException("Payroll Code", employee.PayrollCode, employee.EEId, "Unknown Payroll code.");
 
         }
 
         private async Task ValidatePayrollCode(Employee employee, CancellationToken cancellationToken = default)
         {
-            if (employee.JobRemarks != "BACKOUT")
+            if (employee.JobRemarks != JobRemarks.Backout)
             {
                 using var context = _factory.CreateDbContext();
-                var payrollCode = await context.PayrollCodes.Where(t => t.PayrollCodeId == employee.PayrollCode).FirstOrDefaultAsync(cancellationToken);
+                var payrollCode = await context.PayrollCodes
+                    .Where(t => t.PayrollCodeId == employee.PayrollCode)
+                    .FirstOrDefaultAsync(cancellationToken);
 
                 if (payrollCode != null)
                 {

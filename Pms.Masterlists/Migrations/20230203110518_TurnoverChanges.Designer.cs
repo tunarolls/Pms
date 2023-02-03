@@ -9,8 +9,8 @@ using Pms.Masterlists.Persistence;
 namespace Pms.Masterlists.Migrations
 {
     [DbContext(typeof(EmployeeDbContext))]
-    [Migration("20230126041748_test")]
-    partial class test
+    [Migration("20230203110518_TurnoverChanges")]
+    partial class TurnoverChanges
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -70,7 +70,7 @@ namespace Pms.Masterlists.Migrations
                     b.Property<byte>("Bank")
                         .HasColumnType("TINYINT");
 
-                    b.Property<DateTime>("BirthDate")
+                    b.Property<DateTime?>("BirthDate")
                         .HasColumnType("DATE");
 
                     b.Property<string>("CardNumber")
@@ -78,19 +78,18 @@ namespace Pms.Masterlists.Migrations
                         .HasColumnType("VARCHAR(30)");
 
                     b.Property<string>("CompanyId")
-                        .IsRequired()
                         .HasColumnType("VARCHAR(25)");
 
-                    b.Property<DateTime>("DateCreated")
+                    b.Property<DateTime?>("DateCreated")
                         .HasColumnType("datetime");
 
-                    b.Property<DateTime>("DateHired")
+                    b.Property<DateTime?>("DateHired")
                         .HasColumnType("DATE");
 
-                    b.Property<DateTime>("DateModified")
+                    b.Property<DateTime?>("DateModified")
                         .HasColumnType("DATETIME");
 
-                    b.Property<DateTime>("DateResigned")
+                    b.Property<DateTime?>("DateResigned")
                         .HasColumnType("DATE");
 
                     b.Property<string>("FirstName")
@@ -172,7 +171,7 @@ namespace Pms.Masterlists.Migrations
 
                     b.HasKey("PayrollCodeId");
 
-                    b.ToTable("PayrollCodes");
+                    b.ToTable("payrollcodes");
                 });
 #pragma warning restore 612, 618
         }

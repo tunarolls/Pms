@@ -8,7 +8,7 @@ namespace Pms.Masterlists.Entities
 {
     public interface IGovernmentInformation
     {
-        DateTime BirthDate { get; set; }
+        DateTime? BirthDate { get; set; }
         string BirthDateSetter { set; }
         string EEId { get; set; }
         string Pagibig { get; set; }

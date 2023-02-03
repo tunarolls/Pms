@@ -68,7 +68,7 @@ namespace Pms.Masterlists.Migrations
                     b.Property<byte>("Bank")
                         .HasColumnType("TINYINT");
 
-                    b.Property<DateTime>("BirthDate")
+                    b.Property<DateTime?>("BirthDate")
                         .HasColumnType("DATE");
 
                     b.Property<string>("CardNumber")
@@ -76,19 +76,18 @@ namespace Pms.Masterlists.Migrations
                         .HasColumnType("VARCHAR(30)");
 
                     b.Property<string>("CompanyId")
-                        .IsRequired()
                         .HasColumnType("VARCHAR(25)");
 
-                    b.Property<DateTime>("DateCreated")
+                    b.Property<DateTime?>("DateCreated")
                         .HasColumnType("datetime");
 
-                    b.Property<DateTime>("DateHired")
+                    b.Property<DateTime?>("DateHired")
                         .HasColumnType("DATE");
 
-                    b.Property<DateTime>("DateModified")
+                    b.Property<DateTime?>("DateModified")
                         .HasColumnType("DATETIME");
 
-                    b.Property<DateTime>("DateResigned")
+                    b.Property<DateTime?>("DateResigned")
                         .HasColumnType("DATE");
 
                     b.Property<string>("FirstName")

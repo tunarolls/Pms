@@ -10,7 +10,6 @@ namespace Pms.Masterlists.Persistence
         public void Configure(EntityTypeBuilder<PayrollCode> builder)
         {
             builder.ToTable("payrollcodes").HasKey(ts => ts.PayrollCodeId);
-            //builder.HasKey(ts => ts.PayrollCodeId);
 
             builder.Property(cc => cc.PayrollCodeId).HasColumnType("VARCHAR(12)").IsRequired();
             builder.Property(cc => cc.CompanyId).HasColumnType("VARCHAR(35)").IsRequired();

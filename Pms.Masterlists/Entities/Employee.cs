@@ -15,16 +15,16 @@ namespace Pms.Masterlists.Entities
         #region COMPANY
         public bool Active { get; set; } = true;
 
-        public string CompanyId { get; set; } = string.Empty;
+        public string? CompanyId { get; set; }
 
-        public DateTime DateHired { get; set; }
+        public DateTime? DateHired { get; set; }
 
         [JsonProperty("joined_date")]
         public string DateHiredSetter
         {
             set
             {
-                if (value == "" || value == "0000-00-00")
+                if (value == "" || value == "0000-00-00" || value == "0001-01-01")
                 {
                     DateHired = default;
                 }
@@ -46,14 +46,14 @@ namespace Pms.Masterlists.Entities
             }
         }
 
-        public DateTime DateResigned { get; set; }
+        public DateTime? DateResigned { get; set; }
 
         [JsonProperty("terminated_date")]
         public string DateResignedSetter
         {
             set
             {
-                if (value == "" || value == "0000-00-00")
+                if (value == "" || value == "0000-00-00" || value == "0001-01-01")
                 {
                     DateResigned = default;
                 }
@@ -90,7 +90,7 @@ namespace Pms.Masterlists.Entities
         #endregion
 
         #region PERSONAL
-        public DateTime BirthDate { get; set; }
+        public DateTime? BirthDate { get; set; }
 
         [JsonProperty("birthdate")]
         public string BirthDateSetter
@@ -219,8 +219,8 @@ namespace Pms.Masterlists.Entities
         }
         #endregion
 
-        public DateTime DateCreated { get; set; }
-        public DateTime DateModified { get; set; }
+        public DateTime? DateCreated { get; set; }
+        public DateTime? DateModified { get; set; }
 
         public void ValidateAll()
         {

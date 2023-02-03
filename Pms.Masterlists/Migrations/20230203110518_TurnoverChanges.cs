@@ -1,11 +1,20 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+﻿using System;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Pms.Masterlists.Migrations
 {
-    public partial class test : Migration
+    public partial class TurnoverChanges : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropPrimaryKey(
+                name: "PK_PayrollCodes",
+                table: "PayrollCodes");
+
+            migrationBuilder.RenameTable(
+                name: "PayrollCodes",
+                newName: "payrollcodes");
+
             migrationBuilder.AlterColumn<string>(
                 name: "TIN",
                 table: "masterlist",
@@ -136,15 +145,37 @@ namespace Pms.Masterlists.Migrations
                 oldType: "VARCHAR(45)",
                 oldNullable: true);
 
-            migrationBuilder.AlterColumn<string>(
-                name: "CompanyId",
+            migrationBuilder.AlterColumn<DateTime>(
+                name: "DateResigned",
                 table: "masterlist",
-                type: "VARCHAR(25)",
-                nullable: false,
-                defaultValue: "",
-                oldClrType: typeof(string),
-                oldType: "VARCHAR(25)",
-                oldNullable: true);
+                type: "DATE",
+                nullable: true,
+                oldClrType: typeof(DateTime),
+                oldType: "DATE");
+
+            migrationBuilder.AlterColumn<DateTime>(
+                name: "DateModified",
+                table: "masterlist",
+                type: "DATETIME",
+                nullable: true,
+                oldClrType: typeof(DateTime),
+                oldType: "DATETIME");
+
+            migrationBuilder.AlterColumn<DateTime>(
+                name: "DateHired",
+                table: "masterlist",
+                type: "DATE",
+                nullable: true,
+                oldClrType: typeof(DateTime),
+                oldType: "DATE");
+
+            migrationBuilder.AlterColumn<DateTime>(
+                name: "DateCreated",
+                table: "masterlist",
+                type: "datetime",
+                nullable: true,
+                oldClrType: typeof(DateTime),
+                oldType: "datetime");
 
             migrationBuilder.AlterColumn<string>(
                 name: "CardNumber",
@@ -155,6 +186,14 @@ namespace Pms.Masterlists.Migrations
                 oldClrType: typeof(string),
                 oldType: "VARCHAR(30)",
                 oldNullable: true);
+
+            migrationBuilder.AlterColumn<DateTime>(
+                name: "BirthDate",
+                table: "masterlist",
+                type: "DATE",
+                nullable: true,
+                oldClrType: typeof(DateTime),
+                oldType: "DATE");
 
             migrationBuilder.AlterColumn<string>(
                 name: "AccountNumber",
@@ -195,10 +234,23 @@ namespace Pms.Masterlists.Migrations
                 oldClrType: typeof(string),
                 oldType: "VARCHAR(10)",
                 oldNullable: true);
+
+            migrationBuilder.AddPrimaryKey(
+                name: "PK_payrollcodes",
+                table: "payrollcodes",
+                column: "PayrollCodeId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropPrimaryKey(
+                name: "PK_payrollcodes",
+                table: "payrollcodes");
+
+            migrationBuilder.RenameTable(
+                name: "payrollcodes",
+                newName: "PayrollCodes");
+
             migrationBuilder.AlterColumn<string>(
                 name: "TIN",
                 table: "masterlist",
@@ -303,13 +355,45 @@ namespace Pms.Masterlists.Migrations
                 oldClrType: typeof(string),
                 oldType: "VARCHAR(45)");
 
-            migrationBuilder.AlterColumn<string>(
-                name: "CompanyId",
+            migrationBuilder.AlterColumn<DateTime>(
+                name: "DateResigned",
                 table: "masterlist",
-                type: "VARCHAR(25)",
-                nullable: true,
-                oldClrType: typeof(string),
-                oldType: "VARCHAR(25)");
+                type: "DATE",
+                nullable: false,
+                defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                oldClrType: typeof(DateTime),
+                oldType: "DATE",
+                oldNullable: true);
+
+            migrationBuilder.AlterColumn<DateTime>(
+                name: "DateModified",
+                table: "masterlist",
+                type: "DATETIME",
+                nullable: false,
+                defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                oldClrType: typeof(DateTime),
+                oldType: "DATETIME",
+                oldNullable: true);
+
+            migrationBuilder.AlterColumn<DateTime>(
+                name: "DateHired",
+                table: "masterlist",
+                type: "DATE",
+                nullable: false,
+                defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                oldClrType: typeof(DateTime),
+                oldType: "DATE",
+                oldNullable: true);
+
+            migrationBuilder.AlterColumn<DateTime>(
+                name: "DateCreated",
+                table: "masterlist",
+                type: "datetime",
+                nullable: false,
+                defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                oldClrType: typeof(DateTime),
+                oldType: "datetime",
+                oldNullable: true);
 
             migrationBuilder.AlterColumn<string>(
                 name: "CardNumber",
@@ -318,6 +402,16 @@ namespace Pms.Masterlists.Migrations
                 nullable: true,
                 oldClrType: typeof(string),
                 oldType: "VARCHAR(30)");
+
+            migrationBuilder.AlterColumn<DateTime>(
+                name: "BirthDate",
+                table: "masterlist",
+                type: "DATE",
+                nullable: false,
+                defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                oldClrType: typeof(DateTime),
+                oldType: "DATE",
+                oldNullable: true);
 
             migrationBuilder.AlterColumn<string>(
                 name: "AccountNumber",
@@ -350,6 +444,11 @@ namespace Pms.Masterlists.Migrations
                 nullable: true,
                 oldClrType: typeof(string),
                 oldType: "VARCHAR(10)");
+
+            migrationBuilder.AddPrimaryKey(
+                name: "PK_PayrollCodes",
+                table: "PayrollCodes",
+                column: "PayrollCodeId");
         }
     }
 }

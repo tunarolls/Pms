@@ -44,10 +44,10 @@ namespace Pms.Masterlists.Module
             }, cancellationToken);
         }
 
-        public Employee FindEmployee(string eeId)
-        {
-            return s_Provider.FindEmployee(eeId);
-        }
+        //public Employee FindEmployee(string eeId)
+        //{
+        //    return s_Provider.FindEmployee(eeId);
+        //}
 
         public async Task<Employee?> FindEmployee(string? eeId, CancellationToken cancellationToken = default)
         {
@@ -185,10 +185,10 @@ namespace Pms.Masterlists.Module
             return await s_Hrms.GetNewlyHiredEmployees(fromDate, site.ToString(), cancellationToken);
         }
 
-        public async Task<Employee> SyncOneAsync(string eeId, string site)
-        {
-            return await s_Hrms.GetEmployeeAsync(eeId, site);
-        }
+        //public async Task<Employee> SyncOneAsync(string eeId, string site)
+        //{
+        //    return await s_Hrms.GetEmployeeAsync(eeId, site);
+        //}
 
         public async Task<Employee?> SyncOne(string eeId, string site, CancellationToken cancellationToken = default)
         {

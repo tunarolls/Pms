@@ -6,18 +6,18 @@ namespace Pms.Masterlists.Migrations
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            //migrationBuilder.AddColumn<string>(
-            //    name: "CompanyId",
-            //    table: "masterlist",
-            //    type: "VARCHAR(25)",
-            //    nullable: true);
+            migrationBuilder.AddColumn<string>(
+                name: "CompanyId",
+                table: "masterlist",
+                type: "VARCHAR(25)",
+                nullable: true);
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            //migrationBuilder.DropColumn(
-            //    name: "CompanyId",
-            //    table: "masterlist");
+            migrationBuilder.DropColumn(
+                name: "CompanyId",
+                table: "masterlist");
         }
     }
 }

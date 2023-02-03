@@ -21,7 +21,7 @@ namespace Pms.Masterlists.Persistence
         public EmployeeDbContext CreateDbContext()
         {
             DbContextOptions dbContextOptions = new DbContextOptionsBuilder()
-                .UseMySQL(_connectionString, options => options.MigrationsHistoryTable("EmployeesMigrationHistoryName"))
+                .UseMySQL(_connectionString, options => options.MigrationsHistoryTable("employeesmigrationhistoryname"))
                 .Options;
 
             return new EmployeeDbContext(dbContextOptions);

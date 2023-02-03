@@ -23,6 +23,13 @@ namespace Pms.Common.Views
         public PromptDialogView()
         {
             InitializeComponent();
+
+            Loaded += PromptDialogView_Loaded;
+        }
+
+        private void PromptDialogView_Loaded(object sender, RoutedEventArgs e)
+        {
+            IconHelper.RemoveIcon(Window.GetWindow(this));
         }
     }
 }

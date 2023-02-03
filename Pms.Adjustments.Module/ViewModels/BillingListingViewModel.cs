@@ -138,7 +138,7 @@ namespace Pms.Adjustments.Module.ViewModels
             _ = StartGenerateBillings(cts.Token);
         }
 
-        private async Task StartGenerateBillings(CancellationToken cancellationToken = default)
+        private async Task StartGenerateBillings(CancellationToken cancellationToken)
         {
             await GenerateBillings(cancellationToken);
             ListBillings();
@@ -235,8 +235,14 @@ namespace Pms.Adjustments.Module.ViewModels
                 var cts = GetCancellationTokenSource();
                 var dialogParameters = CreateDialogParameters(this, cts);
                 s_Dialog.Show(DialogNames.CancelDialog, dialogParameters, (_) => { });
-                _ = AddToAdjustment(adjustOption, cts.Token);
+                _ = StartAddToAdjustment(adjustOption, cts.Token);
             }
+        }
+
+        private async Task StartAddToAdjustment(AdjustmentOptions adjustOption, CancellationToken cancellationToken = default)
+        {
+            await AddToAdjustment(adjustOption, cancellationToken);
+            ListBillings();
         }
 
         private async Task AddToAdjustment(AdjustmentOptions adjustOption, CancellationToken cancellationToken = default)
@@ -297,7 +303,6 @@ namespace Pms.Adjustments.Module.ViewModels
                 }
 
                 OnTaskCompleted();
-
                 s_Message.ShowDialog("Done.", "Add to adjust");
             }
             catch (TaskCanceledException) { OnTaskException(); }

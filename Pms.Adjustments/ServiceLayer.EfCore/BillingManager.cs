@@ -44,7 +44,8 @@ namespace Pms.Adjustments.ServiceLayer.EfCore
             using var context = _factory.CreateDbContext();
             if (await context.Billings.AnyAsync(t => t.BillingId == billing.BillingId, cancellationToken))
             {
-                context.Update(billing);
+                context.Entry(billing).State = EntityState.Modified;
+                //context.Update(billing);
             }
             else
             {

@@ -120,7 +120,7 @@ namespace Pms.Common
             return new DialogParameters()
             {
                 { DialogParameterNames.Message, "Starting..." },
-                { DialogParameterNames.Title, "Loading" },
+                { DialogParameterNames.Title, "" },
                 { DialogParameterNames.TaskCompletion, taskCompletion },
                 { DialogParameterNames.CancellationTokenSource, cts }
             };

@@ -8,6 +8,7 @@ using Prism.Services.Dialogs;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -22,7 +23,8 @@ namespace Pms.Adjustments.Module.ViewModels
         private readonly IMessageBoxService s_Message;
         private readonly BillingRecords m_BillingRecords;
         private readonly Employees m_Employees;
-        
+        private readonly SemaphoreSlim _findLock = new(1);
+
         public BillingRecordDetailViewModel(IDialogService dialog, IMessageBoxService message, BillingRecords billingRecords, Employees employees)
         {
             s_Dialog = dialog;
@@ -31,29 +33,35 @@ namespace Pms.Adjustments.Module.ViewModels
             m_Employees = employees;
 
             SaveCommand = new DelegateCommand(Save);
-
-            //PropertyChanged += BillingRecordDetailViewModel_PropertyChanged;
         }
 
         public IEnumerable<AdjustmentTypes> AdjustmentTypes { get; } = Enum.GetValues<AdjustmentTypes>();
         public IEnumerable<BillingRecordStatus> BillingRecordStatus { get; } = Enum.GetValues<BillingRecordStatus>();
         public IEnumerable<DeductionOptions> DeductionOptions { get; } = Enum.GetValues<DeductionOptions>();
 
-        private BillingRecord? _billingRecord;
-        public BillingRecord? BillingRecord
+        private BillingRecord _billingRecord = new();
+        public BillingRecord BillingRecord
         {
             get => _billingRecord;
             set
             {
                 SetProperty(ref _billingRecord, value);
 
-                EEId = _billingRecord?.EEId;
-                FullName = _billingRecord?.EE?.FullName;
+                EEId = _billingRecord.EEId;
+                FullName = _billingRecord.EE?.FullName;
             }
         }
 
         private string? _eeId;
-        public string? EEId { get => _eeId; set => SetProperty(ref _eeId, value); }
+        public string? EEId
+        {
+            get => _eeId;
+            set
+            {
+                SetProperty(ref _eeId, value);
+                _ = FindEmployee(_eeId ?? string.Empty, default);
+            }
+        }
 
         //public string EEId
         //{
@@ -112,18 +120,37 @@ namespace Pms.Adjustments.Module.ViewModels
         #endregion
 
         #region find employee
+        private void FindEmployee(string eeId)
+        {
+
+        }
+
         private async Task FindEmployee(string eeId, CancellationToken cancellationToken = default)
         {
-            try
+            if (await _findLock.WaitAsync(1000, cancellationToken))
             {
-                var ee = await m_Employees.Find(eeId, cancellationToken);
-                if (ee != null)
+                try
                 {
+                    OnMessageSent("Finding employee...");
+                    var ee = await m_Employees.Find(eeId, cancellationToken);
+                    if (ee != null)
+                    {
+                        FullName = ee.FullName;
+                        BillingRecord.EEId = ee.EEId;
+                    }
 
+                    OnTaskCompleted();
                 }
-            }
-            catch
-            {
+                catch (TaskCanceledException) { OnTaskCancelled(); }
+                catch (Exception ex)
+                {
+                    OnTaskException();
+                    s_Message.ShowDialog(ex.Message, "Find", ex.ToString());
+                }
+                finally
+                {
+                    _findLock.Release();
+                }
             }
         }
         #endregion
@@ -153,7 +180,7 @@ namespace Pms.Adjustments.Module.ViewModels
 
         public void OnDialogOpened(IDialogParameters parameters)
         {
-            BillingRecord = parameters.GetValue<BillingRecord>(PmsConstants.BillingRecord);
+            BillingRecord = parameters.GetValue<BillingRecord>(PmsConstants.BillingRecord) ?? BillingRecord;
         }
         #endregion
     }

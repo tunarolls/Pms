@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Pms.Common;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -22,6 +23,13 @@ namespace Pms.Adjustments.Module.Views
         public BillingRecordDetailView()
         {
             InitializeComponent();
+
+            Loaded += BillingRecordDetailView_Loaded;
+        }
+
+        private void BillingRecordDetailView_Loaded(object sender, RoutedEventArgs e)
+        {
+            IconHelper.RemoveIcon(Window.GetWindow(this));
         }
     }
 }

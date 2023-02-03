@@ -27,10 +27,11 @@
             </Style>
             <Style x:Key="Header" TargetType="TextBlock">
                 <Setter Property="HorizontalAlignment" Value="Center" />
-                <Setter Property="VerticalAlignment" Value="Top" />
+                <Setter Property="VerticalAlignment" Value="Bottom" />
                 <Setter Property="Margin" Value="4" />
-                <Setter Property="FontSize" Value="16" />
-                <Setter Property="FontWeight" Value="Medium" />
+                <Setter Property="FontSize" Value="14" />
+                <Setter Property="FontWeight" Value="Heavy" />
+                <Setter Property="Foreground" Value="#000000" />
             </Style>
             <Style TargetType="TextBlock">
                 <Setter Property="HorizontalAlignment" Value="Right" />
@@ -57,46 +58,49 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
         <TextBlock Style="{StaticResource Header}" Text="Payroll Code Details" />
-        <Grid Grid.Row="1" HorizontalAlignment="Center" Margin="8">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="128" />
-                <ColumnDefinition />
-            </Grid.ColumnDefinitions>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="32" />
-                <RowDefinition Height="32" />
-                <RowDefinition Height="32" />
-                <RowDefinition Height="32" />
-                <RowDefinition Height="32" />
-                <RowDefinition Height="*" MaxHeight="128" />
-            </Grid.RowDefinitions>
-            <TextBlock Grid.Row="0" Grid.Column="0" Text="Id" />
-            <TextBlock Grid.Row="1" Grid.Column="0" Text="Name" />
-            <TextBlock Grid.Row="2" Grid.Column="0" Text="Company" />
-            <TextBlock Grid.Row="3" Grid.Column="0" Text="Site" />
-            <TextBlock Grid.Row="4" Grid.Column="0" Text="Process" />
-            <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding SelectedPayrollCode.PayrollCodeId}" IsReadOnly="True" />
-            <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding SelectedPayrollCode.Name}" />
-            <ComboBox Grid.Row="2" Grid.Column="1" SelectedValue="{Binding SelectedPayrollCode.CompanyId}" ItemsSource="{Binding CompanyIds}" />
-            <ComboBox Grid.Row="3" Grid.Column="1" SelectedValue="{Binding SelectedPayrollCode.Site}" ItemsSource="{Binding Sites}" />
-            <ComboBox Grid.Row="4" Grid.Column="1" SelectedValue="{Binding SelectedPayrollCode.Process}" ItemsSource="{Binding ProcessTypes}" />
-            <!--<Button Grid.Row="6" Grid.Column="1" Content="Save" Command="{Binding SaveCommand}" />-->
-            <DataGrid Grid.Column="2" Grid.RowSpan="6" Margin="4"
+        <Border Grid.Row="1" BorderBrush="#FF786F6F" BorderThickness="0.3" Margin="8,8,8,16" Padding="8" CornerRadius="8">
+            <Grid HorizontalAlignment="Center">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="128" />
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="32" />
+                    <RowDefinition Height="32" />
+                    <RowDefinition Height="32" />
+                    <RowDefinition Height="32" />
+                    <RowDefinition Height="32" />
+                    <RowDefinition Height="*" MaxHeight="128" />
+                </Grid.RowDefinitions>
+                <TextBlock Grid.Row="0" Grid.Column="0" Text="Id" />
+                <TextBlock Grid.Row="1" Grid.Column="0" Text="Name" />
+                <TextBlock Grid.Row="2" Grid.Column="0" Text="Company" />
+                <TextBlock Grid.Row="3" Grid.Column="0" Text="Site" />
+                <TextBlock Grid.Row="4" Grid.Column="0" Text="Process" />
+                <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding SelectedPayrollCode.PayrollCodeId}" IsReadOnly="True" />
+                <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding SelectedPayrollCode.Name}" />
+                <ComboBox Grid.Row="2" Grid.Column="1" SelectedValue="{Binding SelectedPayrollCode.CompanyId}" ItemsSource="{Binding CompanyIds}" />
+                <ComboBox Grid.Row="3" Grid.Column="1" SelectedValue="{Binding SelectedPayrollCode.Site}" ItemsSource="{Binding Sites}" />
+                <ComboBox Grid.Row="4" Grid.Column="1" SelectedValue="{Binding SelectedPayrollCode.Process}" ItemsSource="{Binding ProcessTypes}" />
+                <!--<Button Grid.Row="6" Grid.Column="1" Content="Save" Command="{Binding SaveCommand}" />-->
+                <DataGrid Grid.Column="2" Grid.RowSpan="6" Margin="4"
                   AutoGenerateColumns="False"
                   SelectedItem="{Binding SelectedPayrollCode}"
                   ItemsSource="{Binding PayrollCodes}"
                   IsReadOnly="True">
-                <DataGrid.Columns>
-                    <DataGridTextColumn Header="Id" Binding="{Binding PayrollCodeId}" />
-                    <DataGridTextColumn Header="Name" Binding="{Binding Name}" />
-                    <DataGridTextColumn Header="Company" Binding="{Binding CompanyId}" />
-                    <DataGridTextColumn Header="Site" Binding="{Binding Site}" />
-                    <DataGridTextColumn Header="Process" Binding="{Binding Process}" />
-                </DataGrid.Columns>
-            </DataGrid>
-        </Grid>
-        <Separator Grid.Row="2" />
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Id" Binding="{Binding PayrollCodeId}" />
+                        <DataGridTextColumn Header="Name" Binding="{Binding Name}" />
+                        <DataGridTextColumn Header="Company" Binding="{Binding CompanyId}" />
+                        <DataGridTextColumn Header="Site" Binding="{Binding Site}" />
+                        <DataGridTextColumn Header="Process" Binding="{Binding Process}" />
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Grid>
+        </Border>
+        
+        <!--<Separator Grid.Row="2" />-->
         <Button Content="Save Changes" Grid.Row="3" Margin="12" Padding="6" Command="{Binding SaveCommand}" HorizontalAlignment="Center" />
     </Grid>
 </UserControl>

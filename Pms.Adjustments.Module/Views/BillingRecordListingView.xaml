@@ -30,12 +30,12 @@
                     <DataGridTemplateColumn Header="">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
-                                <Button Margin="3,1" Content="Detail" CommandParameter="{Binding}" Command="{Binding DataContext.DetailCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" />
+                                <Button Margin="0" Padding="2,0" Content="Detail" CommandParameter="{Binding}" Command="{Binding DataContext.DetailCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" />
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
                     <DataGridTextColumn Header="EE ID" Binding="{Binding EEId}" />
-                    <DataGridTextColumn Header="Full Name" Binding="{Binding EE.Fullname}" />
+                    <DataGridTextColumn Header="Full Name" Binding="{Binding EE.FullName}" />
                     <DataGridTextColumn Header="Payroll Code" Binding="{Binding EE.PayrollCode}" />
                     <DataGridTextColumn Header="Type" Binding="{Binding AdjustmentType}" />
                     <DataGridTextColumn Header="Advances" Binding="{Binding Advances}" />

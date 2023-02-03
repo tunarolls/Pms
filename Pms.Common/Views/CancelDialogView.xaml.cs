@@ -23,6 +23,13 @@ namespace Pms.Common.Views
         public CancelDialogView()
         {
             InitializeComponent();
+
+            Loaded += CancelDialogView_Loaded;
+        }
+
+        private void CancelDialogView_Loaded(object sender, RoutedEventArgs e)
+        {
+            IconHelper.RemoveIcon(Window.GetWindow(this));
         }
     }
 }

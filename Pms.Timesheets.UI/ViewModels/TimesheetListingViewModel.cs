@@ -118,7 +118,13 @@ namespace Pms.Timesheets.Module.ViewModels
             var cts = GetCancellationTokenSource();
             var dialogParameters = CreateDialogParameters(this, cts);
             s_Dialog.Show(DialogNames.CancelDialog, dialogParameters, (_) => { });
-            _ = Download(parameter, cts.Token);
+            _ = StartDownload(parameter, cts.Token);
+        }
+
+        private async Task StartDownload(object? parameter, CancellationToken cancellationToken)
+        {
+            await Download(parameter, cancellationToken);
+            LoadTimesheets();
         }
 
         private async Task Download(object? parameter, CancellationToken cancellationToken = default)
@@ -149,12 +155,7 @@ namespace Pms.Timesheets.Module.ViewModels
                 }
 
                 OnTaskCompleted();
-            }
-            catch (TaskCanceledException) { OnTaskException(); }
-            catch (System.Net.Http.HttpRequestException ex)
-            {
-                OnTaskException();
-                s_Message.ShowDialog(ex.Message, "Download", ex.ToString());
+                s_Message.ShowDialog("Download finished.", "");
             }
             catch (Exception ex)
             {
@@ -176,25 +177,14 @@ namespace Pms.Timesheets.Module.ViewModels
 
                 for (int i = startIndex; i < pages.Length; i++)
                 {
+                    await _tempDownloadTaskCap.WaitAsync(cancellationToken);
                     tasks.Add(Download(i, cutoff, payrollCode, downloadCts.Token));
                 }
 
-                while (tasks.Any())
-                {
-                    var completedTask = await Task.WhenAny(tasks);
-
-                    if (completedTask.Exception != null)
-                    {
-                        throw completedTask.Exception;
-                    }
-
-                    tasks.Remove(completedTask);
-                }
+                await Task.WhenAll(tasks);
             }
-            catch (TaskCanceledException) { throw; }
             catch
             {
-                downloadCts.Cancel();
                 throw;
             }
         }
@@ -204,7 +194,6 @@ namespace Pms.Timesheets.Module.ViewModels
         {
             try
             {
-                await _tempDownloadTaskCap.WaitAsync(cancellationToken);
                 await m_Timesheets.DownloadContent(cutoff, payrollCode, page, cancellationToken);
                 OnProgressIncrement();
             }
@@ -253,8 +242,8 @@ namespace Pms.Timesheets.Module.ViewModels
                 }
 
                 OnTaskCompleted();
+                s_Message.ShowDialog("Export finished.", "");
             }
-            catch (TaskCanceledException) { OnTaskException(); }
             catch (Exception ex)
             {
                 OnTaskException();
@@ -299,7 +288,7 @@ namespace Pms.Timesheets.Module.ViewModels
                 await Export(timesheets, cutoff, payrollCode, cancellationToken);
                 OnTaskCompleted();
 
-                s_Message.ShowDialog("Export done.", "Success");
+                s_Message.ShowDialog("Export finished.", "");
             }
             catch (TaskCanceledException) { OnTaskException(); }
             catch (Exception ex)
@@ -466,7 +455,6 @@ namespace Pms.Timesheets.Module.ViewModels
 
                 OnTaskCompleted();
             }
-            catch (TaskCanceledException) { OnTaskException(); }
             catch (Exception ex)
             {
                 OnTaskException();
@@ -499,7 +487,6 @@ namespace Pms.Timesheets.Module.ViewModels
 
                 OnTaskCompleted();
             }
-            catch (TaskCanceledException) { OnTaskException(); }
             catch (Exception ex)
             {
                 OnTaskException();

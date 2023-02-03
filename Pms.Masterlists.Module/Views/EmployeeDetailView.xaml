@@ -51,56 +51,59 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
-        <TextBlock VerticalAlignment="Top" HorizontalAlignment="Center" FontSize="16" FontWeight="Medium" Text="Employee Detail" />
-        <Grid Grid.Row="1" HorizontalAlignment="Center" Margin="8">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="32" />
-                <RowDefinition Height="32" />
-                <RowDefinition Height="32" />
-                <RowDefinition Height="32" />
-            </Grid.RowDefinitions>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="128" />
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="128" />
-                <ColumnDefinition Width="96" />
-                <ColumnDefinition Width="128" />
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="128" />
-            </Grid.ColumnDefinitions>
-            
-            <TextBlock Grid.Row="0" Grid.Column="0" Text="EE Id" />
-            <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Employee.EEId}" />
-            <!--<CheckBox Grid.Row="1" Grid.Column="2" IsChecked="{Binding Employee.Active}" Content="Active" />-->
-            <ComboBox Grid.Row="0" Grid.Column="4" SelectedValue="{Binding Employee.Site}" ItemsSource="{Binding Sites}" />
-            <Button Grid.Row="0" Grid.Column="5" Command="{Binding SyncCommand}" Content="Sync To HRMS" />
-            <TextBlock Grid.Row="1" Grid.Column="0" Text="Last Name" />
-            <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Employee.LastName}" />
-            <TextBlock Grid.Row="1" Grid.Column="2" Text="First Name" />
-            <TextBox Grid.Row="1" Grid.Column="3" Text="{Binding Employee.FirstName}" />
-            <TextBlock Grid.Row="1" Grid.Column="4" Text="Middle Name" />
-            <TextBox Grid.Row="1" Grid.Column="5" Text="{Binding Employee.MiddleName}" />
-            <TextBlock Grid.Row="1" Grid.Column="6" Text="Ext" />
-            <TextBox Grid.Row="1" Grid.Column="7" Text="{Binding Employee.NameExtension}" />
-            <TextBlock Grid.Row="2" Grid.Column="0" Text="Payroll Code" />
-            <ComboBox Grid.Row="2" Grid.Column="1" SelectedValue="{Binding Employee.PayrollCode}" ItemsSource="{Binding PayrollCodes}" />
-            <TextBlock Grid.Row="2" Grid.Column="2" Text="Account Number" />
-            <TextBox Grid.Row="2" Grid.Column="3" Text="{Binding Employee.AccountNumber}" />
-            <TextBlock Grid.Row="2" Grid.Column="4" Text="Card Number" />
-            <TextBox Grid.Row="2" Grid.Column="5" Text="{Binding Employee.CardNumber}" />
-            <TextBlock Grid.Row="2" Grid.Column="6" Text="Bank" />
-            <ComboBox Grid.Row="2" Grid.Column="7" SelectedValue="{Binding Employee.Bank, UpdateSourceTrigger=PropertyChanged}" ItemsSource="{Binding BankTypes}" />
-            <TextBlock Grid.Row="3" Grid.Column="0" Text="TIN" />
-            <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding Employee.TIN}" />
-            <TextBlock Grid.Row="3" Grid.Column="2" Text="HDMF" />
-            <TextBox Grid.Row="3" Grid.Column="3" Text="{Binding Employee.Pagibig}" />
-            <TextBlock Grid.Row="3" Grid.Column="4" Text="PhilHealth" />
-            <TextBox Grid.Row="3" Grid.Column="5" Text="{Binding Employee.PhilHealth}" />
-            <TextBlock Grid.Row="3" Grid.Column="6" Text="SSS" />
-            <TextBox Grid.Row="3" Grid.Column="7" Text="{Binding Employee.SSS}" />
-        </Grid>
-        <Separator Grid.Row="2" Grid.ColumnSpan="8" />
+        <TextBlock VerticalAlignment="Bottom" HorizontalAlignment="Center" FontSize="14" FontWeight="Heavy" Text="Employee Detail" Foreground="#000000" Margin="4" />
+        <Border Grid.Row="1" BorderBrush="#FF786F6F" BorderThickness="0.3" Margin="8,8,8,16" Padding="8" CornerRadius="8">
+            <Grid HorizontalAlignment="Center">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="32" />
+                    <RowDefinition Height="32" />
+                    <RowDefinition Height="32" />
+                    <RowDefinition Height="32" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="128" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="128" />
+                    <ColumnDefinition Width="96" />
+                    <ColumnDefinition Width="128" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="128" />
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Row="0" Grid.Column="0" Text="EE Id" />
+                <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Employee.EEId}" />
+                <!--<CheckBox Grid.Row="1" Grid.Column="2" IsChecked="{Binding Employee.Active}" Content="Active" />-->
+                <ComboBox Grid.Row="0" Grid.Column="4" SelectedValue="{Binding Employee.Site}" ItemsSource="{Binding Sites}" />
+                <Button Grid.Row="0" Grid.Column="5" Command="{Binding SyncCommand}" Content="Sync To HRMS" />
+                <TextBlock Grid.Row="1" Grid.Column="0" Text="Last Name" />
+                <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Employee.LastName}" />
+                <TextBlock Grid.Row="1" Grid.Column="2" Text="First Name" />
+                <TextBox Grid.Row="1" Grid.Column="3" Text="{Binding Employee.FirstName}" />
+                <TextBlock Grid.Row="1" Grid.Column="4" Text="Middle Name" />
+                <TextBox Grid.Row="1" Grid.Column="5" Text="{Binding Employee.MiddleName}" />
+                <TextBlock Grid.Row="1" Grid.Column="6" Text="Ext" />
+                <TextBox Grid.Row="1" Grid.Column="7" Text="{Binding Employee.NameExtension}" />
+                <TextBlock Grid.Row="2" Grid.Column="0" Text="Payroll Code" />
+                <ComboBox Grid.Row="2" Grid.Column="1" SelectedValue="{Binding Employee.PayrollCode}" ItemsSource="{Binding PayrollCodes}" />
+                <TextBlock Grid.Row="2" Grid.Column="2" Text="Account Number" />
+                <TextBox Grid.Row="2" Grid.Column="3" Text="{Binding Employee.AccountNumber}" />
+                <TextBlock Grid.Row="2" Grid.Column="4" Text="Card Number" />
+                <TextBox Grid.Row="2" Grid.Column="5" Text="{Binding Employee.CardNumber}" />
+                <TextBlock Grid.Row="2" Grid.Column="6" Text="Bank" />
+                <ComboBox Grid.Row="2" Grid.Column="7" SelectedValue="{Binding Employee.Bank, UpdateSourceTrigger=PropertyChanged}" ItemsSource="{Binding BankTypes}" />
+                <TextBlock Grid.Row="3" Grid.Column="0" Text="TIN" />
+                <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding Employee.TIN}" />
+                <TextBlock Grid.Row="3" Grid.Column="2" Text="HDMF" />
+                <TextBox Grid.Row="3" Grid.Column="3" Text="{Binding Employee.Pagibig}" />
+                <TextBlock Grid.Row="3" Grid.Column="4" Text="PhilHealth" />
+                <TextBox Grid.Row="3" Grid.Column="5" Text="{Binding Employee.PhilHealth}" />
+                <TextBlock Grid.Row="3" Grid.Column="6" Text="SSS" />
+                <TextBox Grid.Row="3" Grid.Column="7" Text="{Binding Employee.SSS}" />
+            </Grid>
+        </Border>
+        
+        <!--<Separator Grid.Row="2" Grid.ColumnSpan="8" />-->
         <Button Content="Save Changes" Grid.Row="3" Margin="12" Padding="6" Command="{Binding SaveCommand}" HorizontalAlignment="Center" />
         <!--<GroupBox Header="Government" Grid.Column="1" Grid.RowSpan="3" Margin="4" Visibility="Collapsed">
                 <StackPanel>

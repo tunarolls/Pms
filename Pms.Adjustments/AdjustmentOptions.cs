@@ -8,6 +8,7 @@ namespace Pms.Adjustments
 {
     public enum AdjustmentOptions
     {
+        NONE = 0,
         ADJUST1 = 1,
         ADJUST2 = 2
     }

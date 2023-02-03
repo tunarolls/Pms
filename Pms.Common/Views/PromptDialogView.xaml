@@ -80,14 +80,16 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
-            <RowDefinition />
+            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
         <Grid Margin="16,24,16,8">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition />
             </Grid.RowDefinitions>
-            <TextBlock Text="{Binding Message}" VerticalAlignment="Center" Margin="0,4" TextWrapping="Wrap" MaxWidth="500" MinHeight="48" />
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <TextBlock Text="{Binding Message}" VerticalAlignment="Center" Margin="0,4" TextWrapping="Wrap" MaxWidth="500" MinHeight="48" MaxHeight="250" />
+            </ScrollViewer>
         </Grid>
         <Expander Style="{DynamicResource MoreInfoBox}" Grid.Row="1" MaxHeight="250" MaxWidth="500" Margin="16,8" Header="More info">
             <TextBox Text="{Binding MoreInfo, Mode=OneWay}" TextWrapping="Wrap" AcceptsReturn="True" VerticalScrollBarVisibility="Auto" IsReadOnly="True" Padding="4,2" />

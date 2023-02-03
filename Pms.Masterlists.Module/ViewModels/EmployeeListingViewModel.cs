@@ -201,7 +201,7 @@ namespace Pms.Masterlists.Module.ViewModels
                     var payrollCode = Main?.PayrollCode?.PayrollCodeId;
                     await LoadValues(payrollCode, cancellationToken);
                     OnTaskCompleted();
-                    s_Message.ShowDialog("Operation completed without errors.", "Sync");
+                    s_Message.ShowDialog("Sync successful.", "Sync");
                 }
             }
             catch (TaskCanceledException)
@@ -297,7 +297,7 @@ namespace Pms.Masterlists.Module.ViewModels
                     var payrollCode = Main?.PayrollCode?.PayrollCodeId;
                     await LoadValues(payrollCode, cancellationToken);
                     OnTaskCompleted();
-                    s_Message.ShowDialog("Operation completed without errors.", "Sync");
+                    s_Message.ShowDialog("Sync successful.", "Sync");
                 }
             }
             catch (TaskCanceledException)
@@ -347,45 +347,16 @@ namespace Pms.Masterlists.Module.ViewModels
                 OnProgressStart(eeIds.Length);
                 foreach (var eeId in eeIds)
                 {
+                    await _syncSs.WaitAsync(cancellationToken);
                     tasks.Add(SyncOne(eeId, site.ToString(), cancellationToken));
                 }
 
-                while (tasks.Any())
-                {
-                    var completedTask = await Task.WhenAny(tasks);
+                await Task.WhenAll(tasks);
 
-                    if (completedTask.Exception?.InnerException is Exception ex)
-                    {
-                        switch (ex)
-                        {
-                            case InvalidFieldValueException:
-                            case InvalidFieldValuesException:
-                            case DuplicateBankInformationException:
-                            default:
-                                exceptions.Add(ex);
-                                break;
-                        }
-                    }
-
-                    tasks.Remove(completedTask);
-                }
-
-                if (exceptions.Any())
-                {
-                    await Task.Run(() =>
-                    {
-                        m_Employees.ReportExceptions(exceptions, new PayrollCode(), $"{site}-REGULAR");
-                    }, cancellationToken);
-
-                    throw new AggregateException(exceptions);
-                }
-                else
-                {
-                    var payrollCode = Main?.PayrollCode?.PayrollCodeId;
-                    await LoadValues(payrollCode, cancellationToken);
-                    OnTaskCompleted();
-                    s_Message.ShowDialog("Operation completed without issues.", "Sync");
-                }
+                var payrollCode = Main?.PayrollCode?.PayrollCodeId;
+                await LoadValues(payrollCode, cancellationToken);
+                OnTaskCompleted();
+                s_Message.ShowDialog("Sync successful.", "Sync");
             }
             catch (TaskCanceledException)
             {
@@ -412,8 +383,6 @@ namespace Pms.Masterlists.Module.ViewModels
         {
             try
             {
-                await _syncSs.WaitAsync(cancellationToken);
-
                 var foundEmployee = await m_Employees.SyncOne(eeId, site.ToString(), cancellationToken);
                 var foundEmployeeLocal = await m_Employees.FindEmployee(eeId, cancellationToken);
 

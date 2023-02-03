@@ -38,7 +38,7 @@ namespace Pms.Masterlists.Module.ViewModels
         #region IDialogAware
         public event Action<IDialogResult>? RequestClose;
 
-        public string Title => "Please select date";
+        public string Title { get; set; } = "Select date";
         public bool CanCloseDialog()
         {
             return true;

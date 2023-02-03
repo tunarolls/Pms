@@ -87,21 +87,21 @@
                 <RowDefinition Height="35" />
                 <RowDefinition/>
             </Grid.RowDefinitions>
-            <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="8,0">
+            <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center" Margin="8,0">
                 <StackPanel Orientation="Horizontal">
-                    <TextBlock  VerticalAlignment="Center" Margin="6">PayrollCode:</TextBlock>
+                    <TextBlock  VerticalAlignment="Center" Margin="6" Text="Payroll Code:"/>
                     <ComboBox ItemsSource="{Binding PayrollCodes}" SelectedItem="{Binding PayrollCode}" Width="125" VerticalAlignment="Center" IsEditable="True"/>
                 </StackPanel>
                 <StackPanel Orientation="Horizontal">
-                    <TextBlock  VerticalAlignment="Center" Margin="6">Cutoff Id:</TextBlock>
+                    <TextBlock  VerticalAlignment="Center" Margin="6" Text="Cutoff Id:" />
                     <ComboBox ItemsSource="{Binding CutoffIds}" SelectedItem="{Binding CutoffId}" Width="125" VerticalAlignment="Center" IsEditable="True"/>
                 </StackPanel>
                 <StackPanel Orientation="Horizontal">
-                    <TextBlock  VerticalAlignment="Center" Margin="6">Company:</TextBlock>
+                    <TextBlock  VerticalAlignment="Center" Margin="6" Text="Company:" />
                     <ComboBox ItemsSource="{Binding Companies}" SelectedItem="{Binding Company}" Width="125" VerticalAlignment="Center" IsEditable="True"/>
                 </StackPanel>
                 <StackPanel Orientation="Horizontal">
-                    <TextBlock  VerticalAlignment="Center" Margin="6">Site:</TextBlock>
+                    <TextBlock  VerticalAlignment="Center" Margin="6" Text="Site:" />
                     <ComboBox ItemsSource="{Binding Sites}" SelectedItem="{Binding Site}" Width="125" VerticalAlignment="Center" IsEditable="True" />
                 </StackPanel>
             </StackPanel>

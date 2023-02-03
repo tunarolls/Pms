@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Pms.Common;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -19,6 +20,13 @@ namespace Pms.Masterlists.Module.Views
         public EmployeeDetailView()
         {
             InitializeComponent();
+
+            Loaded += EmployeeDetailView_Loaded;
+        }
+
+        private void EmployeeDetailView_Loaded(object sender, RoutedEventArgs e)
+        {
+            IconHelper.RemoveIcon(Window.GetWindow(this));
         }
     }
 }

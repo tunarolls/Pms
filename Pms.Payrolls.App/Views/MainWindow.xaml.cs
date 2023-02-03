@@ -1,6 +1,8 @@
-﻿using System;
+﻿using Pms.Common;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -22,6 +24,11 @@ namespace Pms.Payrolls.App.Views
         public MainWindow()
         {
             InitializeComponent();
+        }
+
+        protected override void OnSourceInitialized(EventArgs e)
+        {
+            IconHelper.RemoveIcon(this);
         }
     }
 }

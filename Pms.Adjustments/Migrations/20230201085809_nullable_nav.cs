@@ -6,17 +6,17 @@ namespace Pms.Adjustments.Migrations
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            //migrationBuilder.DropForeignKey(
-            //    name: "FK_adjustment_billing_BillingRecords_RecordId",
-            //    table: "adjustment_billing");
+            migrationBuilder.DropForeignKey(
+                name: "FK_adjustment_billing_BillingRecords_RecordId",
+                table: "adjustment_billing");
 
-            //migrationBuilder.DropPrimaryKey(
-            //    name: "PK_BillingRecords",
-            //    table: "BillingRecords");
+            migrationBuilder.DropPrimaryKey(
+                name: "PK_BillingRecords",
+                table: "BillingRecords");
 
-            //migrationBuilder.RenameTable(
-            //    name: "BillingRecords",
-            //    newName: "billingrecords");
+            migrationBuilder.RenameTable(
+                name: "BillingRecords",
+                newName: "billingrecords");
 
             migrationBuilder.RenameIndex(
                 name: "IX_BillingRecords_EEId",

@@ -29,7 +29,10 @@ namespace Pms.Payrolls.ServiceLayer.Files.Export.BankReport
 
         public void StartExport(IEnumerable<Payroll> payrolls)
         {
-            Dictionary<BankChoices, List<Payroll>> payrollsByBank = payrolls.GroupBy(p => p.EE.Bank).Select(pp => pp.ToList()).ToDictionary(pp => pp.First().EE.Bank);
+            Dictionary<BankChoices, List<Payroll>> payrollsByBank = payrolls
+                .GroupBy(p => p.EE?.Bank ?? BankChoices.UNKNOWN)
+                .Select(pp => pp.ToList())
+                .ToDictionary(pp => pp.First().EE?.Bank ?? BankChoices.UNKNOWN);
             foreach (BankChoices bank in payrollsByBank.Keys)
                 _exporters[bank].StartExport(payrollsByBank[bank]);
         }

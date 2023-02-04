@@ -34,22 +34,18 @@ namespace Pms.Payrolls.ServiceLayer.Files.Exports.Governments
         private void InitPayrolls(IEnumerable<Payroll> payrolls)
         {
             List<List<Payroll>> payrollCodePayrolls = payrolls
-                .GroupBy(p => p.EE.PayrollCode)
+                .GroupBy(p => p.EE?.PayrollCode ?? "")
                 .Select(pp => pp.ToList())
                 .ToList();
 
             foreach (List<Payroll> payrollCodePayroll in payrollCodePayrolls)
             {
-                string payrollCode = payrollCodePayroll.First().EE.PayrollCode;
+                var payrollCode = payrollCodePayroll.First().EE?.PayrollCode ?? "";
                 Dictionary<string, List<Payroll>> payrollsByJobCode = payrollCodePayroll
-                    .GroupBy(p => p.EE.JobCode)
-                    .Select(pp =>
-                        pp
-                        .OrderBy(p => p.EE.FullName)
-                        .ToList()
-                    )
-                    .OrderBy(p => p.First().EE.JobCode)
-                    .ToDictionary(pp => pp.First().EE.JobCode);
+                    .GroupBy(p => p.EE?.JobCode ?? "")
+                    .Select(pp => pp.OrderBy(p => p.EE?.FullName).ToList())
+                    .OrderBy(p => p.First().EE?.JobCode)
+                    .ToDictionary(pp => pp.First().EE?.JobCode ?? "");
 
                 PayrollsByPayrollAndJobCode.Add(payrollCode, payrollsByJobCode);
             }

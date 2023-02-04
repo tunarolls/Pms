@@ -55,7 +55,7 @@ namespace Pms.Payrolls.ServiceLayer.Files.Export.Alphalist
             row.CreateCell(Append(ref columnIndex)).SetCellValue(payroll.NetPay);
         }
 
-        private void WriteEmployeeData(IRow row, string eeId, EmployeeView employee)
+        private void WriteEmployeeData(IRow row, string? eeId, EmployeeView? employee)
         {
             int columnIndex = -1;
             row.CreateCell(Append(ref columnIndex)).SetCellValue(eeId);

@@ -6,19 +6,19 @@ namespace Pms.Payrolls.Migrations
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            //migrationBuilder.AddColumn<string>(
-            //    name: "CompanyId",
-            //    table: "payroll",
-            //    type: "VARCHAR(35)",
-            //    nullable: false,
-            //    defaultValue: "");
+            migrationBuilder.AddColumn<string>(
+                name: "CompanyId",
+                table: "payroll",
+                type: "VARCHAR(35)",
+                nullable: false,
+                defaultValue: "");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            //migrationBuilder.DropColumn(
-            //    name: "CompanyId",
-            //    table: "payroll");
+            migrationBuilder.DropColumn(
+                name: "CompanyId",
+                table: "payroll");
         }
     }
 }

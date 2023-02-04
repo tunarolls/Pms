@@ -24,7 +24,7 @@ namespace Pms.Payrolls.Persistence
                 .UseLazyLoadingProxies(_lazyLoad)
                 .UseMySQL(
                     _connectionString, 
-                    options => options.MigrationsHistoryTable("payrollMigrationHistory")
+                    options => options.MigrationsHistoryTable("payrollmigrationhistory")
                 )
                 .Options;
             return new PayrollDbContext(options);

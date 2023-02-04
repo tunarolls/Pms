@@ -6,28 +6,28 @@ namespace Pms.Payrolls.Migrations
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            //migrationBuilder.AddColumn<double>(
-            //    name: "RegHours",
-            //    table: "payroll",
-            //    type: "DOUBLE(6,2)",
-            //    nullable: false,
-            //    defaultValue: 0.0);
+            migrationBuilder.AddColumn<double>(
+                name: "RegHours",
+                table: "payroll",
+                type: "DOUBLE(6,2)",
+                nullable: false,
+                defaultValue: 0.0);
 
-            //migrationBuilder.CreateIndex(
-            //    name: "IX_payroll_EEId",
-            //    table: "payroll",
-            //    column: "EEId");
+            migrationBuilder.CreateIndex(
+                name: "IX_payroll_EEId",
+                table: "payroll",
+                column: "EEId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            //migrationBuilder.DropIndex(
-            //    name: "IX_payroll_EEId",
-            //    table: "payroll");
+            migrationBuilder.DropIndex(
+                name: "IX_payroll_EEId",
+                table: "payroll");
 
-            //migrationBuilder.DropColumn(
-            //    name: "RegHours",
-            //    table: "payroll");
+            migrationBuilder.DropColumn(
+                name: "RegHours",
+                table: "payroll");
         }
     }
 }

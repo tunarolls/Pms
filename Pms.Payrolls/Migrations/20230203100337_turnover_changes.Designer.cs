@@ -9,8 +9,8 @@ using Pms.Payrolls.Persistence;
 namespace Pms.Payrolls.Migrations
 {
     [DbContext(typeof(PayrollDbContext))]
-    [Migration("20230126092238_test")]
-    partial class test
+    [Migration("20230203100337_turnover_changes")]
+    partial class turnover_changes
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {

@@ -30,7 +30,7 @@ namespace Pms.Payrolls.ServiceLayer.Files.Export.BankReport
             string templatePath = $@"{startupPath}\TEMPLATES\LBP.xls";
             File.Copy(templatePath, filename, true);
 
-            payrolls = payrolls.OrderBy(p => p.EE.FullName);
+            payrolls = payrolls.OrderBy(p => p.EE?.FullName);
             IEnumerable<Payroll> validPayrolls = payrolls.Where(p => !p.IsReadyForExport());
             IEnumerable<Payroll> invalidPayrolls = payrolls.Where(p => p.IsReadyForExport());
 
@@ -88,8 +88,8 @@ namespace Pms.Payrolls.ServiceLayer.Files.Export.BankReport
                 {
                     Payroll payroll = validayrolls[i];
                     row = sheet.GetRow(i + 2);
-                    row.GetCell(0).SetCellValue(payroll.EE.CardNumber);
-                    row.GetCell(1).SetCellValue(payroll.EE.AccountNumber);
+                    row.GetCell(0).SetCellValue(payroll.EE?.CardNumber);
+                    row.GetCell(1).SetCellValue(payroll.EE?.AccountNumber);
                     row.GetCell(6).SetCellValue(payroll.NetPay * 100);
                 }
             }
@@ -107,9 +107,9 @@ namespace Pms.Payrolls.ServiceLayer.Files.Export.BankReport
                     row = sheet.CreateRow(i + firstIndex);
                     row.CreateCell(0).SetCellValue(i + 1);
                     row.CreateCell(1).SetCellValue(payroll.EEId);
-                    row.CreateCell(2).SetCellValue(payroll.EE.FullName);
-                    row.CreateCell(3).SetCellValue(payroll.EE.CardNumber);
-                    row.CreateCell(4).SetCellValue(payroll.EE.AccountNumber);
+                    row.CreateCell(2).SetCellValue(payroll.EE?.FullName);
+                    row.CreateCell(3).SetCellValue(payroll.EE?.CardNumber);
+                    row.CreateCell(4).SetCellValue(payroll.EE?.AccountNumber);
                     row.CreateCell(5).SetCellValue(Math.Round(payroll.NetPay, 2));
                 }
 

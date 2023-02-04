@@ -6,19 +6,19 @@ namespace Pms.Payrolls.Migrations
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            //migrationBuilder.AddColumn<double>(
-            //    name: "AbsTar",
-            //    table: "payroll",
-            //    type: "DOUBLE(6,2)",
-            //    nullable: false,
-            //    defaultValue: 0.0);
+            migrationBuilder.AddColumn<double>(
+                name: "AbsTar",
+                table: "payroll",
+                type: "DOUBLE(6,2)",
+                nullable: false,
+                defaultValue: 0.0);
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            //migrationBuilder.DropColumn(
-            //    name: "AbsTar",
-            //    table: "payroll");
+            migrationBuilder.DropColumn(
+                name: "AbsTar",
+                table: "payroll");
         }
     }
 }

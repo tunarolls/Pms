@@ -2,30 +2,30 @@
 
 namespace Pms.Payrolls.Migrations
 {
-    public partial class test : Migration
+    public partial class NullableEmployee : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AlterColumn<string>(
-                name: "PayrollCode",
+                name: "EEId",
                 table: "payroll",
-                type: "VARCHAR(6)",
-                nullable: false,
-                defaultValue: "",
+                type: "VARCHAR(8)",
+                nullable: true,
                 oldClrType: typeof(string),
-                oldType: "VARCHAR(6)",
-                oldNullable: true);
+                oldType: "VARCHAR(8)");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AlterColumn<string>(
-                name: "PayrollCode",
+                name: "EEId",
                 table: "payroll",
-                type: "VARCHAR(6)",
-                nullable: true,
+                type: "VARCHAR(8)",
+                nullable: false,
+                defaultValue: "",
                 oldClrType: typeof(string),
-                oldType: "VARCHAR(6)");
+                oldType: "VARCHAR(8)",
+                oldNullable: true);
         }
     }
 }

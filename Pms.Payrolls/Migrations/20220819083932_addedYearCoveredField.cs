@@ -6,19 +6,19 @@ namespace Pms.Payrolls.Migrations
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            //migrationBuilder.AddColumn<int>(
-            //    name: "YearCovered",
-            //    table: "payroll",
-            //    type: "INT(4)",
-            //    nullable: false,
-            //    defaultValue: 0);
+            migrationBuilder.AddColumn<int>(
+                name: "YearCovered",
+                table: "payroll",
+                type: "INT(4)",
+                nullable: false,
+                defaultValue: 0);
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            //migrationBuilder.DropColumn(
-            //    name: "YearCovered",
-            //    table: "payroll");
+            migrationBuilder.DropColumn(
+                name: "YearCovered",
+                table: "payroll");
         }
     }
 }

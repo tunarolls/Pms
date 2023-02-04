@@ -34,7 +34,7 @@ namespace Pms.Payrolls.ServiceLayer.Files.Export.BankReport
             string templatePath = $@"{startupPath}\TEMPLATES\CBC.xls";
             File.Copy(templatePath, filename, true);
 
-            payrolls = payrolls.OrderBy(p => p.EE.FullName);
+            payrolls = payrolls.OrderBy(p => p.EE?.FullName);
 
             GenerateXls(filename, payrolls.ToArray());
             GenerateTxt(filename, payrolls.ToArray());
@@ -62,10 +62,10 @@ namespace Pms.Payrolls.ServiceLayer.Files.Export.BankReport
                 {
                     Payroll payroll = validayrolls[i];
                     row = sheet.GetRow(i + 4);
-                    row.GetCell(3).SetCellValue(payroll.EE.AccountNumber);
-                    row.GetCell(4).SetCellValue(payroll.EE.LastName);
-                    row.GetCell(5).SetCellValue(payroll.EE.FirstName);
-                    row.GetCell(6).SetCellValue(payroll.EE.MiddleName);
+                    row.GetCell(3).SetCellValue(payroll.EE?.AccountNumber);
+                    row.GetCell(4).SetCellValue(payroll.EE?.LastName);
+                    row.GetCell(5).SetCellValue(payroll.EE?.FirstName);
+                    row.GetCell(6).SetCellValue(payroll.EE?.MiddleName);
                     row.GetCell(7).SetCellValue(Math.Round(payroll.NetPay, 2));
                 }
             }
@@ -97,14 +97,14 @@ namespace Pms.Payrolls.ServiceLayer.Files.Export.BankReport
                 {
                     Payroll payroll = validayrolls[i];
                     writer.Write("DTL");
-                    writer.Write("|{0}", payroll.EE.AccountNumber);
-                    writer.Write("|{0}", payroll.EE.LastName);
-                    writer.Write("|{0}", payroll.EE.FirstName);
-                    writer.Write("|{0}", payroll.EE.MiddleName);
+                    writer.Write("|{0}", payroll.EE?.AccountNumber);
+                    writer.Write("|{0}", payroll.EE?.LastName);
+                    writer.Write("|{0}", payroll.EE?.FirstName);
+                    writer.Write("|{0}", payroll.EE?.MiddleName);
                     writer.Write("|{0}", payroll.NetPay);
                     writer.Write("|");//Mobile Number
                     writer.Write("|");//Email Address
-                    writer.WriteLine("|{0}", Hash(payroll.EE.AccountNumber, Math.Round(payroll.NetPay, 2)));
+                    writer.WriteLine("|{0}", Hash(payroll.EE?.AccountNumber ?? "", Math.Round(payroll.NetPay, 2)));
                 }
             }
         }

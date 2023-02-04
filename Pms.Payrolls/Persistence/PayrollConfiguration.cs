@@ -14,7 +14,7 @@ namespace Pms.Payrolls.Persistence
             builder.Property(cc => cc.PayrollId).HasColumnType("VARCHAR(35)").IsRequired();
             builder.Property(cc => cc.CompanyId).HasColumnType("VARCHAR(35)").IsRequired();
             builder.Property(cc => cc.CutoffId).HasColumnType("VARCHAR(20)").IsRequired();
-            builder.Property(cc => cc.EEId).HasColumnType("VARCHAR(8)").IsRequired();
+            builder.Property(cc => cc.EEId).HasColumnType("VARCHAR(8)");
             builder.Property(cc => cc.YearCovered).HasColumnType("INT(4)").IsRequired();
 
             builder.Property(cc => cc.PayrollCode).HasColumnType("VARCHAR(6)");

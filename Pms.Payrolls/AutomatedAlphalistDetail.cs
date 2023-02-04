@@ -175,21 +175,18 @@ namespace Pms.Payrolls
 
         public AutomatedAlphalistDetail(IEnumerable<Payroll> yearlyPayrolls, double minimumRate, int yearCovered)
         {
-            Payroll payroll = yearlyPayrolls.First();
+            var payroll = yearlyPayrolls.First();
 
             ActualHourlyRate = payroll.Rate;
-
             PresentNonTaxableBasicSmwHour = payroll.Rate > minimumRate ? payroll.Rate : minimumRate;
-
-
             FactorUsed = payroll.Rate <= minimumRate ? 313 : 0;
 
-            EmployeeView ee = payroll.EE;
-            EEId = ee.EEId;
-            FirstName = ee.FirstName.Replace("ñ", "N").Replace("Ñ", "N");
-            LastName = ee.LastName.Replace("ñ", "N").Replace("Ñ", "N");
-            MiddleName = ee.MiddleName.Replace("ñ", "N").Replace("Ñ", "N");
-            TIN = ee.TIN.Replace("-","");
+            var ee = payroll.EE;
+            EEId = ee?.EEId ?? "";
+            FirstName = ee?.FirstName.Replace("ñ", "N").Replace("Ñ", "N") ?? "";
+            LastName = ee?.LastName.Replace("ñ", "N").Replace("Ñ", "N") ?? "";
+            MiddleName = ee?.MiddleName.Replace("ñ", "N").Replace("Ñ", "N") ?? "";
+            TIN = ee?.TIN ?? "".Replace("-","");
             Nationality = "FILIPINO";
             EmploymentStatus = "R";
             ReasonForSeparation = "";

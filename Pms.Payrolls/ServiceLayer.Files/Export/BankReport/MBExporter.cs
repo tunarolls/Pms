@@ -31,7 +31,7 @@ namespace Pms.Payrolls.ServiceLayer.Files.Export.BankReport
             string filename = $@"{filePath}\{_payrollCode}_{_cutoff.CutoffDate:yyyyMMdd}-{_bankName}.xls";
             File.Copy(templatePath, filename, true);
 
-            payrolls = payrolls.OrderBy(p => p.EE.FullName);
+            payrolls = payrolls.OrderBy(p => p.EE?.FullName);
 
             GenerateXls(filename, payrolls.ToArray());
         }
@@ -72,10 +72,10 @@ namespace Pms.Payrolls.ServiceLayer.Files.Export.BankReport
                     Payroll payroll = validayrolls[i];
                     row = sheet.CreateRow(i + firstIndex);
                     row.CreateCell(0).SetCellValue(i + 1);
-                    row.CreateCell(1).SetCellValue(payroll.EE.LastName);
-                    row.CreateCell(2).SetCellValue(payroll.EE.FirstName);
-                    row.CreateCell(3).SetCellValue(payroll.EE.MiddleName);
-                    row.CreateCell(4).SetCellValue(payroll.EE.AccountNumber);
+                    row.CreateCell(1).SetCellValue(payroll.EE?.LastName);
+                    row.CreateCell(2).SetCellValue(payroll.EE?.FirstName);
+                    row.CreateCell(3).SetCellValue(payroll.EE?.MiddleName);
+                    row.CreateCell(4).SetCellValue(payroll.EE?.AccountNumber);
                     row.CreateCell(5).SetCellValue(Math.Round(payroll.NetPay, 2));
                 }
 

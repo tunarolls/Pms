@@ -25,13 +25,13 @@ namespace Pms.Payrolls.ServiceLayer.EfCore
                 .Select(t => t.CutoffId);
         }
 
-        public static List<string> ExtractEEIds(this IEnumerable<Payroll> payrolls) =>
-            payrolls
-                .GroupBy(ts => ts.EEId)
-                .Select(ts => ts.First())
-                .OrderByDescending(ts => ts.EEId)
-                .Select(ts => ts.EEId)
-                .ToList();
+        //public static List<string> ExtractEEIds(this IEnumerable<Payroll> payrolls) =>
+        //    payrolls
+        //        .GroupBy(ts => ts.EEId)
+        //        .Select(ts => ts.First())
+        //        .OrderByDescending(ts => ts.EEId)
+        //        .Select(ts => ts.EEId)
+        //        .ToList();
 
         public static List<string> ExtractPayrollCodes(this IEnumerable<Payroll> payrolls) =>
                     payrolls

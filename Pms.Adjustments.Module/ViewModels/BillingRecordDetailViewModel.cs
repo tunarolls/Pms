@@ -105,7 +105,7 @@ namespace Pms.Adjustments.Module.ViewModels
                     OnMessageSent($"Saving...");
                     await m_BillingRecords.SaveRecord(BillingRecord, cancellationToken);
 
-                    s_Message.ShowDialog("Billing record saved.", "Success");
+                    s_Message.ShowDialog("Billing record saved.", "");
                 }
 
                 OnTaskCompleted();
@@ -141,7 +141,6 @@ namespace Pms.Adjustments.Module.ViewModels
 
                     OnTaskCompleted();
                 }
-                catch (TaskCanceledException) { OnTaskCancelled(); }
                 catch (Exception ex)
                 {
                     OnTaskException();

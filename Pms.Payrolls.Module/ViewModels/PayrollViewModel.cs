@@ -142,9 +142,8 @@ namespace Pms.Payrolls.Module.ViewModels
                 await Task.Run(() => m_Payrolls.ExportBankReport(payrolls, $"{cutoff.CutoffDate:yy}{12}-13", payrollCode), cancellationToken);
                 OnTaskCompleted();
 
-                s_Message.ShowDialog("Export 13th month done.", "Completed");
+                s_Message.ShowDialog("Export done.", "");
             }
-            catch (TaskCanceledException) { OnTaskException(); }
             catch (Exception ex)
             {
                 OnTaskException();
@@ -192,9 +191,8 @@ namespace Pms.Payrolls.Module.ViewModels
                 await Task.WhenAll(new[] {alphalistTask, verifierTask });
                 OnTaskCompleted();
 
-                s_Message.ShowDialog("Export alphalist done.", "Completed");
+                s_Message.ShowDialog("Export done.", "");
             }
-            catch (TaskCanceledException) { OnTaskException(); }
             catch (Exception ex)
             {
                 OnTaskException();
@@ -228,9 +226,8 @@ namespace Pms.Payrolls.Module.ViewModels
                 await Task.Run(() => m_Payrolls.ExportBankReport(payrolls, cutoff.CutoffId, payrollCode), cancellationToken);
                 OnTaskCompleted();
 
-                s_Message.ShowDialog("Export bank report done.", "Completed");
+                s_Message.ShowDialog("Export done.", "");
             }
-            catch (TaskCanceledException) { OnTaskException(); }
             catch (Exception ex)
             {
                 OnTaskException();
@@ -283,10 +280,9 @@ namespace Pms.Payrolls.Module.ViewModels
 
                 OnTaskCompleted();
 
-                s_Message.ShowDialog("Import payroll done.", "Completed");
+                s_Message.ShowDialog("Import done.", "");
                 LoadValues();
             }
-            catch (TaskCanceledException) { OnTaskException(); }
             catch (PayrollRegisterHeaderNotFoundException ex)
             {
                 OnTaskException();
@@ -327,9 +323,8 @@ namespace Pms.Payrolls.Module.ViewModels
                 await Task.WhenAll(new[] { exportMacroTask, exportMacroBTask });
                 OnTaskCompleted();
 
-                s_Message.ShowDialog("Export macro done.", "Completed");
+                s_Message.ShowDialog("Export done.", "");
             }
-            catch (TaskCanceledException) { OnTaskException(); }
             catch (Exception ex)
             {
                 OnTaskException();
@@ -359,7 +354,6 @@ namespace Pms.Payrolls.Module.ViewModels
                 Payrolls.ReplaceRange(payrolls);
                 OnTaskCompleted();
             }
-            catch (TaskCanceledException) { OnTaskException(); }
             catch (Exception ex)
             {
                 OnTaskException();
@@ -410,20 +404,20 @@ namespace Pms.Payrolls.Module.ViewModels
             {
                 var payrolls = source.OfType<Payroll>();
 
-                ChkCount = payrolls.Count(t => t.EE.Bank == BankChoices.CHK);
-                LbpCount = payrolls.Count(t => t.EE.Bank == BankChoices.LBP);
-                CbcCount = payrolls.Count(t => t.EE.Bank == BankChoices.CBC);
-                MtacCount = payrolls.Count(p => p.EE.Bank == BankChoices.MTAC);
-                MpaloCount = payrolls.Count(p => p.EE.Bank == BankChoices.MPALO);
+                ChkCount = payrolls.Count(t => t.EE?.Bank == BankChoices.CHK);
+                LbpCount = payrolls.Count(t => t.EE?.Bank == BankChoices.LBP);
+                CbcCount = payrolls.Count(t => t.EE?.Bank == BankChoices.CBC);
+                MtacCount = payrolls.Count(p => p.EE?.Bank == BankChoices.MTAC);
+                MpaloCount = payrolls.Count(p => p.EE?.Bank == BankChoices.MPALO);
 
-                ChkTotal = payrolls.Where(p => p.EE.Bank == BankChoices.CHK).Sum(p => p.NetPay);
-                LbpTotal = payrolls.Where(p => p.EE.Bank == BankChoices.LBP).Sum(p => p.NetPay);
-                CbcTotal = payrolls.Where(p => p.EE.Bank == BankChoices.CBC).Sum(p => p.NetPay);
-                MtacTotal = payrolls.Where(p => p.EE.Bank == BankChoices.MTAC).Sum(p => p.NetPay);
-                MpaloTotal = payrolls.Where(p => p.EE.Bank == BankChoices.MPALO).Sum(p => p.NetPay);
+                ChkTotal = payrolls.Where(p => p.EE?.Bank == BankChoices.CHK).Sum(p => p.NetPay);
+                LbpTotal = payrolls.Where(p => p.EE?.Bank == BankChoices.LBP).Sum(p => p.NetPay);
+                CbcTotal = payrolls.Where(p => p.EE?.Bank == BankChoices.CBC).Sum(p => p.NetPay);
+                MtacTotal = payrolls.Where(p => p.EE?.Bank == BankChoices.MTAC).Sum(p => p.NetPay);
+                MpaloTotal = payrolls.Where(p => p.EE?.Bank == BankChoices.MPALO).Sum(p => p.NetPay);
 
-                UnknownEECount = payrolls.Count(p => string.IsNullOrEmpty(p.EE.FirstName));
-                UnknownEETotal = payrolls.Where(p => string.IsNullOrEmpty(p.EE.FirstName)).Sum(p => p.NetPay);
+                UnknownEECount = payrolls.Count(p => string.IsNullOrEmpty(p.EE?.FirstName));
+                UnknownEETotal = payrolls.Where(p => string.IsNullOrEmpty(p.EE?.FirstName)).Sum(p => p.NetPay);
 
                 GrandCount = payrolls.Count();
                 GrandTotal = payrolls.Sum(p => p.NetPay);

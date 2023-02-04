@@ -211,11 +211,10 @@ namespace Pms.Payrolls.App.ViewModels
 
                 OnTaskCompleted();
             }
-            catch (TaskCanceledException) { OnTaskException(); }
             catch (Exception ex)
             {
                 OnTaskException();
-                s_Message.ShowError(ex.Message);
+                s_Message.ShowDialog(ex.Message, "", ex.ToString());
             }
         }
         #endregion

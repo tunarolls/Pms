@@ -83,9 +83,8 @@ namespace Pms.Payrolls.Module.ViewModels
                 await Task.WhenAll(importTasks);
                 OnTaskCompleted();
 
-                s_Message.ShowDialog("Import done.", "Import alphalist");
+                s_Message.ShowDialog("Import done.", "");
             }
-            catch (TaskCanceledException) { OnTaskException(); }
             catch (Exception ex)
             {
                 OnTaskException();

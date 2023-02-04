@@ -95,19 +95,20 @@
 
         <DataGrid ItemsSource="{Binding Payrolls}" Grid.Column="0" Grid.RowSpan="9" AutoGenerateColumns="False" SelectionMode="Single" IsReadOnly="True" Grid.Row="1">
             <DataGrid.Columns>
-                <DataGridTextColumn Header="EE Id" Binding="{Binding EEId}" IsReadOnly="True"/>
-                <DataGridTextColumn Header="Full Name" Binding="{Binding EE.FullName}" Width="175" IsReadOnly="True"/>
-                <DataGridTextColumn Header="Bank" Binding="{Binding EE.Bank}" IsReadOnly="True"/>
-                <DataGridTextColumn Header="Company" Binding="{Binding CompanyId}" IsReadOnly="True"/>
-                <DataGridTextColumn Header="Gross Pay" Binding="{Binding GrossPay, StringFormat={}{0:N2}}" IsReadOnly="True"/>
-                <DataGridTextColumn Header="Regular Pay" Binding="{Binding RegularPay, StringFormat={}{0:N2}}" IsReadOnly="True"/>
-                <DataGridTextColumn Header="Net Pay" Binding="{Binding NetPay, StringFormat={}{0:N2}}" IsReadOnly="True"/>
-                <DataGridTextColumn Header="HDMF EE" Binding="{Binding EmployeePagibig, StringFormat={}{0:N2}}" IsReadOnly="True"/>
-                <DataGridTextColumn Header="HDMF ER" Binding="{Binding EmployerPagibig, StringFormat={}{0:N2}}" IsReadOnly="True"/>
-                <DataGridTextColumn Header="SSS EE" Binding="{Binding EmployeeSSS, StringFormat={}{0:N2}}" IsReadOnly="True"/>
-                <DataGridTextColumn Header="SSS ER" Binding="{Binding EmployerSSS, StringFormat={}{0:N2}}" IsReadOnly="True"/>
-                <DataGridTextColumn Header="PHIC EE" Binding="{Binding EmployeePhilHealth, StringFormat={}{0:N2}}" IsReadOnly="True"/>
-                <DataGridTextColumn Header="PHIC ER" Binding="{Binding EmployerPhilHealth, StringFormat={}{0:N2}}" IsReadOnly="True"/>
+                <DataGridTextColumn Header="EE Id" Binding="{Binding EEId}" />
+                <DataGridTextColumn Header="Full Name" Binding="{Binding EE.FullName}" Width="175" />
+                <DataGridTextColumn Header="Bank" Binding="{Binding EE.Bank}" />
+                <DataGridTextColumn Header="Payroll Code" Binding="{Binding PayrollCode}" />
+                <DataGridTextColumn Header="Company" Binding="{Binding CompanyId}" />
+                <DataGridTextColumn Header="Gross Pay" Binding="{Binding GrossPay, StringFormat={}{0:N2}}" />
+                <DataGridTextColumn Header="Regular Pay" Binding="{Binding RegularPay, StringFormat={}{0:N2}}" />
+                <DataGridTextColumn Header="Net Pay" Binding="{Binding NetPay, StringFormat={}{0:N2}}" />
+                <DataGridTextColumn Header="HDMF EE" Binding="{Binding EmployeePagibig, StringFormat={}{0:N2}}" />
+                <DataGridTextColumn Header="HDMF ER" Binding="{Binding EmployerPagibig, StringFormat={}{0:N2}}" />
+                <DataGridTextColumn Header="SSS EE" Binding="{Binding EmployeeSSS, StringFormat={}{0:N2}}" />
+                <DataGridTextColumn Header="SSS ER" Binding="{Binding EmployerSSS, StringFormat={}{0:N2}}" />
+                <DataGridTextColumn Header="PHIC EE" Binding="{Binding EmployeePhilHealth, StringFormat={}{0:N2}}" />
+                <DataGridTextColumn Header="PHIC ER" Binding="{Binding EmployerPhilHealth, StringFormat={}{0:N2}}" />
             </DataGrid.Columns>
         </DataGrid>
 

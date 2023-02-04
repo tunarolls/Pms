@@ -80,15 +80,10 @@ namespace Pms.Masterlists.Module.ViewModels
                 CompanyIds = companies.Select(t => t.CompanyId);
                 OnTaskCompleted();
             }
-            catch (TaskCanceledException)
-            {
-                OnTaskException();
-                RequestClose?.Invoke(new DialogResult());
-            }
             catch (Exception ex)
             {
                 OnTaskException();
-                s_Message.ShowDialog(ex.Message, "Unexpected error", ex.ToString());
+                s_Message.ShowDialog(ex.Message, "Listing", ex.ToString());
                 RequestClose?.Invoke(new DialogResult());
             }
         }
@@ -110,19 +105,18 @@ namespace Pms.Masterlists.Module.ViewModels
                     SelectedPayrollCode.PayrollCodeId = SelectedPayrollCode.GenerateId();
                     await m_PayrollCodes.Save(SelectedPayrollCode, cancellationToken);
 
-                    s_Message.ShowDialog("Payroll code saved.", "Success");
+                    OnTaskCompleted();
+                    s_Message.ShowDialog("Payroll code saved.", "");
                 }
-
-                OnTaskCompleted();
-            }
-            catch (TaskCanceledException)
-            {
-                OnTaskException();
+                else
+                {
+                    OnTaskCompleted();
+                }
             }
             catch (Exception ex)
             {
                 OnTaskException();
-                s_Message.ShowDialog(ex.Message, "Unexpected error", ex.ToString());
+                s_Message.ShowDialog(ex.Message, "Save", ex.ToString());
             }
         }
 

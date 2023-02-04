@@ -118,9 +118,8 @@ namespace Pms.Adjustments.Module.ViewModels
                 await Task.Run(() => m_Billings.Export(billings, cutoff.CutoffId, payrollCode, adjustment.Value), cancellationToken);
 
                 OnTaskCompleted();
-                s_Message.ShowDialog("Done.", "Export billings");
+                s_Message.ShowDialog("Export done.", "");
             }
-            catch (TaskCanceledException) { OnTaskException(); }
             catch (Exception ex)
             {
                 OnTaskException();
@@ -184,9 +183,8 @@ namespace Pms.Adjustments.Module.ViewModels
                 }
 
                 OnTaskCompleted();
-                s_Message.ShowDialog("Done.", "Generate billings");
+                s_Message.ShowDialog("Done.", "");
             }
-            catch (TaskCanceledException) { OnTaskException(); }
             catch (Exception ex)
             {
                 OnTaskException();
@@ -218,7 +216,6 @@ namespace Pms.Adjustments.Module.ViewModels
                 Billings.ReplaceRange(billings);
                 OnTaskCompleted();
             }
-            catch (TaskCanceledException) { OnTaskException(); }
             catch (Exception ex)
             {
                 OnTaskException();
@@ -303,9 +300,8 @@ namespace Pms.Adjustments.Module.ViewModels
                 }
 
                 OnTaskCompleted();
-                s_Message.ShowDialog("Done.", "Add to adjust");
+                s_Message.ShowDialog("Adjustment done.", "");
             }
-            catch (TaskCanceledException) { OnTaskException(); }
             catch (Exception ex)
             {
                 OnTaskException();

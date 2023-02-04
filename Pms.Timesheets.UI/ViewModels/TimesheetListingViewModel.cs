@@ -155,7 +155,7 @@ namespace Pms.Timesheets.Module.ViewModels
                 }
 
                 OnTaskCompleted();
-                s_Message.ShowDialog("Download finished.", "");
+                s_Message.ShowDialog("Download done.", "");
             }
             catch (Exception ex)
             {
@@ -242,7 +242,7 @@ namespace Pms.Timesheets.Module.ViewModels
                 }
 
                 OnTaskCompleted();
-                s_Message.ShowDialog("Export finished.", "");
+                s_Message.ShowDialog("Export done.", "");
             }
             catch (Exception ex)
             {
@@ -288,9 +288,8 @@ namespace Pms.Timesheets.Module.ViewModels
                 await Export(timesheets, cutoff, payrollCode, cancellationToken);
                 OnTaskCompleted();
 
-                s_Message.ShowDialog("Export finished.", "");
+                s_Message.ShowDialog("Export done.", "");
             }
-            catch (TaskCanceledException) { OnTaskException(); }
             catch (Exception ex)
             {
                 OnTaskException();

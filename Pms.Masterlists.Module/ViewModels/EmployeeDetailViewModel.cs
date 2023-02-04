@@ -85,15 +85,10 @@ namespace Pms.Masterlists.Module.ViewModels
                 PayrollCodes = payrollCodes.Select(t => t.PayrollCodeId);
                 OnTaskCompleted();
             }
-            catch (TaskCanceledException)
-            {
-                OnTaskException();
-                RequestClose?.Invoke(new DialogResult());
-            }
             catch (Exception ex)
             {
                 OnTaskException();
-                s_Message.ShowDialog(ex.Message, "Unexpected error", ex.ToString());
+                s_Message.ShowDialog(ex.Message, "Load Payroll Codes", ex.ToString());
                 RequestClose?.Invoke(new DialogResult(ButtonResult.None));
             }
         }
@@ -117,7 +112,7 @@ namespace Pms.Masterlists.Module.ViewModels
                     await m_Employees.Save(l_Employee, cancellationToken);
                     OnTaskCompleted();
 
-                    s_Message.ShowDialog("Employee saved.", "Success");
+                    s_Message.ShowDialog("Employee saved.", "");
                     RequestClose?.Invoke(new DialogResult());
                 }
                 else
@@ -125,20 +120,16 @@ namespace Pms.Masterlists.Module.ViewModels
                     throw new NullReferenceException("Employee not found.");
                 }
             }
-            catch (TaskCanceledException)
-            {
-                OnTaskException();
-            }
             catch (NullReferenceException ex)
             {
                 OnTaskException();
-                s_Message.ShowDialog(ex.Message, "Error", ex.ToString());
+                s_Message.ShowDialog(ex.Message, "Save", ex.ToString());
                 RequestClose?.Invoke(new DialogResult());
             }
             catch (Exception ex)
             {
                 OnTaskException();
-                s_Message.ShowDialog(ex.Message, "Unexpected error", ex.ToString());
+                s_Message.ShowDialog(ex.Message, "Save", ex.ToString());
             }
         }
 
@@ -170,7 +161,7 @@ namespace Pms.Masterlists.Module.ViewModels
 
                         RaisePropertyChanged(nameof(Employee));
 
-                        s_Message.ShowDialog("Employee synced.", "Success");
+                        s_Message.ShowDialog("Employee synced.", "");
                     }
                     else
                     {
@@ -182,20 +173,16 @@ namespace Pms.Masterlists.Module.ViewModels
                     throw new NullReferenceException("Employee not found.");
                 }
             }
-            catch (TaskCanceledException)
-            {
-                OnTaskException();
-            }
             catch (NullReferenceException ex)
             {
                 OnTaskException();
-                s_Message.ShowDialog(ex.Message, "Error", ex.ToString());
+                s_Message.ShowDialog(ex.Message, "Sync", ex.ToString());
                 RequestClose?.Invoke(new DialogResult());
             }
             catch (Exception ex)
             {
                 OnTaskException();
-                s_Message.ShowDialog(ex.Message, "Unexpected error", ex.ToString());
+                s_Message.ShowDialog(ex.Message, "Sync", ex.ToString());
             }
         }
     }

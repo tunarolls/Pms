@@ -161,7 +161,7 @@ namespace Pms.Masterlists.Module.ViewModels
                 if (!employees.Any())
                 {
                     OnTaskCompleted();
-                    s_Message.ShowDialog("No employees synced.", "Sync");
+                    s_Message.ShowDialog("No employees synced.", "");
                     return;
                 }
 
@@ -201,17 +201,8 @@ namespace Pms.Masterlists.Module.ViewModels
                     var payrollCode = Main?.PayrollCode?.PayrollCodeId;
                     await LoadValues(payrollCode, cancellationToken);
                     OnTaskCompleted();
-                    s_Message.ShowDialog("Sync successful.", "Sync");
+                    s_Message.ShowDialog("Sync done.", "");
                 }
-            }
-            catch (TaskCanceledException)
-            {
-                OnTaskException();
-            }
-            catch (AggregateException ex)
-            {
-                OnTaskException();
-                s_Message.ShowDialog(ex.Message, "Sync", ex.ToString());
             }
             catch (HttpRequestException ex)
             {
@@ -258,7 +249,7 @@ namespace Pms.Masterlists.Module.ViewModels
                 if (!employees.Any())
                 {
                     OnTaskCompleted();
-                    s_Message.ShowDialog("No employees synced.", "Sync");
+                    s_Message.ShowDialog("No employees synced.", "");
                     return;
                 }
 
@@ -297,27 +288,18 @@ namespace Pms.Masterlists.Module.ViewModels
                     var payrollCode = Main?.PayrollCode?.PayrollCodeId;
                     await LoadValues(payrollCode, cancellationToken);
                     OnTaskCompleted();
-                    s_Message.ShowDialog("Sync successful.", "Sync");
+                    s_Message.ShowDialog("Sync done.", "");
                 }
-            }
-            catch (TaskCanceledException)
-            {
-                OnTaskException();
-            }
-            catch (AggregateException ex)
-            {
-                OnTaskException();
-                s_Message.ShowDialog(ex.Message, "Sync", ex.ToString());
             }
             catch (HttpRequestException ex)
             {
                 OnTaskException();
-                s_Message.ShowDialog(ErrorMessages.HrmsHttpRequestError, "Sync", ex.ToString());
+                s_Message.ShowDialog(ErrorMessages.HrmsHttpRequestError, "Sync Resigned", ex.ToString());
             }
             catch (Exception ex)
             {
                 OnTaskException();
-                s_Message.ShowDialog(ex.Message, "Sync", ex.ToString());
+                s_Message.ShowDialog(ex.Message, "Sync Resigned", ex.ToString());
             }
         }
         #endregion
@@ -356,26 +338,17 @@ namespace Pms.Masterlists.Module.ViewModels
                 var payrollCode = Main?.PayrollCode?.PayrollCodeId;
                 await LoadValues(payrollCode, cancellationToken);
                 OnTaskCompleted();
-                s_Message.ShowDialog("Sync successful.", "Sync");
-            }
-            catch (TaskCanceledException)
-            {
-                OnTaskException();
-            }
-            catch (AggregateException ex)
-            {
-                OnTaskException();
-                s_Message.ShowDialog(ex.Message, "Sync", ex.ToString());
+                s_Message.ShowDialog("Sync done.", "");
             }
             catch (HttpRequestException ex)
             {
                 OnTaskException();
-                s_Message.ShowDialog(ErrorMessages.HrmsHttpRequestError, "Sync", ex.ToString());
+                s_Message.ShowDialog(ErrorMessages.HrmsHttpRequestError, "Sync All", ex.ToString());
             }
             catch (Exception ex)
             {
                 OnTaskException();
-                s_Message.ShowDialog(ex.Message, "Sync", ex.ToString());
+                s_Message.ShowDialog(ex.Message, "Sync All", ex.ToString());
             }
         }
 
@@ -465,10 +438,6 @@ namespace Pms.Masterlists.Module.ViewModels
                 var payrollCode = Main?.PayrollCode?.PayrollCodeId;
                 await LoadValues(payrollCode, cancellationToken);
                 OnTaskCompleted();
-            }
-            catch (TaskCanceledException)
-            {
-                OnTaskException();
             }
             catch (Exception ex)
             {
@@ -674,13 +643,12 @@ namespace Pms.Masterlists.Module.ViewModels
                 var path = await m_Employees.ExportMasterlist(employees, payrollCode, cancellationToken: cancellationToken);
                 OnTaskCompleted();
 
-                s_Message.ShowDialog("Masterfile exported.", "Success", $"File saved to {path}");
+                s_Message.ShowDialog("Export done.", "", $"File saved to {path}");
             }
-            catch (TaskCanceledException) { OnTaskException(); }
             catch (Exception ex)
             {
                 OnTaskException();
-                s_Message.ShowDialog(ex.Message, "Unexpected error", ex.ToString());
+                s_Message.ShowDialog(ex.Message, "Export Masterlist", ex.ToString());
             }
         }
         #endregion
@@ -708,13 +676,12 @@ namespace Pms.Masterlists.Module.ViewModels
                 var path = await m_Employees.ExportMasterlist(noTin, payrollCode, cancellationToken: cancellationToken);
                 OnTaskCompleted();
 
-                s_Message.ShowDialog("Unknown TIN exported.", "Success", $"File saved to {path}");
+                s_Message.ShowDialog("Export dpne.", "", $"File saved to {path}");
             }
-            catch (TaskCanceledException) { OnTaskException(); }
             catch (Exception ex)
             {
                 OnTaskException();
-                s_Message.ShowDialog(ex.Message, "Unexpected error", ex.ToString());
+                s_Message.ShowDialog(ex.Message, "Unknown TIN Export", ex.ToString());
             }
         }
         #endregion

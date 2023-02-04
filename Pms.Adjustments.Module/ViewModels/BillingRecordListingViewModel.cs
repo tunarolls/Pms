@@ -98,9 +98,8 @@ namespace Pms.Adjustments.Module.ViewModels
                 }
 
                 OnTaskCompleted();
-                s_Message.ShowDialog("Done.", "Import");
+                s_Message.ShowDialog("Import done.", "");
             }
-            catch (TaskCanceledException) { OnTaskException(); }
             catch (Exception ex)
             {
                 OnTaskException();
@@ -131,11 +130,10 @@ namespace Pms.Adjustments.Module.ViewModels
 
                 OnTaskCompleted();
             }
-            catch (TaskCanceledException) { OnTaskException(); }
             catch (Exception ex)
             {
                 OnTaskException();
-                s_Message.ShowError(ex.Message);
+                s_Message.ShowDialog(ex.Message, "List billings", ex.ToString());
             }
         }
         #endregion
